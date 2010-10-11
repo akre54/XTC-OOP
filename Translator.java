@@ -2,6 +2,10 @@
  * Object-Oriented Programming
  * Copyright (C) 2010 Robert Grimm
  * Edited by Patrick Hammer
+<<<<<<< HEAD
+=======
+ * Test Edited by Paige
+>>>>>>> dropbox/master
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -72,7 +76,9 @@ public class Translator extends Tool {
 			bool("countMethods", "optionCountMethods", false,
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
-				 "Translate .java file to c++.");
+				 "Translate .java file to c++.").
+			bool("file", "file", false,
+				 "Output to a file");
 	}
 
 	public void prepare() {
