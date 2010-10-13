@@ -46,7 +46,9 @@ PACKAGE     = xtc.oop
 PACKAGE_LOC = xtc/oop
 
 SOURCE = \
+	CppCreator.java \
 	Translator.java
+
 
 JNI_SOURCE =
 

@@ -2,6 +2,10 @@
  * Object-Oriented Programming
  * Copyright (C) 2010 Robert Grimm
  * Edited by Patrick Hammer
+<<<<<<< HEAD
+ * Test Edited by Paige
+=======
+>>>>>>> 5da2b25a04c1f9340af211ca5b1ab8296bcb9d2b
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -41,9 +45,11 @@ import xtc.util.Tool;
  * @author A.Krebs
  * @author L. Pelka
  * @author P.Ponzeka
- * @version $Revision$
+ * @version 1
  */
 public class Translator extends Tool {
+
+	File inputFile = null;
 
 	/** Create a new translator. */
 	public Translator() {
@@ -64,7 +70,7 @@ public class Translator extends Tool {
 
 	public void init() {
 		super.init();
-
+		
 		// Declare command line arguments.
 		runtime.
 			bool("printJavaAST", "printJavaAST", false,
@@ -77,7 +83,6 @@ public class Translator extends Tool {
 
 	public void prepare() {
 		super.prepare();
-
 		// Perform consistency checks on command line arguments.
 	}
 
@@ -86,6 +91,8 @@ public class Translator extends Tool {
 		if (Integer.MAX_VALUE < file.length()) {
 			throw new IllegalArgumentException(file + ": file too large");
 		}
+		inputFile = file;
+		System.out.println("using this method");
 		return file;
 	}
 
@@ -95,25 +102,38 @@ public class Translator extends Tool {
 		Result result = parser.pCompilationUnit(0);
 		return (Node)parser.value(result);
 	}
+
 	//-----------------------------------------------------------------------
 	public void process(Node node) {
 		// Handle the translate option
 		if (runtime.test("translate")) {
-			runtime.console().p("translating...").pln().flush();
-			new Visitor() {
-				public void visitCompilationUnit(GNode n) {
-					visit(n);
-					//runtime.console().p("Number of methods: ").p(count).pln().flush();
-				}
 
-				public void visitMethodDeclaration(GNode n) {
-					runtime.console().p(n.getString(3)).pln().flush(); //xtc.tree.node
-					visit(n);
-				}
-				public void visit(Node n) {
-					for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-				}
-			}.dispatch(node);
+			//two cases of using the CppCreator class
+			//one uses a filepath and the other uses the source .java file as an arg.
+
+			String path = "/users/hammer/Desktop/test.java";
+			CppCreator toC = new CppCreator (path);
+			toC.write("Testing 1,2,3...\n");
+			toC.write("Now testing");
+			if (runtime.test("optionVerbose")) {
+				runtime.console().p("creating file at" + path).pln().flush();
+			}
+			toC.close();
+			if (runtime.test("optionVerbose")) {
+				runtime.console().p("Your file has been written...").pln().flush();
+			}
+
+			CppCreator dow = new CppCreator (inputFile);
+			dow.write("Testing on a different file\n");
+			dow.write("Now testing again");
+
+			if (runtime.test("optionVerbose")) {
+				runtime.console().p("creating file at " + inputFile.getAbsolutePath()).pln().flush();
+			}
+			dow.close();
+			if (runtime.test("optionVerbose")) {
+				runtime.console().p("Your file has been written...").pln().flush();
+			}
 		}
 		//-----------------------------------------------------------------------
 
@@ -146,10 +166,10 @@ public class Translator extends Tool {
 	
 	/**
 	 * Run the translator with the specified command line arguments.
-	 *
+	 * Uses xtc.util.tool run();
 	 * @param args The command line arguments.
 	 */
 	public static void main(String[] args) {
 		new Translator().run(args);
-	}	
+	}
 }
