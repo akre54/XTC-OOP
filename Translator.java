@@ -111,7 +111,7 @@ public class Translator extends Tool {
 			//two cases of using the CppCreator class
 			//one uses a filepath and the other uses the source .java file as an arg.
 
-			String path = "/users/hammer/Desktop/test.java";
+			String path = "/users/elizabethpelka/Desktop/test.java";
 			CppCreator toC = new CppCreator (path);
 			toC.write("Testing 1,2,3...\n");
 			toC.write("Now testing");
