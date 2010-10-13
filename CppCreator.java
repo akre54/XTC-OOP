@@ -22,8 +22,8 @@ class CppCreator {
  *
  * @param jFile a file whose name ends in .java
  */ 
-    public CppCreator (File jFile) {
-		cFile = convertNameToC (jFile);
+    public CppCreator (File jFile, String end) {
+		cFile = convertNameToC (jFile, end);
 		try {
 			outputWriter = new FileWriter(cFile);
 		}
@@ -31,6 +31,15 @@ class CppCreator {
 		}
     }
 
+	public CppCreator (File jFile) {
+		cFile = convertNameToC (jFile);
+		try {
+			outputWriter = new FileWriter(cFile);
+		}
+		catch (IOException a) {
+		}
+    }
+	
 /** 
  * Create a new cpp file that has the same name and path as the origonal .java file.
  * Follows the pathname conventions of the File class: http://download.oracle.com/javase/1.4.2/docs/api/java/io/File.html
@@ -46,13 +55,20 @@ class CppCreator {
 	}
 
 
-    private static File convertNameToC (File input) {
+    private static File convertNameToC (File input, String end) {
+		String jname = input.getName ();
+		String cname = jname.substring (0,jname.length()-4) + end; // remove ".java" and add ".cpp"
+		File cfile = new File (input.getParent (), cname);
+		return cfile;
+    }
+	
+	private static File convertNameToC (File input) {
 		String jname = input.getName ();
 		String cname = jname.substring (0,jname.length()-4) + "cpp"; // remove ".java" and add ".cpp"
 		File cfile = new File (input.getParent (), cname);
 		return cfile;
     }
-
+	
     private static File convertNameToC (String pathName) {
 		String cname = pathName.substring (0,pathName.length()-4) + "cpp"; // remove ".java" and add ".cpp"
 		File cfile = new File (pathName);
