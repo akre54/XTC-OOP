@@ -7,6 +7,7 @@
 
 package xtc.oop;
 
+import xtc.lang.javacc.syntaxtree.ImportDeclaration;
 import java.util.ArrayList;
 
 public class InheiritanceTree {
@@ -22,9 +23,9 @@ public class InheiritanceTree {
 		children = new ArrayList<InheiritanceTree>;
 
 
-		// buildTree(n); 	// constructor should eventually build the whole tree
+		// buildTree(n.getJFile()); 	// constructor should eventually build the whole tree
 
-		path = n.getFile.getParent(); // GNode needs a File field, or else the File field has to come from somewhere else
+		path = n.getJFile.getParent(); // JFile needs a File field, or else the File field has to come from somewhere else
 		translated = false;
 	}
 
@@ -37,17 +38,32 @@ public class InheiritanceTree {
 	}
 
 
-	/* pseudocode for now... will hook up all later when we decide on a final format	
-	public static void buildTree(InheiritanceTree t) {
+	/* pseudocode for now... needs a JavaFile class which has the ImportDeclarations (might extend JavaAST have a File field)
+	public static void buildTree(JavaFile jfile) {
 
-		jfile = getFileAndDependencies(t);
-
-		for (dependencies : jfile) {
+		for (ImportDeclaration dependency : jfile) {
 			t.addChild(new Inheiritancetree(dependancy));
 		}
 
 	}
 
 	*/
+
+}
+
+
+/* possibility of what a JavaFile class would look
+ * like, if we chose to extend File
+*/
+class JavaFile extends File {
+
+	public JavaFile(String pathname) {
+		super(pathname); // calls File constructor
+	}
+
+	public getDependencies() {
+		
+		return (new Node(this)).instanceOf(ImportDeclaration);
+	}
 
 }
