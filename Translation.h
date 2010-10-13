@@ -130,5 +130,10 @@ namespace oop {
       m1(&__Bar::m1) {
     }
   };
-
-}
+//------------ 10/12/10 -----------
+	
+	
+	
+	
+	
+}//end of namespace oop

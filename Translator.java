@@ -2,6 +2,10 @@
  * Object-Oriented Programming
  * Copyright (C) 2010 Robert Grimm
  * Edited by Patrick Hammer
+<<<<<<< HEAD
+ * Test Edited by Paige
+=======
+>>>>>>> 5da2b25a04c1f9340af211ca5b1ab8296bcb9d2b
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -106,10 +110,123 @@ public class Translator extends Tool {
 					//runtime.console().p("Number of methods: ").p(count).pln().flush();
 				}
 
-				public void visitMethodDeclaration(GNode n) {
-					runtime.console().p(n.getString(3)).pln().flush(); //xtc.tree.node
+			
+				
+				//EDITED BY PAIGE PONZEKA 10/11/10 CLASSES
+				public void visitClassDeclaration(GNode n){
+					runtime.console().p(n.getName()).pln().flush(); //xtc.tree.node
+						
+					runtime.console().p(n.getString(1)).pln().flush(); //prints the name of the class name 
+				
+					new Visitor(){
+						
+						public void visitCompilationUnit(GNode n) {
+							visit(n);
+						}
+						
+						public void visitModifier(GNode n) {
+							//runs a for loop for ALL the children of the Qualified Identifier Subtree
+							for(int i=0;i<(n.size());i++)
+							{
+								//here we have to insert file readers and create the subfolders for the import declaration
+								runtime.console().p(n.getString(i)).pln().flush(); //xtc.tree.node
+							}
+							visit(n);
+						}
+						public void visitClassBody(GNode n)
+						{
+							runtime.console().p(n.getName()).pln().flush(); //prints the name of the class name 
+							new Visitor(){
+								
+								public void visitCompilationUnit(GNode n) {
+									visit(n);
+								}
+								public void visitConstructorDeclaration(GNode n) {
+									runtime.console().p(n.getName()).pln().flush(); //prints the name of the class name 
+									runtime.console().p(n.getString(2)).pln().flush(); //prints the name of the constructor
+									new Visitor(){
+										
+										public void visitCompilationUnit(GNode n) {
+											visit(n);
+										}
+										
+										public void visitModifier(GNode n) {
+											//runs a for loop for ALL the children of the Qualified Identifier Subtree
+											for(int i=0;i<(n.size());i++)
+											{
+												//here we have to insert file readers and create the subfolders for the import declaration
+												runtime.console().p(n.getString(i)).pln().flush(); //xtc.tree.node
+											}
+											
+											
+											visit(n);
+										}
+										public void visit(Node n) {
+											for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+										}
+										}.dispatch(n);
+									visit(n);
+								}
+								public void visitMethodDeclaration(GNode n) {
+									runtime.console().p(n.getName()).pln().flush(); //xtc.tree.node
+									runtime.console().p(n.getString(3)).pln().flush(); //xtc.tree.node
+									visit(n);
+								}	
+								public void visit(Node n) {
+									for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+								}
+								
+							}.dispatch(n);
+							visit(n);
+						}
+						public void visit(Node n) {
+							for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+						}
+						
+						
+					}.dispatch(n);
+					
+				visit(n);
+					
+					
+				}
+				
+				//Edited by Paige 10/11/10 IMPORTS
+				public void visitImportDeclaration(GNode n) {
+					//visit the import declaration nodes and get the folders and files
+						runtime.console().p(n.getName()).pln().flush(); //xtc.tree.node
+					
+					//create a new visitor to visit only the subtree of the Import Declarations
+					new Visitor(){
+						
+						public void visitCompilationUnit(GNode n) {
+							visit(n);
+						}
+						
+						
+						
+						
+						public void visitQualifiedIdentifier(GNode n) {
+							//runs a for loop for ALL the children of the Qualified Identifier Subtree
+							for(int i=0;i<(n.size());i++)
+							{
+								//here we have to insert file readers and create the subfolders for the import declaration
+								runtime.console().p(n.getString(i)).pln().flush(); //xtc.tree.node
+							}
+							visit(n);
+						}
+						
+						public void visit(Node n) {
+							for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+						}
+						
+					}.dispatch(n);
+					
 					visit(n);
 				}
+				//end of edited by paige 10/11/10
+				
+				
 				public void visit(Node n) {
 					for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 				}
