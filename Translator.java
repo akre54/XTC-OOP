@@ -207,10 +207,7 @@ class cppClass extends Visitor{
 	}//end of cppClass constructor
 	public void visitClassDeclaration(GNode n) {
 		
-		//While debugging... Print the name of the current tree node
-		//if(DEBUG){System.out.println(n.getName());}
 		
-		//if(DEBUG){System.out.println(getClassName(n));}
 		classString.append("Class Insert_Type "+ getClassName(n)+ "{ \n");
 		
 		//call setMethods
@@ -251,7 +248,7 @@ class cppClass extends Visitor{
 	{
 		//create a new cppMethod Class
 		cppMethod aMethod = new cppMethod(n);
-		return aMethod.getMethodString();
+		return aMethod.getString();
 	}//end of setMethods method
 }//end of cppClass
 
@@ -268,17 +265,10 @@ class cppMethod extends Visitor{
 	}//end of cppMethod constructor
 	public void visitMethodDeclaration(GNode n) {
 		
-		//While debugging... Print the name of the current tree node
-		//if(DEBUG){System.out.println(n.getName());}
-		
-		//if(DEBUG){System.out.println(getClassName(n));}
-		
 		methodString.append("\t Method Insert_Type "+ getMethodName(n)+ "{ \n");
-		
-		methodString.append("\t //method body here \n");
-		
+		StringBuilder fields= setFields(n);
+		methodString.append(fields+"\n");
 		methodString.append("\t} \n");
-		
 		
 	}//end of visitClassDeclaration Method
 	
@@ -294,7 +284,7 @@ class cppMethod extends Visitor{
 	{
 		return true;
 	}//end of isMethodDeclaration Method
-	public StringBuilder getMethodString()
+	public StringBuilder getString()
 	/*
 	 returns the entire string generated for the method
 	 */
@@ -306,45 +296,47 @@ class cppMethod extends Visitor{
 		return n.getString(3);
 	}//end of getMethodName
 	
-	public void setFields(GNode n)
+	public StringBuilder setFields(GNode n)
 	{
-		new Visitor(){
-			//for each instance of a FieldDeclaration
-			public void visitFieldDeclaration(GNode n) {
-				
-				//While debugging... Print the name of the current tree node
-				if(DEBUG){System.out.println(n.getName());}
-				
-				//for each instance of a classDeclaration create a new cppClass class
-				cppFieldDeclaration field= new cppFieldDeclaration(n); 	
-				
-			}//end of visitFieldDeclaration Method
-			
-			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-			} //end of visit method
-			
-		}.dispatch(n);//end of visitor
+		cppFieldDeclaration methodFields= new cppFieldDeclaration(n);
+		return methodFields.getFieldString();
 	}
 	
 }//end of cppMethod
 
-class cppFieldDeclaration{
+class cppFieldDeclaration extends Visitor
+{
 	
 	public final boolean DEBUG = true;
+	private StringBuilder fieldString;
+	
 	
 	/*Takes Block and sets the fields */
 	cppFieldDeclaration(GNode n){
 		
-		if(isFieldDeclaration(n)){
-			//call the required methods
-		}
-		else {
-			//return an error
-			System.out.println("ERROR: This is not a Block");
-		   }
+		fieldString=new StringBuilder();
+		visit (n);
 	}//end of cppField Constructor
+	public void visitFieldDeclaration(GNode n) {
+		
+		//fix set modifier
+		fieldString.append("\t\t"+setModifier(n)+" "+setType(n)+" "+setDeclarator(n)+"; \n");
+		//setType(n);
+		//setModifier(n;)
+		//methodString.append("\t Method Insert_Type "+ getMethodName(n)+ "{ \n");
+		//methodString.append("\t \t//method body here \n");
+		//methodString.append("\t} \n");
+		
+	}//end of visitClassDeclaration Method
 	
+	
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public StringBuilder getFieldString()
+	{
+		return fieldString;
+	}
 	public boolean isFieldDeclaration(GNode n)
 	/*
 	 checks to make sure the given GNode is a FieldDeclaration
@@ -357,22 +349,228 @@ class cppFieldDeclaration{
 			//inside Declarator
 		return " ";
 	}
-	public void setType(GNode n)
+	public StringBuilder setType(GNode n)
 	{
 			//new class
 		//different options for class types and primitive types
 			//return " ";
+		cppType classType = new cppType(n);
+		return classType.getType();
 		
 	}
-	public void setModifier(GNode n)
+	public StringBuilder setModifier(GNode n)
 	{
 			//new class
+		cppModifier modifiers=new cppModifier(n);
+		return modifiers.getModifierString();
 		//first child of field Declaration
 		
 	}
-	public void setDeclarator(GNode n)
+	public StringBuilder setDeclarator(GNode n)
 	{
-			//new class
+		cppDeclarator decl= new cppDeclarator(n);
+		return decl.getString();
 	}
 	
 }//end of cppFieldDeclaration Class
+
+class cppDeclarator extends Visitor
+{
+	public final boolean DEBUG=false;
+	private StringBuilder declaratorString;
+
+	cppDeclarator(GNode n)
+	{
+		declaratorString=new StringBuilder();
+		declaratorString.append(getDeclarator(n));
+		visit(n);
+	}//end of cppDeclarator constructor
+	
+	public void visitDeclarators(GNode n) {
+		//typeString.append(getPrimitiveType(n));
+		if(DEBUG){System.out.println("Declarators");};
+		
+	}//end of visitClassDeclaration Method
+	public StringBuilder getDeclarator(GNode n)
+	{
+		cppSubDeclarator subDecl = new cppSubDeclarator(n);
+		return subDecl.getString();
+		
+	}//end of setDeclarator method
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	
+	public StringBuilder getString()
+	{
+		return declaratorString;
+	}
+	
+
+}//end of cppDeclarator type
+
+class cppSubDeclarator extends Visitor{
+	public final boolean DEBUG=false;
+	private StringBuilder declaratorString;
+	
+	cppSubDeclarator(GNode n)
+	{
+		declaratorString = new StringBuilder();
+		visit(n);
+	}
+	public void visitDeclarator(GNode n) {
+		declaratorString.append(n.getString(0));
+		if(DEBUG){System.out.println("Declarator");};
+		
+	}//end of visitClassDeclaration Method
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	
+	public StringBuilder getString()
+	{
+		return declaratorString;
+	}
+	
+}//end of cppSubDeclarator method
+class cppType extends Visitor{
+
+	public final boolean DEBUG=false;
+	private StringBuilder typeString;
+	cppType(GNode n)
+	{
+		typeString=new StringBuilder();
+		visit(n);
+		
+	}//end of cppType Constructior
+	public void visitType(GNode n) {
+		typeString.append(getPrimitiveType(n));
+		if(DEBUG){System.out.println("TYPEString!:"+ typeString);};
+		
+	}//end of visitClassDeclaration Method
+	
+
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	
+	public StringBuilder getPrimitiveType(GNode n)
+	{
+		cppPrimitiveType pType = new cppPrimitiveType(n);
+		return pType.getPrimString(n);
+	}
+	public StringBuilder getType()
+	{
+		return typeString;
+	}
+	
+	/******** DO SOMETHING HERE FOR OTHER TYPES   *********/
+}//end of cppType class
+
+class cppPrimitiveType extends Visitor{
+	public final boolean DEBUG=false;
+	private StringBuilder primitiveTypeString;
+	cppPrimitiveType(GNode n)
+	{
+		primitiveTypeString=new StringBuilder();
+		visit(n);
+		
+	}//end of cppType Constructior
+	public void visitPrimitiveType(GNode n) {
+		if(DEBUG){System.out.println("Prim TYPE");};
+		
+		primitiveTypeString.append(n.getString(0));
+		
+	}//end of visitClassDeclaration Method
+	
+	
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	
+	public StringBuilder getPrimString(GNode n)
+	{
+		return primitiveTypeString;
+	}
+	
+}
+
+
+
+class cppModifier extends Visitor{
+	
+	public final boolean DEBUG=false;
+	private StringBuilder modifierString;
+	
+	cppModifier(GNode n)
+	{
+		if(DEBUG){System.out.println("IN CppModifier");}
+		modifierString=new StringBuilder();
+		visit(n);
+	}//end of cppModifier Constructor
+	
+	public void visitModifiers(GNode n) {
+		cppSubModifier submod=new cppSubModifier(n);
+		modifierString.append(submod.getSubModifierString());
+	}//end of visitClassDeclaration Method
+	
+	
+	public void visit(Node n) {
+		//if(DEBUG){System.out.println(n.getName());}
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	
+	public StringBuilder getModifierString()
+	{
+		return modifierString;
+	}
+	/*public void setModifierName(GNode n)
+	{	//StringBuilder modifiers = new StringBuilder();
+		if(DEBUG){System.out.println(n.getName());}
+		for(int i=0; i<n.size();i++)
+		{
+			modifierString.append(n.getString(i));
+		}
+		//return modifiers;
+	}*/
+	
+}//end of cppModifier class
+
+
+/***NOTTTTTT WORKINGGGGGGGG :( ****/
+class cppSubModifier extends Visitor{
+	
+	public final boolean DEBUG=false;
+	private StringBuilder subModifierString;
+	
+	cppSubModifier(GNode n)
+	{
+		//if(DEBUG){System.out.println("IN CppModifier");}
+		subModifierString=new StringBuilder();
+		visit(n);
+	}//end of cppModifier Constructor
+	
+	public void visitModifier(GNode n) {
+		setSubModifierName(n);
+	}//end of visitClassDeclaration Method
+	
+	
+	public void visit(Node n) {
+		if(DEBUG){System.out.println(n.getName());}
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	
+	public StringBuilder getSubModifierString()
+	{
+		return subModifierString;
+	}
+	
+	public void setSubModifierName(GNode n){
+		if(DEBUG){System.out.println(n.getName());}
+		for(int i=0; i<n.size();i++)
+		{
+			subModifierString.append(n.getString(i));
+		}
+	}
+	
+}//end of cppsubModifier class
