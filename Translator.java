@@ -113,25 +113,13 @@ public class Translator extends Tool {
 		if (runtime.test("translate")) {
 			runtime.console().p("translating...").pln().flush();
 			
+			cppClass cppReader = new cppClass(node);
 			
-			
-			new Visitor(){
+			//new Visitor(){
 				
-				public void visitClassDeclaration(GNode n) {
-					
-					//While debugging... Print the name of the current tree node
-					if(DEBUG){runtime.console().p(n.getName()).pln().flush();}
-					
-					//for each instance of a classDeclaration create a new cppClass class
-					cppClass ClassDec= new cppClass(n); 	
 				
-				}//end of visitClassDeclaration Method
 				
-				public void visit(Node n) {
-					for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-				} //end of visit method
-				
-			}.dispatch(node);//end of visitor
+			//}.dispatch(node);//end of visitor
 			
 		
 		// Handle the test option
@@ -206,27 +194,38 @@ public class Translator extends Tool {
 /*
  Takes a classDeclaration GNode and  generates the basic class values
  */
-class cppClass{ 
+class cppClass extends Visitor{ 
 	
 	//public string className;
-	public final boolean DEBUG = false;
-	
-	cppClass(GNode n)
+	public final boolean DEBUG = true;
+	private StringBuilder classString = new StringBuilder();
+	cppClass(Node n)
 	{
-		if(DEBUG){System.out.println("Inside cppClass");}
+		visit(n);
+		if(DEBUG){System.out.println(classString);}
 	
-		if(isClassDeclaration(n))
-		{
-			//call the required methods
-			System.out.println(getClassName(n));
-			setMethods(n);
-		}
-		else
-		{
-			//throw and error and exit user has sent the wrong GNode
-			System.out.println("ERROR: This is not a classDeclaration");
-		}
 	}//end of cppClass constructor
+	public void visitClassDeclaration(GNode n) {
+		
+		//While debugging... Print the name of the current tree node
+		//if(DEBUG){System.out.println(n.getName());}
+		
+		//if(DEBUG){System.out.println(getClassName(n));}
+		classString.append("Class Insert_Type "+ getClassName(n)+ "{ \n");
+		
+		//call setMethods
+		StringBuilder methods=setMethods(n);
+		classString.append(methods+ "\n");
+
+		classString.append("} \n");
+		
+		
+	}//end of visitClassDeclaration Method
+	
+	
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
 	
 	public boolean isClassDeclaration(GNode n)
 	/*
@@ -245,47 +244,48 @@ class cppClass{
 		
 	}//end of getClassName method
 	
-	public void setMethods(GNode n)
+	public StringBuilder setMethods(GNode n)
 	/*
 	  sets the methods for the ClassDeclaration at GNode n
 	 */
 	{
-		new Visitor(){
-			//for each instance of MethodDeclaration create a new cppMethod and send it the methodDeclaration GNode
-			public void visitMethodDeclaration(GNode n) {
-			
-				//While debugging... Print the name of the current tree node
-				if(DEBUG){System.out.println(n.getName());}
-			
-				//for each instance of a classDeclaration create a new cppClass class
-				cppMethod methodDec= new cppMethod(n); 	
-			
-			}//end of visitMethodDeclaration Method
-		
-			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-			} //end of visit method
-			
-		}.dispatch(n);//end of visitor
+		//create a new cppMethod Class
+		cppMethod aMethod = new cppMethod(n);
+		return aMethod.getMethodString();
 	}//end of setMethods method
 }//end of cppClass
 
-class cppMethod{
-	public final boolean DEBUG = false;
+class cppMethod extends Visitor{
+	public final boolean DEBUG = true;
+	private StringBuilder methodString;
 	cppMethod(GNode n)
 	{
-		if(DEBUG){System.out.println("Inside cppMethod");}
+		//if(DEBUG){System.out.println("Inside cppMethod");}
+		methodString=new StringBuilder();
+		visit(n);
 		
-		if(isMethodDeclaration(n)){
-			//do required methods to make a method 
-			System.out.println("\t"+getMethodName(n));
-		}
-		else {
-			//its not a methodDeclaration return some error
-			System.out.println("ERROR: This is not a MethodDeclaration GNode");
-		}
 
 	}//end of cppMethod constructor
+	public void visitMethodDeclaration(GNode n) {
+		
+		//While debugging... Print the name of the current tree node
+		//if(DEBUG){System.out.println(n.getName());}
+		
+		//if(DEBUG){System.out.println(getClassName(n));}
+		
+		methodString.append("\t Method Insert_Type "+ getMethodName(n)+ "{ \n");
+		
+		methodString.append("\t //method body here \n");
+		
+		methodString.append("\t} \n");
+		
+		
+	}//end of visitClassDeclaration Method
+	
+	
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
 	
 	public boolean isMethodDeclaration(GNode n)
 	/*
@@ -294,7 +294,13 @@ class cppMethod{
 	{
 		return true;
 	}//end of isMethodDeclaration Method
-	
+	public StringBuilder getMethodString()
+	/*
+	 returns the entire string generated for the method
+	 */
+	{
+		return methodString;
+	}
 	public String getMethodName(GNode n)
 	{
 		return n.getString(3);
