@@ -7,6 +7,8 @@ public class Foo
 	{
 			Foo
 		     int x = 0;
+		
+		System.out.println("Howdy");
 		// }
 		// public void squirrel () {
 	}

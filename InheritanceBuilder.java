@@ -77,7 +77,7 @@ public class InheritanceBuilder{
 							* USA.
 							*/
 							
-							#include "java_lang.h"
+							#include \"java_lang.h\"
 							
 							#include <sstream>
 							
@@ -92,7 +92,14 @@ public class InheritanceBuilder{
 	 */
 	public static void addClassdef(/*passes the classdeclaration (maybe AST node)*/Gnode n){
 		
-		String Classname = classDeclaration.getName();
+		
+		/********************PAIGE-10/15/10 *****************************************************
+			classDeclaration.getName() will probably print out ClassDeclaration. 
+		 In my code I did, classDeclaration.getString(1); which litterally prints out the string of the 2nd child
+		 I don't really know if there is a better way to do this... but I can look into it.
+		 Though I think it pretty much constant across classDeclarations
+		****************************************************************************************/
+		String Classname = classDeclaration.getName(); 
 		
 		h_classdef.write(
 			"struct __"+ClassName+"; \ln"+/**/
