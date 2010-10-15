@@ -3,7 +3,6 @@
  * Copyright (C) 2010 Robert Grimm
  * Edited by Patrick Hammer
 <<<<<<< HEAD
- * Test Edited by Paige
 =======
 >>>>>>> 5da2b25a04c1f9340af211ca5b1ab8296bcb9d2b
  *
@@ -71,7 +70,6 @@ public class Translator extends Tool {
 
 	public void init() {
 		super.init();
-
 		
 		// Declare command line arguments.
 		runtime.
@@ -80,7 +78,9 @@ public class Translator extends Tool {
 			bool("countMethods", "optionCountMethods", false,
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
-				 "Translate .java file to c++.");
+				 "Translate .java file to c++.").
+			bool("file", "file", false,
+				 "Output to a file");
 	}
 
 	public void prepare() {
