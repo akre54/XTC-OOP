@@ -208,7 +208,7 @@ class cppClass extends Visitor{
 	public void visitClassDeclaration(GNode n) {
 		
 		
-		classString.append("Class Insert_Type "+ getClassName(n)+ "{ \n");
+		classString.append("Class "+ getClassName(n)+ "{ \n");
 		
 		//call setMethods
 		StringBuilder methods=setMethods(n);
@@ -253,7 +253,7 @@ class cppClass extends Visitor{
 }//end of cppClass
 
 class cppMethod extends Visitor{
-	public final boolean DEBUG = true;
+	public final boolean DEBUG = false;
 	private StringBuilder methodString;
 	cppMethod(GNode n)
 	{
@@ -265,13 +265,56 @@ class cppMethod extends Visitor{
 	}//end of cppMethod constructor
 	public void visitMethodDeclaration(GNode n) {
 		
-		methodString.append("\t Method Insert_Type "+ getMethodName(n)+ "{ \n");
+		methodString.append("\t" + setType(n)+" "+ getMethodName(n)+ "{ \n");
 		StringBuilder fields= setFields(n);
 		methodString.append(fields+"\n");
 		methodString.append("\t} \n");
 		
 	}//end of visitClassDeclaration Method
-	
+	public StringBuilder setType(GNode n)
+	{
+		StringBuilder type= new StringBuilder();
+		
+		Node node=n.getNode(2); //VoidType, Type 
+		Object o=n.get(2);
+		/*
+		 
+		 if node is a Primitrive Type
+			do Something
+		 if node is a Qualified Identifier
+			do something
+		 else
+			printout the name at the current position
+		 
+		 
+		 
+		 */
+		StringBuilder s= new StringBuilder();
+		if(node.hasName("Type"))
+		{
+			s.append(getPrimitiveType((GNode)node));
+			s.append(getQualIden((GNode)node));
+		}  
+		else
+			s.append(node.getName());
+		
+		
+		
+		
+		return s;
+		
+		
+	}
+	public StringBuilder getPrimitiveType(GNode n)
+	{
+		cppPrimitiveType pType = new cppPrimitiveType(n);
+		return pType.getPrimString(n);
+	}
+	public StringBuilder getQualIden(GNode n)
+	{
+		cppQualifiedIde qi= new cppQualifiedIde(n);
+		return qi.getString();
+	}
 	
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
@@ -302,7 +345,105 @@ class cppMethod extends Visitor{
 		return methodFields.getFieldString();
 	}
 	
-}//end of cppMethod
+}//end of cppMethod class
+
+class cpprType extends Visitor{
+	
+	public final boolean DEBUG=false;
+	private StringBuilder rTypeString;
+	cpprType(GNode n)
+	{
+		rTypeString=new StringBuilder();
+		visit(n);
+		
+	}//end of cppType Constructior
+	public void visitType(GNode n) {
+		if(DEBUG){System.out.println("TYPEString!:"+ rTypeString);};
+		
+		rTypeString.append(getPrimitiveType(n));
+		rTypeString.append(getQualIden(n));
+		
+		
+	}//end of visitClassDeclaration Method
+	
+	
+	public void visit(Node n) {
+		//for (Object o : n) 
+			dispatch(n);
+	} //end of visit method
+	
+	public StringBuilder getPrimitiveType(GNode n)
+	{
+		cpprPrimitiveType pType = new cpprPrimitiveType(n);
+		return pType.getPrimString(n);
+	}
+	public StringBuilder getQualIden(GNode n)
+	{
+		cpprQualifiedIde qi= new cpprQualifiedIde(n);
+		return qi.getString();
+	}
+	public StringBuilder getType()
+	{
+		return rTypeString;
+	}
+	
+	/******** DO SOMETHING HERE FOR OTHER TYPES   *********/
+}//end of cppType class
+
+class cpprQualifiedIde extends Visitor{
+	public final boolean DEBUG=true;
+	private StringBuilder qString;
+	cpprQualifiedIde(GNode n)
+	{
+		qString=new StringBuilder();
+		visit(n);
+	}
+	public void visitQualifiedIdentifier(GNode n) {
+		if(DEBUG){System.out.println("Q I");};
+		
+		qString.append(n.getString(0));
+		
+	}//end of visitClassDeclaration Method
+	public void visit(Node n) {
+		//for (Object o : n) 
+		//if (o instanceof Node) 
+			dispatch(n);
+	} //end of visit method
+	public StringBuilder getString()
+	{
+		return qString;
+	}
+}//end of cppQualifiedIde class
+
+class cpprPrimitiveType extends Visitor{
+	public final boolean DEBUG=false;
+	private StringBuilder primitiveTypeString;
+	cpprPrimitiveType(GNode n)
+	{
+		primitiveTypeString=new StringBuilder();
+		visit(n);
+		
+	}//end of cppType Constructior
+	public void visitPrimitiveType(GNode n) {
+		if(DEBUG){System.out.println("Prim TYPE");};
+		
+		primitiveTypeString.append(n.getString(0));
+		
+	}//end of visitClassDeclaration Method
+	
+	
+	public void visit(Node n) {
+		//for (Object o : n) 
+			dispatch(n);
+	} //end of visit method
+	
+	public StringBuilder getPrimString(GNode n)
+	{
+		return primitiveTypeString;
+	}
+	
+}
+
 
 class cppFieldDeclaration extends Visitor
 {
@@ -397,9 +538,21 @@ class cppDeclarator extends Visitor
 		return subDecl.getString();
 		
 	}//end of setDeclarator method
+	
+	public void setLiterals(GNode n)
+	{
+		
+		
+		//new class (Generics?) 
+		
+		
+		
+		
+	}
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method
+	
 	
 	public StringBuilder getString()
 	{
@@ -444,8 +597,13 @@ class cppType extends Visitor{
 		
 	}//end of cppType Constructior
 	public void visitType(GNode n) {
+		
+		
 		typeString.append(getPrimitiveType(n));
+		typeString.append(getQualIden(n));
+		
 		if(DEBUG){System.out.println("TYPEString!:"+ typeString);};
+		
 		
 	}//end of visitClassDeclaration Method
 	
@@ -453,11 +611,15 @@ class cppType extends Visitor{
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method
-	
 	public StringBuilder getPrimitiveType(GNode n)
 	{
 		cppPrimitiveType pType = new cppPrimitiveType(n);
 		return pType.getPrimString(n);
+	}
+	public StringBuilder getQualIden(GNode n)
+	{
+			cppQualifiedIde qi= new cppQualifiedIde(n);
+			return qi.getString();
 	}
 	public StringBuilder getType()
 	{
@@ -466,6 +628,29 @@ class cppType extends Visitor{
 	
 	/******** DO SOMETHING HERE FOR OTHER TYPES   *********/
 }//end of cppType class
+
+class cppQualifiedIde extends Visitor{
+	public final boolean DEBUG=false;
+	private StringBuilder qString;
+	cppQualifiedIde(GNode n)
+	{
+		qString=new StringBuilder();
+		visit(n);
+	}
+	public void visitQualifiedIdentifier(GNode n) {
+		if(DEBUG){System.out.println("Q I");};
+		
+		qString.append(n.getString(0));
+		
+	}//end of visitClassDeclaration Method
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public StringBuilder getString()
+	{
+		return qString;
+	}
+}//end of cppQualifiedIde class
 
 class cppPrimitiveType extends Visitor{
 	public final boolean DEBUG=false;

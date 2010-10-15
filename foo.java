@@ -3,7 +3,7 @@
 
 public class Foo 
 {
-    public void mainFoo () 
+    public int mainFoo () 
 	{
 		     int x = 0;
 		
@@ -27,6 +27,8 @@ class bar{
 		int value =3;
 		boolean thankYou=false;
 		int additionTest= 4+3;
+		String message = "YAY";
+		cat stevie;
 	}
 	public String newBar()
 	{
