@@ -3,31 +3,45 @@ import java.io.File;
 
 public class Foo 
 {
-    public static void main (String[] args) 
+    public int mainFoo () 
 	{
-			
-		    final int x = 0;
+		     int x = 0;
+		
+		//System.out.println("Howdy");
 		// }
 		// public void squirrel () {
 	}
 }
 
-class Boo{
-	private File j;
-	public static String s;
-	public final int y;
-	int d;
-	Boo(){
-		j = cpp;
-		d=4;
-		y = 34;
-		string = ""+y;
+class bar{
+	bar(int i)
+	{
+		//do stuff
 	}
-	public void method1(String r,int j){}
-	private String method2(final Object o, Boo b){}
-	public static void method3(){}
-	public String toString(){}
-	method5(){}
+	public int getBar(String height)
+	{
+		return 6;
+	}
+	public void setBar ()
+	{
+		int value =3;
+		boolean thankYou=false;
+		int additionTest= 4+3;
+		String message = "YAY";
+		cat stevie;
+	}
+	public String newBar()
+	{
+		return "Test";
+	}
+	
 }
 
+class iWantABeer
+{
+	public void please()
+	{
+		boolean deperation=true;
+	}
+}
 
