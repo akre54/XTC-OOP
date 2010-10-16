@@ -22,6 +22,15 @@ class CppCreator {
  *
  * @param jFile a file whose name ends in .java
  */ 
+	public CppCreator (File jFile, String desc,String end) {
+		cFile = convertNameToC (jFile, desc, end);
+		try {
+			outputWriter = new FileWriter(cFile);
+		}
+		catch (IOException a) {
+		}
+    }
+
     public CppCreator (File jFile, String end) {
 		cFile = convertNameToC (jFile, end);
 		try {
@@ -57,7 +66,7 @@ class CppCreator {
 
     private static File convertNameToC (File input, String end) {
 		String jname = input.getName ();
-		String cname = jname.substring (0,jname.length()-4) + end; // remove ".java" and add ".cpp"
+		String cname = jname.substring (0,jname.length()-4) + end; // remove ".java" and add end
 		File cfile = new File (input.getParent (), cname);
 		return cfile;
     }
@@ -65,6 +74,13 @@ class CppCreator {
 	private static File convertNameToC (File input) {
 		String jname = input.getName ();
 		String cname = jname.substring (0,jname.length()-4) + "cpp"; // remove ".java" and add ".cpp"
+		File cfile = new File (input.getParent (), cname);
+		return cfile;
+    }
+
+	private static File convertNameToC (File input,String desc, String end) {
+		String jname = input.getName ();
+		String cname = jname.substring (0,jname.length()-5) +desc + "." + end; // remove ".java" and add desc.end
 		File cfile = new File (input.getParent (), cname);
 		return cfile;
     }

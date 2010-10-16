@@ -47,7 +47,7 @@ import xtc.util.Tool;
  * @version 1
  */
 public class Translator extends Tool {
-	public final boolean DEBUG=true;
+	public final boolean DEBUG=false;
 
 	File inputFile = null;
 
@@ -113,6 +113,12 @@ public class Translator extends Tool {
 		if (runtime.test("translate")) {
 			runtime.console().p("translating...").pln().flush();
 			
+			/****EDIT LIZ**********/
+			
+			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile);
+		
+			/***********************/
+			
 			/*________________________EDITED BY PAIGE PONZEKA 10/13/10____________________________*/
 			
 			
@@ -161,7 +167,7 @@ public class Translator extends Tool {
 							for(int i=0;i<(n.size());i++)
 							{
 								//n.getString(i) gets all the string names of the subtree	
-								runtime.console().p(n.getString(i)).pln().flush(); 
+								if(DEBUG){runtime.console().p(n.getString(i)).pln().flush(); }
 							}
 							visit(n);
 						}//end of visitQualifiedIdentifier Method
@@ -179,6 +185,10 @@ public class Translator extends Tool {
 				
 				//visit Class Declaration
 				public void visitClassDeclaration(GNode n){
+				/****EDIT LIZ**********/
+					
+					inherit.addClassdef(n);
+				/***********************/
 					/*
 					 Visit Each ClassDeclaration Subtree
 						-Modifiers
@@ -210,7 +220,7 @@ public class Translator extends Tool {
 							for(int i=0;i<(n.size());i++)
 							{
 							    //print the name of each modifier
-								runtime.console().p(n.getString(i)).pln().flush();
+								if(DEBUG){runtime.console().p(n.getString(i)).pln().flush();}
 							}
 							visit(n);
 						}//end of visitModifier Method
@@ -222,7 +232,7 @@ public class Translator extends Tool {
 					}.dispatch(n); //end of Modifer subtree visitor
 						
 					//print the ClassName
-					runtime.console().p(n.getString(1)).pln().flush();
+					if(DEBUG){runtime.console().p(n.getString(1)).pln().flush();}
 					
 					
 					/*
@@ -285,7 +295,7 @@ public class Translator extends Tool {
 									 */
 									
 									//print out the name of the contructor
-									runtime.console().p(n.getString(2)).pln().flush();
+									if(DEBUG){runtime.console().p(n.getString(2)).pln().flush();}
 									
 									new Visitor(){
 										
@@ -295,7 +305,7 @@ public class Translator extends Tool {
 											for(int i=0;i<(n.size());i++)
 											{
 												//here we have to insert file readers and create the subfolders for the import declaration
-												runtime.console().p(n.getString(i)).pln().flush(); //xtc.tree.node
+												if(DEBUG){runtime.console().p(n.getString(i)).pln().flush();} //xtc.tree.node
 											}
 											visit(n);
 										}//end of visitModifier method
@@ -353,7 +363,7 @@ public class Translator extends Tool {
 															for(int i=0;i<(n.size());i++)
 															{
 																//print the type 
-																runtime.console().p(n.getString(i)).pln().flush(); 
+																if(DEBUG){runtime.console().p(n.getString(i)).pln().flush();} 
 															}
 														
 															visit(n);
@@ -395,7 +405,7 @@ public class Translator extends Tool {
 											
 											
 											//print out ParameterName
-											runtime.console().p(n.getString(3)).pln().flush(); 
+											if(DEBUG){runtime.console().p(n.getString(3)).pln().flush(); }
 											
 											
 											/*
@@ -467,7 +477,7 @@ public class Translator extends Tool {
 											for(int i=0;i<(n.size());i++)
 											{
 												//here we have to insert file readers and create the subfolders for the import declaration
-												runtime.console().p(n.getString(i)).pln().flush(); //xtc.tree.node
+												if(DEBUG){runtime.console().p(n.getString(i)).pln().flush();} //xtc.tree.node
 											}
 											visit(n);
 										}//end of visitModifier Method
@@ -506,7 +516,7 @@ public class Translator extends Tool {
 									
 								
 									//print out the methodName
-									runtime.console().p(n.getString(3)).pln().flush();
+									if(DEBUG){runtime.console().p(n.getString(3)).pln().flush();}
 								
 									/*
 									 Visit FormalParameter Subtree
@@ -547,7 +557,7 @@ public class Translator extends Tool {
 													for(int i=0;i<(n.size());i++)
 													{
 														//print the children
-														runtime.console().p(n.getString(i)).pln().flush(); 
+														if(DEBUG){runtime.console().p(n.getString(i)).pln().flush(); }
 													}
 												
 													visit(n);
@@ -562,7 +572,7 @@ public class Translator extends Tool {
 													for(int i=0;i<(n.size());i++)
 													{
 														//print the children
-														runtime.console().p(n.getString(i)).pln().flush(); 
+														if(DEBUG){runtime.console().p(n.getString(i)).pln().flush();} 
 													}
 													visit(n);
 												}//end of visitDimensions method											
@@ -662,6 +672,10 @@ public class Translator extends Tool {
 			}.dispatch(node); //end of main dispatch
 			//two cases of using the CppCreator class
 			//one uses a filepath and the other uses the source .java file as an arg.
+			
+			/****EDIT LIZ******/
+			inherit.close(); // when all nodes are visited and inheritance files are made close files
+			/****EDIT LIZ******/
 
 			String path = "/users/elizabethpelka/Desktop/test.java";
 			CppCreator toC = new CppCreator (path);
@@ -713,7 +727,7 @@ public class Translator extends Tool {
 
 			}.dispatch(node);
 		}
-
+	
 	}
 	
 	/**
@@ -725,5 +739,5 @@ public class Translator extends Tool {
 	public static void main(String[] args) {
 		new Translator().run(args);
 	}	
-	}
-}
+}//end of Translator.java
+

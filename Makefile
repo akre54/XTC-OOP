@@ -46,13 +46,11 @@ PACKAGE     = xtc.oop
 PACKAGE_LOC = xtc/oop
 
 SOURCE = \
-<<<<<<< HEAD
-	Translator.java 
-
-=======
+	Translator.java \
 	CppCreator.java \
-	Translator.java
->>>>>>> d02fb8183cb6bc2db4d6390d5b2d2e88da7b6e50
+	InheritanceBuilder.java
+
+
 
 
 JNI_SOURCE =
