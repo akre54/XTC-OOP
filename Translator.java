@@ -744,7 +744,7 @@ public class Translator extends Tool {
 	}	
 }//end of Translator.java
 
-}
+
 /*
  Takes a classDeclaration GNode and  generates the basic class values
  */
@@ -910,7 +910,7 @@ class cppMethod extends Visitor{
 class cppParameters extends Visitor
 {
 	
-	public final boolean DEBUG = true;
+	public final boolean DEBUG = false;
 	private StringBuilder pString;	
 	
 	cppParameters(GNode n)
@@ -941,7 +941,7 @@ class cppParameters extends Visitor
 }//end of cppParameters class
 class cppSubParameters extends Visitor{
 	
-	public final boolean DEBUG = true;
+	public final boolean DEBUG = false;
 	private StringBuilder pString;	
 	
 	cppSubParameters (GNode n)
@@ -1156,6 +1156,26 @@ class cppLiteral extends Visitor{
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method	
+	
+	/*
+	 For Declarations: 
+		StringLiteral (literally ="thisString")
+		BooleanLiteral
+		IntergerLiteral
+		MultiplicativeExpression -Even for Division (just changes sign in the middle)
+			IntergerLiteral(4) 
+			*
+			IntegerLiteral(3)
+		AdditiveExpression
+			IntegerLiteral(4)
+			+
+			IntergerLiteral(3)
+		AdditiveExpression - even for Subtraction (just chages sign in the middle
+			PrimaryIdentifier("additionTest")
+			+
+			PrimaryIdentifier("multiplicationTest")
+		
+	 */
 	
 }//end of cppLiteral class
 class cppType extends Visitor{

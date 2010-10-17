@@ -29,6 +29,10 @@ class bar{
 		int additionTest= 4+3;
 		String message = "YAY";
 		cat stevie;
+		int multiplicationTest= 4*3;
+		int newNum=additionTest+multiplicationTest;
+		int division= 12/3;
+		int subtraction=12-2;
 	}
 	public String newBar()
 	{
