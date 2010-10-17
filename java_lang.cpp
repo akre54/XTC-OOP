@@ -64,7 +64,11 @@ namespace java {
 
     // java.lang.Class.toString()
     String __Class::toString(Class __this) {
-      return "class " + __this->name;
+      if (__this->primitive) {
+        return __this->name;
+      } else {
+        return "class " + __this->name;
+      }
     }
 
     // java.lang.Class.getName()
@@ -75,6 +79,21 @@ namespace java {
     // java.lang.Class.getSuperclass()
     Class __Class::getSuperclass(Class __this) {
       return __this->parent;
+    }
+
+    // java.lang.Class.isPrimitive()
+    bool __Class::isPrimitive(Class __this) {
+      return __this->primitive;
+    }
+
+    // java.lang.Class.isArray()
+    bool __Class::isArray(Class __this) {
+      return 0 != __this->component;
+    }
+
+    // java.lang.Class.getComponentType()
+    Class __Class::getComponentType(Class __this) {
+      return __this->component;
     }
 
     // java.lang.Class.isInstance(Object)
@@ -99,6 +118,43 @@ namespace java {
     // The vtable for java.lang.Class.  Note that this definition
     // invokes the default no-arg constructor for __Class_VT.
     __Class_VT __Class::__vtable;
+
+    // =======================================================================
+
+    // Internal accessor for int's class.
+    Class __Integer::__primitiveClass() {
+      static Class k = new __Class("int", 0, 0, true);
+      return k;
+    }
+
+    // =======================================================================
+
+    // Template specialization for arrays of ints.
+    template<>
+    Class __Array<int32_t>::__class() {
+      static Class k = new __Class("[I",
+                                   __Object::__class(),
+                                   __Integer::__primitiveClass());
+      return k;
+    }
+
+    // Template specialization for arrays of objects.
+    template<>
+    Class __Array<Object>::__class() {
+      static Class k = new __Class("[Ljava.lang.Object;",
+                                   __Object::__class(),
+                                   __Object::__class());
+      return k;
+    }
+
+    // Template specialization for arrays of classes.
+    template<>
+    Class __Array<Class>::__class() {
+      static Class k = new __Class("[Ljava.lang.Class;", 
+                                   __Array<Object>::__class(),
+                                   __Class::__class());
+      return k;
+    }
 
   }
 }
