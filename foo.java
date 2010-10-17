@@ -25,6 +25,7 @@ class bar{
 	public void setBar ()
 	{
 		int value =3;
+		int nothing;
 		boolean thankYou=false;
 		int additionTest= 4+3;
 		String message = "YAY";
@@ -33,6 +34,8 @@ class bar{
 		int newNum=additionTest+multiplicationTest;
 		int division= 12/3;
 		int subtraction=12-2;
+		int longNum = 12+3/2;
+		String s = "te"+"xt";
 	}
 	public String newBar()
 	{

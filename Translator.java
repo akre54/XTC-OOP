@@ -1099,19 +1099,43 @@ class cppSubDeclarator extends Visitor{
 	cppSubDeclarator(GNode n)
 	{
 		declaratorString = new StringBuilder();
-		
 		visit(n);
 	}
 	public void visitDeclarator(GNode n) {
 		declaratorString.append(n.getString(0));
 		if(DEBUG){System.out.println("Declarator");};
-		getLiteral(n);		
+		//getLiteral(n);	
+		getExpression(n);
 	}//end of visitClassDeclaration Method
-	
+	public void getExpression(GNode n)
+	{
+		
+		if(n.getNode(2)!=null)
+		{
+			Node sub=n.getNode(2);
+			
+			System.out.println(sub.getName());
+			if((Object)n instanceof xtc.lang.javacc.syntaxtree.Expression)
+			{
+			cppExpression cppEx = new cppExpression(n);
+				
+			System.out.println("Expression:"+cppEx.getString()+"\n");
+			declaratorString.append("= "+cppEx.getString());
+			}
+			else {
+					getLiteral(n);			
+			}
+
+				
+
+		}
+	}
 	public void getLiteral(GNode n)
 	{
 		if(DEBUG){System.out.println("PRENODE:"+n.getName());}
-		Node node = n.getNode(2);
+			cppLiteral cppLit =new cppLiteral(n);
+			declaratorString.append("= "+cppLit.getString());
+		//Node node = n.getNode(2);
 		
 		
 		/*WHAT TO DO WITH THE LITERAL AND ADDITIVE EXPRESSIONS*/
@@ -1140,28 +1164,127 @@ class cppSubDeclarator extends Visitor{
 }//end of cppSubDeclarator method
 
 class cppLiteral extends Visitor{
-	
+	public final boolean DEBUG =false;
 	private StringBuilder lString;
+	private boolean foundLiteral;
+	private int location;
+	private int count;
+	private String litString;
 	cppLiteral(GNode n)
 	{
+		foundLiteral=false;
 		lString = new StringBuilder();
+		count=0;
+		location=1;
 		visit(n);
 		
 	}//end of cppLiteral Constructor
+	cppLiteral(GNode n, int value)
+	{
+		foundLiteral=false;
+		lString = new StringBuilder();
+		location=value;
+		count=0;
+		visit(n);
+		
+	}//end of cppLiteral Constructor	
 	public StringBuilder getString()
 	{
 		return lString;
 	}//end of getString
-	
+	public void getValue (GNode n)
+	{
+		//if(DEBUG){System.out.println("cppLiteral: "+n.getName());}
+	}
+	public boolean checkBreak()
+	{
+		if(DEBUG){System.out.println("Count: "+count);}
+		if(DEBUG){System.out.println("Location: "+location);}		
+		if((foundLiteral) && (count==location))
+		{
+			if(DEBUG){System.out.println("String: "+litString);}
+			lString.append(litString);
+			return true;
+		}
+		else {
+			return false;
+		}
+
+		
+	}
+	public void visitBooleanLiteral(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(0));}
+		foundLiteral=true;
+		count++;
+		litString=n.getString(0);		
+		if(checkBreak()){return;}
+			
+		//cppExpression cppEx = new cppExpression(n);
+	}
+	public void visitIntegerLiteral(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(0));}
+		foundLiteral=true;
+		count++;
+		litString=n.getString(0);	
+		if(checkBreak()){return;}		
+		//cppExpression cppEx = new cppExpression(n);
+	}
+	public void visitStringLiteral(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(0));}
+		foundLiteral=true;
+		count++;
+		litString=n.getString(0);	
+		if(checkBreak()){return;}		
+		//cppExpression cppEx = new cppExpression(n);
+	}	
+	public void visitPrimaryIdentifier(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(0));}
+		foundLiteral=true;
+		count++;
+		litString=n.getString(0);	
+		if(checkBreak()){return;}		
+	}	
 	public void visit(Node n) {
-		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+		//count++;
+		for (Object o : n){
+			//count++;
+			//Node test= n.getNode(0);
+			
+			//if(DEBUG){System.out.println(test.getName());}
+			//if(DEBUG){System.out.println("Count: "+count);}
+			//if(DEBUG){System.out.println("Location: "+location);}
+			/*if((foundLiteral) && (count==location))
+			{
+				if(DEBUG){System.out.println("String: "+litString);}
+				lString.append(litString);
+				break;
+			}*/
+			 if (o instanceof Node) dispatch((Node)o);
+		}
+		
 	} //end of visit method	
+	/*public void interface Visitor<R, E extends Throwable> {
+		
+		R visitLiteral(GNode n) throws E;
+		R visitAdditionExpression(GNode n) throws E;
+		R visitMultiplicativeExpression(GNode n) throws E;
+		
+	}*/	
+	
 	
 	/*
 	 For Declarations: 
-		StringLiteral (literally ="thisString")
+		-StringLiteral (literally ="thisString")
 		BooleanLiteral
-		IntergerLiteral
+		-IntegerLiteral
+		-FloatingPointLiteral
+		-CharacterLiteral
+		NullLiteral
+		Literal?
 		MultiplicativeExpression -Even for Division (just changes sign in the middle)
 			IntergerLiteral(4) 
 			*
@@ -1174,10 +1297,85 @@ class cppLiteral extends Visitor{
 			PrimaryIdentifier("additionTest")
 			+
 			PrimaryIdentifier("multiplicationTest")
-		
+		AdditiveExpression
+			IntergerLiteral(12)
+			+
+			MultiplicativeExpression
+				IntegerLiteral(3)
+			/
+			IntegerLiteral(2)
+		AdditiveExpression
+			StringLiteral("te")
+			+
+			StringLiteral("xt")
+		 
+		 //create method that takes the GNode of the expression
+			//make a visitor for the literals (base)
+			//make a visitor for Expression
 	 */
 	
 }//end of cppLiteral class
+
+class cppExpression extends Visitor
+{
+	public final boolean DEBUG = true;
+	private StringBuilder eString;
+	cppExpression(GNode n)
+	{
+		eString=new StringBuilder();
+		visit(n);
+	}
+	public void visitAdditiveExpression(GNode n)
+	{
+		//if(DEBUG){System.out.println("+ Expression");};
+		//cppLiteral cppLit =new cppLiteral(n);
+		cppLiteral cppLit =new cppLiteral(n);	
+		eString.append(cppLit.getString());
+		
+		if(DEBUG){System.out.println(cppLit.getString());};
+		
+		cppExpression cppExp=new cppExpression(n);
+		
+		if(DEBUG){System.out.println(n.getString(1));}
+		eString.append(n.getString(1));
+		
+		cppLiteral cppLit2 =new cppLiteral(n,2);
+		eString.append(cppLit2.getString());
+		if(DEBUG){System.out.println(cppLit2.getString());};
+		
+		cppExpression cppExp2=new cppExpression(n);	
+		eString.append(cppExp2.getString());	
+	}
+	public void visitMultiplicativeExpression(GNode n)
+	{
+		//if(DEBUG){System.out.println("/ Expression");};
+		
+		cppLiteral cppLit =new cppLiteral(n);	
+		eString.append(cppLit.getString());
+		
+		if(DEBUG){System.out.println(cppLit.getString());};
+		
+		cppExpression cppExp=new cppExpression(n);
+		
+		if(DEBUG){System.out.println(n.getString(1));}
+		eString.append(n.getString(1));
+		
+		cppLiteral cppLit2 =new cppLiteral(n,2);
+		eString.append(cppLit2.getString());
+		if(DEBUG){System.out.println(cppLit2.getString());};
+		
+		cppExpression cppExp2=new cppExpression(n);	
+		eString.append(cppExp2.getString());	
+	}	
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	}	
+	
+	public StringBuilder getString()
+	{
+		return eString;
+	}//end of getString Method
+}//end of cppExpression Class
 class cppType extends Visitor{
 
 	public final boolean DEBUG=false;
@@ -1225,7 +1423,6 @@ class cppType extends Visitor{
 	
 	/******** DO SOMETHING HERE FOR OTHER TYPES   *********/
 }//end of cppType class
-
 class cppQualifiedIde extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder qString;
@@ -1248,7 +1445,6 @@ class cppQualifiedIde extends Visitor{
 		return qString;
 	}
 }//end of cppQualifiedIde class
-
 class cppPrimitiveType extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder primitiveTypeString;
@@ -1276,9 +1472,6 @@ class cppPrimitiveType extends Visitor{
 	}
 	
 }
-
-
-
 class cppModifier extends Visitor{
 	
 	public final boolean DEBUG=false;
@@ -1317,8 +1510,6 @@ class cppModifier extends Visitor{
 	}*/
 	
 }//end of cppModifier class
-
-
 /***NOTTTTTT WORKINGGGGGGGG :( ****/
 class cppSubModifier extends Visitor{
 	
