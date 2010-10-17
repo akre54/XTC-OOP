@@ -1,3 +1,4 @@
+package dinosaur;
 import java.io.File;
 //import java.io.blah;
 
@@ -7,13 +8,13 @@ public class Foo
 	{
 		     int x = 0;
 		
-		//System.out.println("Howdy");
+		System.out.println("Howdy");
 		// }
 		// public void squirrel () {
 	}
 }
 
-class bar{
+class bar extends foo implements FACE{
 	bar(int i)
 	{
 		//do stuff

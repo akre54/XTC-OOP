@@ -745,6 +745,12 @@ public class Translator extends Tool {
 }//end of Translator.java
 
 
+//looks into write to method to .cpp file... write to method that will take a file
+//tweek methods to take a single given GNode
+//functionality for arrays
+//System.out.print
+//write to a file
+
 /*
  Takes a classDeclaration GNode and  generates the basic class values
  */
@@ -805,12 +811,13 @@ class cppClass extends Visitor{
 		return aMethod.getString();
 	}//end of setMethods method
 }//end of cppClass
-
+//change to take just one method GNode
 class cppMethod extends Visitor{
 	public final boolean DEBUG = false;
 	private StringBuilder methodString;
 	cppMethod(GNode n)
 	{
+		//test(n);
 		//if(DEBUG){System.out.println("Inside cppMethod");}
 		methodString=new StringBuilder();
 		visit(n);
@@ -823,8 +830,19 @@ class cppMethod extends Visitor{
 		StringBuilder fields= setFields(n);
 		methodString.append(fields+"\n");
 		methodString.append("\t} \n");
-		
+		getExpressionStatements(n);
 	}//end of visitClassDeclaration Method
+	/*public void test(GNode n)
+	{
+		Node node= (Node) n;
+		Object o=node.get(0);
+		System.out.println("TESTING!!!!!! "+o.toString());
+		if (o instanceof Modifiers)
+		{
+			System.out.println("RAWR I'm A Dinosaur");
+		}
+		
+	}*/
 	public StringBuilder setType(GNode n)
 	{
 		StringBuilder type= new StringBuilder();
@@ -832,16 +850,12 @@ class cppMethod extends Visitor{
 		Node node=n.getNode(2); //VoidType, Type 
 		Object o=n.get(2);
 		/*
-		 
 		 if node is a Primitrive Type
 			do Something
 		 if node is a Qualified Identifier
 			do something
 		 else
 			printout the name at the current position
-		 
-		 
-		 
 		 */
 		StringBuilder s= new StringBuilder();
 		if(node.hasName("Type"))
@@ -851,9 +865,6 @@ class cppMethod extends Visitor{
 		}  
  		else
 			s.append(node.getName());
-		
-		
-		
 		
 		return s;
 		
@@ -904,11 +915,226 @@ class cppMethod extends Visitor{
 		cppFieldDeclaration methodFields= new cppFieldDeclaration(n);
 		return methodFields.getFieldString();
 	}
+	public void getExpressionStatements(GNode n)
+	{
+		cppExpressionStatement cppEx= new cppExpressionStatement(n);
+	}
 	
 }//end of cppMethod class
+//put in code for Constructors
+class cppExpressionStatement extends Visitor{
+	
+	public final boolean DEBUG = true;
+	private StringBuilder pString;	
+	private boolean isOut;
+	private String print;
+	private boolean isSystem;
+	private boolean isSystemOutPrint;
+	private GNode arguments;
+	cppExpressionStatement(GNode n)
+	{
+		pString=new StringBuilder();
+		isOut=false;
+		isSystem=false;
+		isSystemOutPrint=false;
+		arguments=null;
+		visit(n);
+		testSystemOut();
+	}
+	public void visitCallExpression(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(2));}
+		pString.append(n.getString(2));
+		print=n.getString(2);
+		getSelectionExpression(n);
+		cppArguments cppargs = new cppArguments(n);
+		arguments=cppargs.getArguments();
+	}//end of visitCallExpression method
+	/*public void visitPrimaryIdentifier(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(0));}
+	}//end of visitPrimaryIdentifier Method
+	public void visitSelectionExpression(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(1));}
+	}//end of visitSelectionExpression Method
+	*/
+	public void getSelectionExpression(GNode n)
+	{
+		cppSelectionExpression cppCall = new cppSelectionExpression(n);
+		isOut=cppCall.isOut();
+		isSystem=cppCall.isSystem();
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	/*public void visitArguments(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getName());}
+	}*/
+	
+	public StringBuilder getString()
+	{
+		return pString;
+	}
+	public boolean isOut()
+	{
+		return isOut();
+	}
+	public boolean isSystem()
+	{
+		return isSystem();
+	}
+	public boolean isSystemOutPrint()
+	{
+		return isSystemOutPrint;
+	}
+	public String getPrint()
+	{
+		return print;
+	}
+	public void testSystemOut()
+	{
+		//if(DEBUG){System.out.println("SYSTEM:"+isSystem +"OUT:"+isOut+"Print:"+print);}
+		if(isSystem)
+		{
+			if(isOut)
+			{
+				if(print.compareTo("println")==0)
+				{
+					isSystemOutPrint=true;
+					//call constructor for System.out.println
+					if(DEBUG){System.out.println(arguments.getName());}
+				}
+				else if(print.compareTo("print")==0)
+				{
+					isSystemOutPrint=true;
+					if(DEBUG){System.out.println(arguments.getName());}
+					//call constructor for System.out.println
+				}
+				else {
+					//something is wrong
+					System.out.println("Error");
+				}
 
-class cppParameters extends Visitor
-{
+			}
+		}
+		
+	}
+}//end of cppExpressionStatemnet class
+class cppArguments extends Visitor{
+	public final boolean DEBUG=false;
+	private StringBuilder aString;
+	private GNode arguments;
+	cppArguments(GNode n)
+	{
+		aString=new StringBuilder();
+		visit(n);
+	}
+	public GNode getArguments()
+	{
+		return arguments;
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method	
+	public void visitArguments (GNode n)
+	{
+		if(DEBUG){System.out.println(n.getName());}
+		arguments=n;
+	}
+}//end of cppArguments method
+class cppSelectionExpression extends Visitor{
+	public final boolean DEBUG = false;
+	private StringBuilder sString;
+	private boolean isOut;
+	private boolean isSystem;
+	private GNode arguments; 
+	cppSelectionExpression(GNode n)
+	{
+		sString=new StringBuilder();
+		isOut=false;
+		isSystem=false;
+		visit(n);
+	}
+	public void visitSelectionExpression(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(1));}
+		String s = n.getString(1);
+		if(s.compareTo("out")==0)
+		{
+			isOut=true;
+		}
+		getPrimaryIdentifer(n);
+		sString.append(n.getString(1));
+	}//end of visitSelectionExpression Method
+	
+	public GNode getArguments()
+	{
+		if (arguments!=null)
+		{
+			return arguments;
+		}
+		else {
+			System.out.println("ERROR!");
+			return null;
+		}
+
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method	
+	public void getPrimaryIdentifer(GNode n)
+	{
+		cppPrimaryIdentifier PrimId= new cppPrimaryIdentifier(n);
+			isSystem=PrimId.isSystem();
+	}
+	public boolean isSystem()
+	{
+			return isSystem;
+	}
+    public boolean isOut()
+	{
+			return isOut;
+	}
+	public StringBuilder getString()
+	{
+		return sString;
+	}
+}//end of cppCallExpression Class
+class cppPrimaryIdentifier extends Visitor{
+	public final boolean DEBUG = false;
+	private StringBuilder pString;
+	private boolean isSystem;
+	cppPrimaryIdentifier(GNode n)
+	{
+		pString= new StringBuilder();
+		isSystem=false;
+		visit(n);
+	}
+	public void visitPrimaryIdentifier(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getString(0));}
+		String s=n.getString(0);
+		pString.append(n.getString(0));
+		if(s.compareTo("System")==0)
+		{
+			isSystem=true;
+		}
+	}
+	public void visit(Node n){
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);	
+	}
+	public StringBuilder getString()
+	{
+		return pString;
+	}
+	public boolean isSystem()
+	{
+		return isSystem;
+	}
+}//end of cppPrimaryIdentifer class
+class cppParameters extends Visitor{
 	
 	public final boolean DEBUG = false;
 	private StringBuilder pString;	
@@ -974,9 +1200,7 @@ class cppSubParameters extends Visitor{
 		return pString;
 	}//end of getString method
 }//end of cppSubParameters class
-
-class cppFieldDeclaration extends Visitor
-{
+class cppFieldDeclaration extends Visitor{
 	
 	public final boolean DEBUG = true;
 	private StringBuilder fieldString;
@@ -1044,9 +1268,7 @@ class cppFieldDeclaration extends Visitor
 	}
 	
 }//end of cppFieldDeclaration Class
-
-class cppDeclarator extends Visitor
-{
+class cppDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
 
@@ -1091,7 +1313,6 @@ class cppDeclarator extends Visitor
 	
 
 }//end of cppDeclarator type
-
 class cppSubDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
@@ -1114,43 +1335,26 @@ class cppSubDeclarator extends Visitor{
 		{
 			Node sub=n.getNode(2);
 			
-			System.out.println(sub.getName());
-			if((Object)n instanceof xtc.lang.javacc.syntaxtree.Expression)
+			//System.out.println(sub.getName());
+			if(DEBUG){System.out.println("size: "+sub.size());}
+			
+			if(sub.size()>1)
 			{
 			cppExpression cppEx = new cppExpression(n);
 				
-			System.out.println("Expression:"+cppEx.getString()+"\n");
+			if(DEBUG){System.out.println("Expression:"+cppEx.getString()+"\n");}
 			declaratorString.append("= "+cppEx.getString());
 			}
 			else {
 					getLiteral(n);			
 			}
-
-				
-
 		}
 	}
 	public void getLiteral(GNode n)
 	{
 		if(DEBUG){System.out.println("PRENODE:"+n.getName());}
 			cppLiteral cppLit =new cppLiteral(n);
-			declaratorString.append("= "+cppLit.getString());
-		//Node node = n.getNode(2);
-		
-		
-		/*WHAT TO DO WITH THE LITERAL AND ADDITIVE EXPRESSIONS*/
-		/*if (node !=null)
-		{
-			if(DEBUG){System.out.println("NODE:"+node.getName());}
-			if(DEBUG){System.out.println("NODE:"+node.getString(0));}
-			if(node.getString(0)!=null)
-			{
-				declaratorString.append(node.getString(0));	
-			}
-			
-			//declaratorString.append(node.getString(0));
-		}*/
-		
+			declaratorString.append("= "+cppLit.getString());		
 	}
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
@@ -1162,7 +1366,6 @@ class cppSubDeclarator extends Visitor{
 	}
 	
 }//end of cppSubDeclarator method
-
 class cppLiteral extends Visitor{
 	public final boolean DEBUG =false;
 	private StringBuilder lString;
@@ -1315,10 +1518,8 @@ class cppLiteral extends Visitor{
 	 */
 	
 }//end of cppLiteral class
-
-class cppExpression extends Visitor
-{
-	public final boolean DEBUG = true;
+class cppExpression extends Visitor{
+	public final boolean DEBUG = false;
 	private StringBuilder eString;
 	cppExpression(GNode n)
 	{
