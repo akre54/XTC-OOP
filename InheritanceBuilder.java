@@ -16,7 +16,7 @@ import xtc.util.Tool;
  *for easy writing to .h file VTable
  */
 public class InheritanceBuilder{
-	
+	public final boolean DEBUG=false;
 	
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
@@ -246,9 +246,9 @@ public class InheritanceBuilder{
 				retrn="";
 				methodname = n.getString(3);
 				params = "";
-				System.out.println(n.getName()+"---"+n.getString(3));
+				if(DEBUG){System.out.println(n.getName()+"---"+n.getString(3));}
 				visit(n);
-				System.out.println("---END-"+n.getName());
+				if(DEBUG){System.out.println("---END-"+n.getName());}
 				h_classdef.write("static "+ retrn +" "+methodname+" ("+classname+""+params+");\n");
 
 			}
@@ -268,9 +268,9 @@ public class InheritanceBuilder{
 			}*/
 			public void visitFormalParameter(GNode n){
 				is_fparam = true;
-					System.out.println(n.getName()+"---"+n.getString(3));
+				if(DEBUG){System.out.println(n.getName()+"---"+n.getString(3));}
 					visit(n);
-					System.out.println("---END-"+n.getName());
+				if(DEBUG){System.out.println("---END-"+n.getName());}
 				is_fparam = false;
 
 			}
@@ -285,9 +285,9 @@ public class InheritanceBuilder{
 			}*/
 			public void visitVoidType(GNode n){
 				retrn = "void";
-				System.out.println(n.getName()+"---"+n.getName());
+				if(DEBUG){System.out.println(n.getName()+"---"+n.getName());}
 				visit(n);
-				System.out.println("---END-"+n.getName());
+				if(DEBUG){System.out.println("---END-"+n.getName());}
 
 			
 			}
@@ -302,9 +302,9 @@ public class InheritanceBuilder{
 				if(is_fparam) params = params+","+n.getString(0);
 				else retrn = n.getString(0);
 				
-				System.out.println(n.getName()+"---"+n.getString(0));
+				if(DEBUG){System.out.println(n.getName()+"---"+n.getString(0));}
 				visit(n);
-				System.out.println("---END-"+n.getName());
+				if(DEBUG){System.out.println("---END-"+n.getName());}
 
 
 			}

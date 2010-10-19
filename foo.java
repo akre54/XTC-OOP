@@ -4,6 +4,8 @@ import java.io.File;
 
 public class Foo 
 {
+	public static int you;
+	static int valueHere;
     public int mainFoo () 
 	{
 		     int x = 0;
