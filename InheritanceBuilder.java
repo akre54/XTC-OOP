@@ -20,7 +20,7 @@ public class InheritanceBuilder{
 	
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
-	//ArrayList<String>; 
+
 
 	
 	InheritanceBuilder(File jfile){
@@ -97,9 +97,9 @@ public class InheritanceBuilder{
 	 * writes to the h_classdef file GNode n's class declaration and Vtable
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
 	 */
-	public void addClassdef(/*passes the classdeclaration (maybe AST node)*/GNode n){
+	public void addClassdef(GNode n,InheritanceTree t){
 		
-		String ClassName = n.getString(1);
+		String ClassName = t.className;
 		
 		h_classdef.write(
 			"struct __"+ClassName+"; \n"+/**/
@@ -119,7 +119,7 @@ public class InheritanceBuilder{
 				/*  */
 				"static Class __class();\n\n");/**/
 				
-				write_all_methods(n);  h_classdef.write("\n\n"+
+				write_all_methods(t);  h_classdef.write("\n\n"+
 						 
 				/*create instance of VTABLE*/
 				"private: \n static __"+ClassName+"_VT __vtable;\n"+/**/
@@ -128,16 +128,16 @@ public class InheritanceBuilder{
 						 
 		/* ---------------------start of stuct __ClassName_VT in .h file -------------------*/
 			
-			"struct __"+ClassName+"_VT{\n"+
+			"struct __"+ClassName+"_VT{\n");
 				
 				/* DECLARE METHOD PTRS ---> ",methodreturnType (*methodname)(methodparameters)",\n" */
-				write_all_method_ptrs(n)+"\n\n"+/**/
+				write_all_method_ptrs(t); h_classdef.write("\n\n"+/**/
 						
 						 
-				"__"+ClassName+"_VT():\n"+
+				"__"+ClassName+"_VT():\n");
 						 
 						/* INITIALIZE METHOD PTRS ---> methodname"(&__"+ClassName+"::"+methodname+"),\n" */
-						write_assign_method_ptrs(n)+/**/
+				write_assign_method_ptrs(t); h_classdef.write( /**/
 				"{}\n"+
 						 
 						 
@@ -178,22 +178,25 @@ public class InheritanceBuilder{
 			}
 			public void visitPrimitiveType(GNode n){
 				if(is_field){
-					h_classdef.write(n.getString(0)+" ");
-					visit(n);
+					String type = n.getString(0);
+					if(type.equals("int"))type="int_32_t";
+					if(type.equals("boolean"))type="bool";
+					h_classdef.write(type+" ");
+					
 				}
 			}
 			public void visitDeclarator(GNode n){//variable name
 				if(is_field){
-					h_classdef.write(n.getString(0)+" ");
+					h_classdef.write(n.getString(0));
 
-					visit(n);
+					//visit(n);
 				}
 			}
 			public void visitQualifiedIdentifier(GNode n){//type
 				if(is_field){
-				h_classdef.write(n.getString(0)+" ");
+					h_classdef.write(n.getString(0)+" ");
 
-				visit(n);
+				//visit(n);
 				
 				}
 			}
@@ -219,129 +222,77 @@ public class InheritanceBuilder{
 	
 	
 	/*
-	 * will return a concatinated string of all method declarations in GNode n
+	 * will print string of all method declarations in this class
 	 * syntax --->  "static "+ returntype +" "+methodName+" ("+className+","+..other paramaterTypes,..+");\n"
 	 *
 	 *
 	 */		
-	private void write_all_methods(GNode n){
-		Node node = n;
-
-		final String classname = n.getString(1);
-
-		new Visitor(){
-			String s = "";
-			String retrn="";
-			String methodname="";
-			String params = "";
-			boolean is_fparam=false;
+	private void write_all_methods(InheritanceTree t){
+		//loops through local methods and prints out in proper syantax
+		for(int index =1;index<t.local.size();index++){
+			h_classdef.write("static "+t.local.get(index).returntype+" "+t.local.get(index).name+" ("+t.className);
 			
-			/*public void visitClassBody(GNode n){
-				
-				System.out.println(n.getName());
-				visit(n);
-				System.out.println("---END-"+n.getName());
-			}*/
-			public void visitMethodDeclaration(GNode n){
-				retrn="";
-				methodname = n.getString(3);
-				params = "";
-				System.out.println(n.getName()+"---"+n.getString(3));
-				visit(n);
-				System.out.println("---END-"+n.getName());
-				h_classdef.write("static "+ retrn +" "+methodname+" ("+classname+""+params+");\n");
-
+			for(int j=0; j<t.local.get(index).params.size();j++){
+				h_classdef.write(", "+t.local.get(index).params.get(j));
 			}
-			/*public void visitModifiers(GNode n){
-					System.out.println(n.getName());
-					visit(n);
-					System.out.println("---END-"+n.getName());
+			h_classdef.write(");\n");
 
-			}
-			public void visitModifier(GNode n){
-
-				System.out.println(n.getName()+"---"+n.getString(0));
-				visit(n);
-				System.out.println("---END-"+n.getName());
-
-				
-			}*/
-			public void visitFormalParameter(GNode n){
-				is_fparam = true;
-					System.out.println(n.getName()+"---"+n.getString(3));
-					visit(n);
-					System.out.println("---END-"+n.getName());
-				is_fparam = false;
-
-			}
-			/*public void visitFormalParameters(GNode n){
-			
-					System.out.println(n.getName());
-					visit(n);
-					System.out.println("---END-"+n.getName());
-
-					
-				
-			}*/
-			public void visitVoidType(GNode n){
-				retrn = "void";
-				System.out.println(n.getName()+"---"+n.getName());
-				visit(n);
-				System.out.println("---END-"+n.getName());
-
-			
-			}
-			/*public void visitType(GNode n){
-				System.out.println(n.getName());
-				visit(n);
-				System.out.println("---END-"+n.getName());
-
-				
-			}*/
-			public void visitQualifiedIdentifier(GNode n){
-				if(is_fparam) params = params+","+n.getString(0);
-				else retrn = n.getString(0);
-				
-				System.out.println(n.getName()+"---"+n.getString(0));
-				visit(n);
-				System.out.println("---END-"+n.getName());
-
-
-			}
-			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-			}
-			
-			
-		}.dispatch(node);	
+		}
 	}
 	
 	
 	/*
-	 * will return a concatinated string of all methods ptr declarations from superclass's Vtable
-	 * +  method ptr declarations of PUBLIC NON-STATIC methods in GNode n's class 
+	 * will print a string of all methods ptr declarations from superclass's Vtable
+	 * +  method ptr declarations of PUBLIC NON-STATIC methods in this class. 
+	 *
 	 * syntax --->  ",methodreturnType (*methodname)(methodparameters)",\n"
-	 *
-	 * also creates a new ArrayList<String> that has :
-	 *		all elements of the ArrayList GNode n's ExtenstionType() a.k.a. Superclass
-	 *   +  all String representations of method prt declarations with syntax above^ from this class
 	 */	
-	private String write_all_method_ptrs(GNode n){
-		return "method prts,\n";
+	private void write_all_method_ptrs(InheritanceTree t){
+		//ptr for __class()
+		h_classdef.write("Class __isa;\n");
+		//loops through vtable adn prints out in proper syntax
+		for(int index =1;index<t.Vt_ptrs.size();index++){
+			h_classdef.write(t.Vt_ptrs.get(index).returntype+" (*"+t.Vt_ptrs.get(index).name+")("+t.className);
+			
+			for(int j=0; j<t.Vt_ptrs.get(index).params.size();j++){
+				h_classdef.write(", "+t.Vt_ptrs.get(index).params.get(j));
+			}
+			h_classdef.write(");\n");
+			
+		}
 	}
 	
 	
 	/*
-	 * will return a concatinated string of all initalized method ptrs from superclass's Vtable 
-	 * + initialized method ptrs of public methods in GNode n's class
-	 * syntax --->  methodname"(&__"+ClassName+"::"+methodname+"),\n"
+	 * prints out string of all initalized method ptrs from superclass's Vtable 
+	 * + initialized method ptrs of public methods in this class to the .h file.
 	 *
-	 * also creates a new ArrayList<String> that has :
-	 *		all elements of the ArrayList GNode n's ExtenstionType() a.k.a. Superclass
-	 *   +  all String representations of method prt declarations with syntax above^ from this class
+	 * syntax --->  methodname"(&__"+ClassName+"::"+methodname+"),\n"
+	 * or syntax ---> methodname+"(("+returntype+"(*)("+classname+","+...other params+"))&__"+ownerclass+"::"+methodname+")"
+	 *
 	 */	
-	private String write_assign_method_ptrs(GNode n){
-		return "method prt(initialized),\n";
+	private void write_assign_method_ptrs(InheritanceTree t){
+		//ptr for __class()
+		h_classdef.write(t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
+		
+		//loops through vtable and prints out in proper syntax
+		for(int index =1;index<t.Vt_ptrs.size();index++){
+			//syntax for an overwritten method
+			if((t.Vt_ptrs.get(index).ownerClass).equals(t.className)){
+				h_classdef.write(",\n"+t.Vt_ptrs.get(index).name+"(&__"+t.className+"::"+t.Vt_ptrs.get(index).name+")");
+			}
+			//syntax for a method that needs a this class casting
+			else{
+				h_classdef.write(",\n"+t.Vt_ptrs.get(index).name+"(("+t.Vt_ptrs.get(index).returntype+"(*)("+t.className);
+				
+				for(int j=0; j<t.Vt_ptrs.get(index).params.size();j++){
+					h_classdef.write(", "+t.Vt_ptrs.get(index).params.get(j));
+				}
+				h_classdef.write("))&__"+t.Vt_ptrs.get(index).ownerClass+"::"+t.Vt_ptrs.get(index).name+")");
+			
+			}
+			
+		}
 	}
 	
 	
@@ -379,45 +330,7 @@ public class InheritanceBuilder{
 /*
 MY LOGIC FOR INHERITANCE
  
- 1. a arraylist of string will exist for every class declaration of a leaf on the inheritance hiearchy 
- 2  somehow a the classes need to be filled in from object down to leaf 
-			(!! a superclass must be defined before a subclass!!)
- 3. when we visit all class declarations call addClassdef() for only every class that extends object or class?
-		- save each class you defined
-		- now call addClassdef() on all classes that extend those classes
-		- save all those...
- 4.  every class automaticly extends object and the class ToString method if not overwritten (class without extends)
- 5. every classs NEEDS a vtable bc it inherits from object and may be the superclass for another class
- 
- class Inheritance builder
-	feilds
-		-h_classdef		
-		-cpp_methoddef
-		-
-	constructor
-		- creates cpp and h files
-		-
-		-
-	methods
-		-public addClassdef
-			*
-			*
-		-	private String write_all_feilds(){
-		-	private String write_all_assigned_feilds(){
-		-	private String write_all_methods(){
-		-	private String write_all_method_ptrs(){
 
- 
- >one instance for each run of the translator
- >
- 
- 
- 
- 1 find out how many children method dec has
- 2 if node.getString children 
- 3 create #children recursive routines
- 
- 
  
  
  
