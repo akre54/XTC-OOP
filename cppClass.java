@@ -150,11 +150,8 @@ class cppMethod extends Visitor{
 		}
 		else if (nodeName.equals("MethodDeclaration"))
 		{
-			if(DEBUG){System.out.println("METHODDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");}
-			StringBuilder fields= setFields(n);
-			methodString.append(fields+"\n");
-			methodString.append("\t} \n");
-			getExpressionStatements(n);		
+			if(DEBUG){System.out.println("Given Method Node");}
+			getMethodDetails(n);	
 		}
 		
 	}//end of cppMethod constructor
@@ -162,12 +159,17 @@ class cppMethod extends Visitor{
 	public void visitMethodDeclaration(GNode n) {
 		
 		methodString.append("\t" + setType(n)+" "+ getMethodName(n)+"("+getParameters(n)+")" +"{ \n");
-		StringBuilder fields= setFields(n);
-		methodString.append(fields+"\n");
-		methodString.append("\t} \n");
-		getExpressionStatements(n);
+		getMethodDetails(n);
+
 	}//end of visitClassDeclaration Method
 	
+	public void getMethodDetails(GNode n)
+	{
+		StringBuilder fields= setFields(n);
+		methodString.append(fields);
+		methodString.append("\t \t" +getExpressionStatements(n)+"\n");
+		methodString.append("\t} \n");		
+	}
 	/**
 	 @return <code>StringBuilder</code> that is the type for the method
 	 */
@@ -253,25 +255,26 @@ class cppMethod extends Visitor{
 	 creates the expressionStatement class
 	 **Review this **
 	 */
-	public void getExpressionStatements(GNode n)
+	public StringBuilder getExpressionStatements(GNode n)
 	{
 		cppExpressionStatement cppEx= new cppExpressionStatement(n);
+		return cppEx.getString();
 	}
 	
 }//end of cppMethod class
 //put in code for Constructors
-
 /**
  creates an class that explored the CallExperssion subtree
  */
 class cppExpressionStatement extends Visitor{
 	
-	public final boolean DEBUG = false;
+	public final boolean DEBUG = true;
 	private StringBuilder pString;	
 	private boolean isOut;
 	private String print;
 	private boolean isSystem;
 	private boolean isSystemOutPrint; //checks the system.out.print case
+	private StringBuilder SystemOut; //System.out Text
 	private GNode arguments;
 	/**
 	 
@@ -284,18 +287,24 @@ class cppExpressionStatement extends Visitor{
 		isSystemOutPrint=false;
 		arguments=null;
 		visit(n);
-		testSystemOut();
+		
 	}
 	public void visitCallExpression(GNode n)
 	{
 		if(DEBUG){System.out.println(n.getString(2));}
-		pString.append(n.getString(2));
 		print=n.getString(2);
 		getSelectionExpression(n);
 		cppArguments cppargs = new cppArguments(n);
 		arguments=cppargs.getArguments();
+		testSystemOut();
+		if(!isSystemOutPrint)
+		{
+			pString.append(n.getString(2));
+		}
+		
+		//testSystemOut();
 	}//end of visitCallExpression method
-	/**
+	/***
 	 method that creates a new cppSelectionExpression class that checks the isOut and isSystem cases
 	 */
 	public void getSelectionExpression(GNode n)
@@ -329,7 +338,7 @@ class cppExpressionStatement extends Visitor{
 	{
 		return print;
 	}
-	/**
+	/*****
 	 Test case that calls the SystemPrint class if The System Out Print values are true
 	 */
 	public void testSystemOut()
@@ -340,11 +349,18 @@ class cppExpressionStatement extends Visitor{
 					isSystemOutPrint=true;
 					//call constructor for System.out.println
 					if(DEBUG){System.out.println(arguments.getName());}
+					SystemPrint printLn = new SystemPrint(arguments, true);
+					if(DEBUG){System.out.println(printLn.getString());}
+					pString.append(printLn.getString());
+					
 				}
 				else if(print.compareTo("print")==0){
 					isSystemOutPrint=true;
 					if(DEBUG){System.out.println(arguments.getName());}
-					//call constructor for System.out.println
+					//call constructor for System.out.print
+					SystemPrint print = new SystemPrint(arguments, false);
+					if(DEBUG){System.out.println(print.getString());}
+					pString.append(print.getString());
 				}
 				else {
 					//something is wrong or a case test is missing
@@ -355,6 +371,7 @@ class cppExpressionStatement extends Visitor{
 		}
 		
 	}
+	
 }//end of cppExpressionStatemnet class
 /**
  class the visits the arguments subtree
@@ -778,7 +795,7 @@ class cppArray extends Visitor{
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method
 	public void visitNewArrayExpression(GNode n) {
-		if(DEBUG){System.out.println("ARRAY!");}
+		if(DEBUG){System.out.println("ARRAY_ NEW!");}
 		isArray=true;
 		getPrimitiveType(n);
 		getSize(n);
