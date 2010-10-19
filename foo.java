@@ -50,6 +50,7 @@ class iWantABeer
 	public void please()
 	{
 		boolean deperation=true;
+		int[] Arraya= new int[10];
 	}
 }
 
