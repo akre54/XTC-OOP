@@ -46,11 +46,12 @@ PACKAGE     = xtc.oop
 PACKAGE_LOC = xtc/oop
 
 SOURCE = \
-	Translator.java \
 	CppCreator.java \
 	InheritanceBuilder.java \
 	SystemPrint.java \
-	ArrayMaker.java
+	ArrayMaker.java \
+	cppClass.java \
+	Translator.java 
 
 
 

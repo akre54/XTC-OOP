@@ -1,4 +1,4 @@
-package oop;
+package xtc.oop;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -13,8 +13,9 @@ import xtc.util.Tool;
 public class SystemPrint {
 	private boolean isLN = false;
 	private StringBuffer toPrint;
-	public void SystemPrint (GNode arguments, boolean isLine) {
+	public SystemPrint (GNode arguments, boolean isLine) {
 		isLN = isLine;
+		toPrint= new StringBuffer();
 		coutStringMaker (arguments);
 	}
 	
@@ -82,7 +83,7 @@ public class SystemPrint {
  * 
  * @return StringBuffer
  */ 
-	public StringBuffer getStringBuffer () {
+	public StringBuffer getString() {
 		return toPrint;
 	}
 }
