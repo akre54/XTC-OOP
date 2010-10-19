@@ -6,30 +6,24 @@ import xtc.tree.Visitor;
 
 import xtc.util.Tool;
 /**
- * Correctly translates the java System.out.print and prinln to
- * a string.
+ * Translates a java array to a C array.
  * 
  */ 
-public class SystemPrint {
-	private boolean isLN = false;
+public class ArrayMaker {
 	private StringBuffer toPrint;
-	public void SystemPrint (GNode arguments, boolean isLine) {
-		isLN = isLine;
-		coutStringMaker (arguments);
+	public void ArrayMaker (GNode arguments) {
+		arrayStringMaker (arguments);
 	}
-	
-	private void coutStringMaker (GNode n) {
+
+	private void arrayStringMaker (GNode n) {
 		Node node = n;
 		toPrint.append("cout << ");
 		new Visitor() {
 			boolean isCallExpression = false;
+			boolean hasStrings = false;
 			public void visitArguments(GNode n) {
 				visit(n);
-				if (isLN) {
-					toPrint.append("<< endl;");
-				} else {
-					toPrint.append(";");
-				}
+				toPrint.append(";");
 			}
 			public void visitStringLiteral (GNode n) {
 				toPrint.append(n.getString(0));
@@ -77,8 +71,7 @@ public class SystemPrint {
 		}.dispatch(node);
 	}
 /** 
- * Returns the complete translation of System.out.print
- * and println.
+ * Returns the complete translation of a Java array
  * 
  * @return StringBuffer
  */ 
