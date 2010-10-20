@@ -116,13 +116,14 @@ public class InheritanceBuilder{
 				/* FEILDS ---> ex: int x;  */
 		        write_all_feilds(t); h_classdef.write("\n\n");
 				
-				/*CONSTRUCTOR initializer syntax  */
-				write_all_constructors(t); //write all CONSTRUCTORs;
+				/*CONSTRUCTOR(S)*/
+				write_all_constructors(t); 
 				
 						 
-				/*  */
-				h_classdef.write("\t   static Class __class();\n\n");/**/
-				
+				/* avoid static field initializer fiasco with  _class() */
+				h_classdef.write("\t   static Class __class();\n\n");
+		
+		        /*  ALL INSTANCE METHODS    */
 				write_all_methods(t);  h_classdef.write("\n\n"+
 						 
 				/*create instance of VTABLE*/
@@ -137,10 +138,10 @@ public class InheritanceBuilder{
 				/* DECLARE METHOD PTRS ---> ",methodreturnType (*methodname)(methodparameters)",\n" */
 				write_all_method_ptrs(t); h_classdef.write("\n\n"+/**/
 						
-						 
+				/*  VT CONSTRUCTOR*/		 
 				"\t   __"+ClassName+"_VT():\n");
 						 
-						/* INITIALIZE METHOD PTRS ---> methodname"(&__"+ClassName+"::"+methodname+"),\n" */
+				/* INITIALIZE METHOD PTRS ---> methodname"(&__"+ClassName+"::"+methodname+"),\n" */
 				write_assign_method_ptrs(t); h_classdef.write( /**/
 				"{}\n"+
 						 
@@ -202,7 +203,11 @@ public class InheritanceBuilder{
 								 +t.constructors.get(index).fparams.get(i).var_name);
 			}
 			h_classdef.write("):__vpt(&__vtable){\n\t\t");
-				h_classdef.write("**body**");//body of the constructor
+			
+			//**  cppBlock is called on constructor's block node  **//
+				cppConstructor cblock = new cppConstructor(t.constructors.get(index).cnode);
+				h_classdef.write(cblock.getString().toString());//write body of the constructor
+			
 			h_classdef.write("\n\t   };\n\n");
 		}
 	}
@@ -304,8 +309,12 @@ public class InheritanceBuilder{
 			}
 			//calls to CppMethod to create the body of the method
 			cpp_methoddef.write("){\n");
-			cpp_methoddef.write("\t\t ***BODY CALL***");
-			cpp_methoddef.write("\n\t}\n\n");
+			
+			//**  cppBlock is called on method's block node  **//
+			cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+			cpp_methoddef.write(mblock.getString().toString());//write body of the method
+			
+			cpp_methoddef.write("\n\n");
 		}
 		
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+

@@ -381,6 +381,12 @@ class cppMethod extends Visitor{
 /**Creates a class that searchs through the ConditionalStatement Subtree
  if/else statements (currently NonFunctioning)*/
 class cppConditionalStatement extends Visitor{
+
+/**
+ creates a class that explores the ForStatement subtree
+ */
+class cppForStatement extends Visitor
+{
 	public final boolean DEBUG = false;
 	private StringBuilder fString;		
 	cppConditionalStatement(GNode n)
@@ -543,7 +549,7 @@ class cppBlock extends Visitor{
 		return express.getString();
 	}
 	public StringBuilder getString()
-	{
+	{	
 		return fString;
 	}
 }
@@ -1736,6 +1742,12 @@ class cppExpression extends Visitor{
 	{
 		if(DEBUG){System.out.println("+ Expression");};
 		//cppLiteral cppLit =new cppLiteral(n);
+		//Note from patrick: I believe there should be
+		//something like this here:
+		//ArrayMaker appArr = new ArrayMaker (n, true);
+		//if (appArr.getIsArray()) {
+		//eString.append(cppLit.getStringBuffer());
+		//}
 		cppLiteral cppLit =new cppLiteral(n);	
 		eString.append(cppLit.getString());
 		if(DEBUG){System.out.println(cppLit.getString());};

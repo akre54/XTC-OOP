@@ -15,6 +15,7 @@ public class ArrayMaker {
 	String size;
 	boolean oneLine = false;
 	boolean isExpression = false;
+	boolean isArray = false;
 
 	/** 
 	 * Takes a FieldDeclaration node of part of an array
@@ -37,8 +38,13 @@ public class ArrayMaker {
 	 * @return void
 	 */ 
 	public ArrayMaker (GNode arguments, boolean arg) {
+		toPrint = new StringBuffer();
 		isExpression = arg;
-		arrayStringMaker (arguments);
+		if (isExpression) {
+			arrayExpressionStringMaker (arguments);
+		} else {
+			arrayStringMaker (arguments);
+		}
 	}
 
 	private void arrayStringMaker (GNode n) {
@@ -108,6 +114,67 @@ public class ArrayMaker {
 		}.dispatch(node);
 		toPrint.append(";");
 	}
+
+	private void arrayExpressionStringMaker (GNode n) {
+		Node node = n;
+		new Visitor() {
+			public void visitType (GNode n) {
+				//Leads to PrimitiveType
+				visit(n);
+			}
+			public void visitQualifiedIdentifier (GNode n) {
+				visit(n);
+			}
+			public void visitPrimitiveType (GNode n) {
+				//Type of the array
+				toPrint.append(" = new __Array<");
+				String temp = n.getString(0);
+				if (temp.equals("int")) {
+					toPrint.append("int32_t>");
+				} else if (temp.equals("class")) {
+					toPrint.append("Class>");
+				} else if (temp.equals("object")) {
+					toPrint.append("Object>");
+				}
+				visit(n);
+			}
+			public void visitDimensions (GNode n) {
+				//Number of dimensions
+				//dimension = n.lastIndexOf(n);
+				visit(n);
+			}
+			public void visitPrimaryIdentifier (GNode n) {
+				//Has the name of the arry being set
+				toPrint.append(n.getString(0));
+				visit(n);
+			}
+			public void visitExpressionStatement (GNode n) {
+				visit(n);
+			}
+			public void visitExpression (GNode n) {
+				visit(n);
+				// visits primary identifier then the epression type
+				toPrint.append(n.getString(1));
+			}
+			public void visitNewArrayExpression (GNode n) {
+				isArray = true;
+				visit(n);
+			}
+			public void visitConcreteDimensions (GNode n) {
+				//leads to IntergerLiteral
+				visit(n);
+			}
+			public void visitIniegerLiteral (GNode n) {
+				//Gives array dimensions
+				toPrint.append("("+n.getString(0)+")");
+				visit(n);
+			}
+			public void visit(Node n) {
+				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+			}
+		}.dispatch(node);
+		toPrint.append(";");
+	}
 	/** 
 	 * Returns the complete translation of a Java array
 	 * 
@@ -116,4 +183,13 @@ public class ArrayMaker {
 	public StringBuffer getStringBuffer () {
 		return toPrint;
 	}
+	/** 
+	 * Returns whether or not an expression statement was
+	 * working on an array
+	 * @return boolean
+	 */ 
+	public boolean getIsArray () {
+		return isArray;
+	}
+
 }
