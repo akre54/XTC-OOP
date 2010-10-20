@@ -13,10 +13,12 @@ import xtc.tree.Visitor;
 public class InheritanceTree{
 	
 	public final String className;
+	public ArrayList<InstanceField> fields;
 	public ArrayList<Vtable_entry> Vt_ptrs;
-	public ArrayList<Vtable_entry> local;//all methods defined IN THIS CLASS
+	public ArrayList<Vtable_entry> local;//all methods defined IN THIS CLASS virtual or not!
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
+	public ArrayList<ConstructorDec> constructors;
 
 	/**
 	 * The constructor for creating the Object class Inheritance tree.
@@ -34,28 +36,29 @@ public class InheritanceTree{
 		Vt_ptrs = new ArrayList<Vtable_entry>(0);
 		
 		//add __isa to Vtable
-		Vt_ptrs.add(new Vtable_entry("Class", "__isa",new ArrayList<String>(0),className));
+		Vt_ptrs.add(new Vtable_entry("Class", "__isa",new ArrayList<String>(0),
+									 className,new ArrayList<String>(0)));
 		
 		//add hashcode to Vtable
 		ArrayList<String> hashcode = new ArrayList<String>(0);
 		hashcode.add("Object");
 		Vt_ptrs.add(new Vtable_entry("int32_t","hashcode",
-									 hashcode,"Object"));
+									 hashcode,"Object",new ArrayList<String>(0)));
 		//add equals to Vtable
 		ArrayList<String> equals = new ArrayList<String>(0);
 		equals.add("Object");
 		Vt_ptrs.add(new Vtable_entry("bool","equals",
-									 equals,"Object"));
+									 equals,"Object",new ArrayList<String>(0)));
 		//add getClass to Vtable
 		ArrayList<String> getClass = new ArrayList<String>(0);
 		getClass.add("Object");
 		Vt_ptrs.add(new Vtable_entry("Class","getClass",
-									 getClass,"Object"));
+									 getClass,"Object",new ArrayList<String>(0)));
 		//add toString to Vtable
 		ArrayList<String> toString = new ArrayList<String>(0);
 		toString.add("Object");
 		Vt_ptrs.add(new Vtable_entry("String","toString",
-									 toString,"Object"));
+									 toString,"Object",new ArrayList<String>(0)));
 
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
@@ -82,32 +85,32 @@ public class InheritanceTree{
 		ArrayList<String> toString = new ArrayList<String>(0);
 		toString.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","toString",
-									 toString,"Class"));
+									 toString,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getName = new ArrayList<String>(0);
 		getName.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","getName",
-									 getName,"Class"));
+									 getName,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getSuperclass = new ArrayList<String>(0);
 		getSuperclass.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","getSuperclass",
-									 getSuperclass,"Class"));
+									 getSuperclass,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getComponentType = new ArrayList<String>(0);
 		getComponentType.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","getComponentType",
-									 getComponentType,"Class"));
+									 getComponentType,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isPrimitive = new ArrayList<String>(0);
 		isPrimitive.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","isPrimitive",
-									 isPrimitive,"Class"));
+									 isPrimitive,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isArray = new ArrayList<String>(0);
 		isArray.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","isArray",
-									 isArray,"Class"));
+									 isArray,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isInstance = new ArrayList<String>(0);
 		isInstance.add("Class");
 		isInstance.add("Object");
 		Vt_ptrs.add(new Vtable_entry("String","isInstance",
-									 isInstance,"Class"));
+									 isInstance,"Class",new ArrayList<String>(0)));
 		
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
@@ -129,19 +132,25 @@ public class InheritanceTree{
 		//className defined from node
 		className = n.getString(1);
 		
+		//field arraylist defined with all field declarations
+		fields = addfielddeclarations(n);
+		
+		//constructors arraylist defined
+		constructors = addConstructors(n);
+		
 		//local arraylist defined
 		local = new ArrayList<Vtable_entry>(0);
-				
+
 		//copies the superclass's Vtable into virtual Vtable
 		Vt_ptrs = new ArrayList<Vtable_entry>(supr.Vt_ptrs);
 		
-		//change __isa field to point to this class's feild
+		//change __isa methods to point to this class
 		Vt_ptrs.get(0).ownerClass = className;
 		
 		//defines arraylist of the virtual methods of this class
 		ArrayList<Vtable_entry> virtual = addvirtualptrs(n);
 		
-		//checks to if virtual methods overwrite superclass methods
+		//checks if virtual methods overwrite superclass methods
 		check_for_overwrites(virtual);
 		
 		//add virtual methods to vtable
@@ -203,6 +212,7 @@ public class InheritanceTree{
 			ArrayList<String> params = new ArrayList<String>(0);
 			boolean is_fparam=false;
 			boolean is_virtual=false;
+			ArrayList<String> pnames = new ArrayList<String>(0);
 			
 			
 			public void visitClassDeclaration(GNode n){
@@ -214,7 +224,7 @@ public class InheritanceTree{
 				retrn="";
 				methodname = n.getString(3);
 				params.clear();
-				System.out.println(params.isEmpty());
+				pnames.clear();
 				is_virtual = true;
 				
 				//go into tree to get info
@@ -222,9 +232,9 @@ public class InheritanceTree{
 				
 				
 				//test to see if the modifier was public (if it should be virtual)
-				if(is_virtual) virtual.add(new Vtable_entry(retrn,methodname,params,className));
+				if(is_virtual) virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));
 				//add it to local no matter what 	
-				local.add(new Vtable_entry(retrn,methodname,params,className));
+				local.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));
 								
 			}
 			public void visitModifier(GNode n){
@@ -242,6 +252,11 @@ public class InheritanceTree{
 				if(is_fparam) params.add(type);
 				else retrn = type;
 			}
+			public void visitFormalParameter(GNode n){//variable name
+				pnames.add(n.getString(3));
+				visit(n);
+					
+			}
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 			}
@@ -249,6 +264,198 @@ public class InheritanceTree{
 		}.dispatch(n);
 	
 		return virtual;
+	}
+	/**
+	 * returns ArrayList<InstanceField> that holds all the fields fieldDeclaration info.
+	 * @param GNode n
+	 * however instance fields are defined or declared outside the constructor 
+	 *		is how they will be stored here.
+	 *
+	 */
+	public ArrayList<InstanceField> addfielddeclarations(GNode n){
+		Node node = n;
+		final ArrayList<InstanceField> f = new ArrayList<InstanceField>(0);
+		new Visitor(){
+			
+			ArrayList<String> mods= new ArrayList<String>(0);
+			String type;
+			String name;
+			String val;
+			boolean is_field = false;
+			boolean is_selectExp = false;
+			boolean is_arg = false;
+			
+			
+			public void visitClassBody(GNode n){
+				visit(n);
+			}
+			public void visitConstructorDeclaration(GNode n){
+				//do not look in constructor
+			}
+			public void visitMethodDeclaration(GNode n){
+				//do not look in methods
+			}
+			public void visitFieldDeclaration(GNode n){
+				is_field = true;
+				mods.clear();
+				type ="";
+				name="";
+				val="";
+				
+				visit(n);
+				is_field = false;
+				f.add(new InstanceField(mods,type,name,val));
+			}
+			//if not looking in FieldDeclaration's subtree ignore nodes
+			
+			public void visitModifier(GNode n){
+				if(is_field){		
+					mods.add(n.getString(0));
+				}
+				
+			}
+			public void visitPrimitiveType(GNode n){
+				if(is_field){
+					String type = n.getString(0);
+					if(type.equals("int"))type="int_32_t";
+					if(type.equals("boolean"))type="bool";
+					
+				}
+			}
+			public void visitDeclarator(GNode n){//variable name
+				if(is_field){
+					name = n.getString(0);
+					
+
+				}
+			}
+			public void visitQualifiedIdentifier(GNode n){//type
+				if(is_field){
+					type=n.getString(0);
+									
+				}
+			}
+			public void visitAdditiveExpression(GNode n){
+				visit(n.getNode(0));
+				val = val+" "+n.getString(1);
+				visit(n.getNode(2));
+			}
+			public void visitIntegerLiteral(GNode n){
+				val = val+n.getString(0);
+			}
+			public void visitStringLiteral(GNode n){
+				val = val+n.getString(0);
+			}
+			public void visitCallExpression(GNode n){
+				if(is_field){
+					visit(n.getNode(0));
+					visit(n.getNode(1));
+					val = val+n.getString(2);
+					visit(n.getNode(3));
+				}	
+			}
+			public void visitArguments(GNode n){
+				if(is_field){
+					is_arg =true;
+					val=val+"(";
+					visit(n);
+					//val.  take off last ,
+					val=val+")";
+					is_arg=false;
+				}
+			}
+			public void visitSelectionExpression(GNode n){
+				if(is_field){
+					is_selectExp=true;
+					//get primary identifer
+					visit(n);
+					//add selectionExp member
+					val = val+n.getString(1);
+					is_selectExp=false;
+				}
+			}
+			public void visitPrimaryIdentifier(GNode n){
+				if(is_field){
+					if(is_selectExp)
+						val = val+n.getString(0)+".";
+					if(is_arg)
+						val = val+n.getString(0)+",";
+				}
+			}
+			public void visit(Node n) {
+				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+			}
+		
+		}.dispatch(node);
+		return f;
+	
+	}
+	/**
+	 * returns an arraylist<ConstructorDec> that holds all constructors' info from class.
+	 * @param Gnode n
+	 * 
+	 */
+	private ArrayList<ConstructorDec> addConstructors(GNode n){
+		Node node = n;
+		final ArrayList<ConstructorDec> c = new ArrayList<ConstructorDec>(0);
+		new Visitor(){
+			ArrayList<String> fmods=new ArrayList<String>(0);
+			String ftype;
+			String fname;
+			ArrayList<String> mods= new ArrayList<String>(0);
+			ArrayList<Fparam> fp = new ArrayList<Fparam>(0);
+			boolean is_fparam;
+			boolean is_constr;
+			
+			public void visitConstructorDeclaration(GNode n){
+				is_constr = true;
+				//clear arraylists
+				mods.clear();
+				fp.clear();
+
+				//get info from tree
+				visit(n);
+				
+				//add constructordec to c
+				c.add(new ConstructorDec(mods,fp,n));
+				
+				is_constr =false;
+			}
+			public void visitFormalParameter(GNode n){
+				is_fparam =true;
+				//clear
+				fmods.clear();
+				ftype ="";
+				fname=n.getString(3);
+				
+				//get info from tree
+				visit(n);
+				
+				//add new Fparam to fp
+				fp.add(new Fparam(fmods,ftype,fname));
+				is_fparam =false;
+			}
+			public void visitModifier(GNode n){
+				if(is_fparam)fmods.add(n.getString(0));
+				if(is_constr)mods.add(n.getString(0));
+			}
+			public void visitPrimitiveType(GNode n){
+				ftype=n.getString(0);
+				if(ftype.equals("int")) ftype ="int32_t";
+				if(ftype.equals("boolean")) ftype ="bool";
+
+			}
+			public void visitQualifiedIdentifier(GNode n){
+				ftype=n.getString(0);
+			}
+			public void visit(Node n) {
+				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+			}
+	
+		
+		}.dispatch(node);
+		return c;
+		
 	}
 	/**
 	 * search will return a InheritanceTree of matching className

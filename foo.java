@@ -3,10 +3,10 @@ import java.io.File;
 //import java.io.blah;
 
 public class Foo 
-{
-    public int mainFoo () 
+{int x;
+    public int mainFoo (bary b, String s) 
 	{
-		     int x = 0;
+		      x = 0 + b.marry.harry(r,b) + b.nothing;
 		
 		System.out.println("Howdy");
 		// }
@@ -15,7 +15,7 @@ public class Foo
 }
 
 class bar extends foo implements FACE{
-	bar(int i)
+	bar(int i,bary b,String s)
 	{
 		//do stuff
 	}

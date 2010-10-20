@@ -120,7 +120,7 @@ public class Translator extends Tool {
 			final InheritanceTree Object = new InheritanceTree();
 			
 			//creates the Class class as subclass of Object class
-			InheritanceTree Class = new InheritanceTree(Object);
+			final InheritanceTree Class = new InheritanceTree(Object);
 			
 			
 			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile);
@@ -136,12 +136,12 @@ public class Translator extends Tool {
 				
 				public void visitClassDeclaration(GNode n){
 					//if no extenstion it's superclass is Object
-					supr=Object;
+					supr=Class;
 					visit(n);
 					
 					//if the super class has been defined make the subclass
 					if(supr!=null){
-						inherit.addClassdef(n,(new InheritanceTree(n,supr)));
+						inherit.addClassdef((new InheritanceTree(n,supr)));
 					}
 					
 				}
