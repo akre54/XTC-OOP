@@ -145,7 +145,7 @@ public class cppClass extends Visitor{
  *Also takes a MethodDeclaration Class
  */
 class cppMethod extends Visitor{
-	public final boolean DEBUG = false;
+	public final boolean DEBUG = true;
 	private StringBuilder methodString;
 	/**
 	 visits all the nodes in a ClassDeclaration Node or visits a single MethodDeclaration Node
@@ -165,9 +165,18 @@ class cppMethod extends Visitor{
 			if(DEBUG){System.out.println("Given Method Node");}
 			getMethodDetails(n);	
 		}
+		else if (nodeName.equals("ConstructorDeclaration"))
+		{
+			if(DEBUG){System.out.println("Given Constructor Node");}
+			getMethodDetails(n);	
+		}
+		
 		
 	}//end of cppMethod constructor
-	
+	public void visitConstructorDeclaration(GNode n){
+		methodString.append("\t" + setType(n)+" "+ getMethodName(n)+"("+getParameters(n)+")" +"{ \n");
+		getMethodDetails(n);
+	}
 	public void visitMethodDeclaration(GNode n) {
 		
 		methodString.append("\t" + setType(n)+" "+ getMethodName(n)+"("+getParameters(n)+")" +"{ \n");
