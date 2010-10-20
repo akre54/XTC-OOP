@@ -221,8 +221,9 @@ public class InheritanceBuilder{
 	 */		
 	private void write_all_methods(InheritanceTree t){
 		//loops through local methods and prints out in proper syantax
-		for(int index =1;index<t.local.size();index++){
-			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+" ("+t.className);
+		System.out.println("this class has"+t.local.size()+" local methods");
+		for(int index =0;index<t.local.size();index++){
+			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+"("+t.className);
 			
 			for(int j=0; j<t.local.get(index).params.size();j++){
 				h_classdef.write(", "+t.local.get(index).params.get(j));

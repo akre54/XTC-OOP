@@ -229,7 +229,7 @@ public class InheritanceTree{
 				
 				//go into tree to get info
 				visit(n);
-				
+				System.out.println("methods!!! - "+methodname);
 				
 				//test to see if the modifier was public (if it should be virtual)
 				if(is_virtual) virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));

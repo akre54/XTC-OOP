@@ -31,6 +31,7 @@ import xtc.lang.JavaFiveParser;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
+import java.util.ArrayList;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -127,6 +128,7 @@ public class Translator extends Tool {
 			
 			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile);
 				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
+			final ArrayList<GNode> ToTree = new ArrayList<GNode>(0);
 			
 			new Visitor() {
 				
@@ -147,6 +149,7 @@ public class Translator extends Tool {
 					if(supr!=null){
 						inherit.addClassdef((new InheritanceTree(n,supr)));
 					}
+					else ToTree.add(n);
 					
 				}
 				public void visitExtention(GNode n){
@@ -161,6 +164,20 @@ public class Translator extends Tool {
 				
 			}.dispatch(node); //end of main dispatch
 			
+			//creates the rest of the tree all nodes whose super exists until all 
+			//trees created
+			InheritanceTree supr;
+			while(!ToTree.isEmpty()){
+				for(int i=0;i<ToTree.size();i++){
+					supr = Object.search(ToTree.get(i).getNode(3)
+									 .getNode(0).getNode(0).getString(0));
+					if(supr!=null){
+						inherit.addClassdef((new InheritanceTree(ToTree.get(i),supr)));
+						ToTree.remove(i);
+					}
+				}
+			}
+				
 			
 			inherit.close(); // when all nodes are visited and inheritance files are made close files
 
