@@ -48,7 +48,7 @@ import xtc.util.Tool;
  * @version 1
  */
 public class Translator extends Tool {
-	public final boolean DEBUG=false;
+	public final boolean DEBUG=true;
 
 	File inputFile = null;
 
@@ -96,7 +96,7 @@ public class Translator extends Tool {
 			throw new IllegalArgumentException(file + ": file too large");
 		}
 		inputFile = file;
-		System.out.println("using this method");
+		//System.out.println("using this method");
 		return file;
 	}
 
@@ -113,6 +113,8 @@ public class Translator extends Tool {
 		// Handle the translate option
 		if (runtime.test("translate")) {
 			runtime.console().p("translating...").pln().flush();
+			
+			
 			
 			/* adams dependency instance and method */
 			
@@ -131,6 +133,8 @@ public class Translator extends Tool {
 				InheritanceTree supr;
 				
 				public void visitCompilationUnit(GNode n){
+					//Paiges testing class
+					cppClass classtester=new cppClass(n);
 					visit(n);
 				}
 				
