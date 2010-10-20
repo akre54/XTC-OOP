@@ -1,17 +1,18 @@
-package oop;
+package xtc.oop;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 
 import xtc.util.Tool;
-/**
+/***
  * Translates a java array to a C array.
  * 
  */ 
 public class ArrayMaker {
 	private StringBuffer toPrint;
-	public void ArrayMaker (GNode arguments) {
+	public ArrayMaker (GNode arguments) {
+		toPrint=new StringBuffer();
 		arrayStringMaker (arguments);
 	}
 

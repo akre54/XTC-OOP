@@ -49,6 +49,8 @@ import xtc.util.Tool;
 	making objects of classes
 	-missing visitors
 	System.out.println
+ -get values outside of Methods - getClassDeclarations outside of the Method Strings without 
+ getting values inside a MethodDeclaration
 
 */
 
@@ -88,9 +90,13 @@ public class cppClass extends Visitor{
 		 */
 		 
 		classString.append("Class "+ getClassName(n)+ "{ \n");
+		classString.append(setFields(n));
+		StringBuilder constructor = setConstructor(n);
+		classString.append(constructor);
 		StringBuilder methods=setMethods(n);
 		classString.append(methods+ "\n");
 		classString.append("} \n");
+		
 	}//end of visitClassDeclaration Method
 	
 	/**
@@ -99,6 +105,11 @@ public class cppClass extends Visitor{
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method
+	
+	public StringBuilder setConstructor(GNode n){
+		cppConstructor constr=new cppConstructor(n);
+		return constr.getString();
+	}
 	
 	/**
 	 Checks to make sure the given GNode is actually an instance of ClassDeclaration
@@ -109,6 +120,15 @@ public class cppClass extends Visitor{
 		return true;
 	}//end of isClassDeclaration method
 	
+	/**
+	 @return Stringbuilder that gets the fields inside a class declaration (but outside methods)
+	 */
+	public StringBuilder setFields(GNode n)
+	{
+		//creates a new cppFieldDeclaration class
+		cppFieldDeclaration classFields= new cppFieldDeclaration(n);
+		return classFields.getString();
+	}
 	/**
 	 @return the className of the given classDeclaration's node
 	 */	
@@ -128,71 +148,26 @@ public class cppClass extends Visitor{
 	}//end of setMethods method
 }//end of cppClass
 
-/**
- Creates a Class that searches through the MethodDeclaration Nodes in a subtree
- *Also takes a MethodDeclaration Class
- */
-class cppMethod extends Visitor{
+
+class cppConstructor extends Visitor{
 	public final boolean DEBUG = false;
 	private StringBuilder methodString;
-	/**
-	 visits all the nodes in a ClassDeclaration Node or visits a single MethodDeclaration Node
-	 */
-	cppMethod(GNode n)
+	cppConstructor(GNode n)
 	{
-		//check to see if given node is a MethodDeclaration node or a classDeclaration
-		String nodeName= n.getName();
-		methodString=new StringBuilder();
-		if(DEBUG){System.out.println("NodeName:"+nodeName);}
-		if(nodeName.equals("ClassDeclaration"))
-		{
-			visit(n);
-		}
-		else if (nodeName.equals("MethodDeclaration"))
-		{
-			if(DEBUG){System.out.println("Given Method Node");}
-			getMethodDetails(n);	
-		}
-		
-	}//end of cppMethod constructor
-	
-	public void visitMethodDeclaration(GNode n) {
-		
-		methodString.append("\t" + setType(n)+" "+ getMethodName(n)+"("+getParameters(n)+")" +"{ \n");
-		getMethodDetails(n);
-
-	}//end of visitClassDeclaration Method
-	
-	public void getMethodDetails(GNode n)
-	{
+		methodString= new StringBuilder();
+		visit(n);
+	}
+	public void visitConstructorDeclaration(GNode n){
+		methodString.append("\t"+ getConstructorName(n)+"("+getParameters(n)+")" +"{ \n");
 		StringBuilder fields= setFields(n);
 		methodString.append(fields);
 		methodString.append("\t \t" +getExpressionStatements(n)+"\n");
-		methodString.append("\t} \n");		
+		methodString.append("\t} \n");	
 	}
-	/**
-	 @return <code>StringBuilder</code> that is the type for the method
-	 */
-	public StringBuilder setType(GNode n)
+	public String getConstructorName(GNode n)
 	{
-		StringBuilder type= new StringBuilder();
-		
-		Node node=n.getNode(2); //VoidType, Type 
-		Object o=n.get(2);
-		StringBuilder s= new StringBuilder();
-		if(node.hasName("Type")) //check to see if the node is a Type subtree
-		{
-			s.append(getPrimitiveType((GNode)node));
-			s.append(getQualIden((GNode)node));
-		}  
- 		else //the type is a VoidType
-			s.append(node.getName());
-		
-		return s;
+		return n.getString(2);
 	}
-	/**
-	 @return StringBuilder that gets the parameters of a method
-	 */
 	public StringBuilder getParameters(GNode n)
 	{
 		//creates a new cppParameters class
@@ -222,16 +197,145 @@ class cppMethod extends Visitor{
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method
+	public StringBuilder getString()
+	{
+		return methodString;
+	}
+	/**
+	 @return StringBuilder that returns the fields of a method
+	 */
+	public StringBuilder setFields(GNode n)
+	{
+		//creates a new cppFieldDeclaration class
+		cppFieldDeclaration methodFields= new cppFieldDeclaration(n);
+		return methodFields.getString();
+	}
+	/**
+	 creates the expressionStatement class
+	 **Review this **
+	 */
+	public StringBuilder getExpressionStatements(GNode n)
+	{
+		cppExpressionStatement cppEx= new cppExpressionStatement(n);
+		return cppEx.getString();
+	}
+	
+}
+/**
+ Creates a Class that searches through the MethodDeclaration Nodes in a subtree
+ *Also takes a MethodDeclaration Class
+ */
+class cppMethod extends Visitor{
+	public final boolean DEBUG = false;
+	private StringBuilder methodString;
+	/**
+	 visits all the nodes in a ClassDeclaration Node or visits a single MethodDeclaration Node
+	 */
+	cppMethod(GNode n)
+	{
+		//check to see if given node is a MethodDeclaration node or a classDeclaration
+		String nodeName= n.getName();
+		methodString=new StringBuilder();
+		if(DEBUG){System.out.println("NodeName:"+nodeName);}
+		if(nodeName.equals("ClassDeclaration"))
+		{
+			visit(n);
+		}
+		else if (nodeName.equals("MethodDeclaration"))
+		{
+			if(DEBUG){System.out.println("Given Method Node");}
+			getMethodDetails(n);	
+		}
+	}//end of cppMethod constructor
+	
+	public void visitMethodDeclaration(GNode n) {
+		
+		methodString.append("\t" + setType(n)+" "+ getMethodName(n)+"("+getParameters(n)+")" +"{ \n");
+		getMethodDetails(n);
+
+	}//end of visitClassDeclaration Method
+	public StringBuilder getForStatements(GNode n)
+	{
+		cppForStatement forstate=new cppForStatement(n);
+		return forstate.getString();
+	}
+	public void getMethodDetails(GNode n)
+	{
+		StringBuilder fields= setFields(n);
+		methodString.append(fields);
+		methodString.append("\t \t" +getExpressionStatements(n)+"\n");
+		methodString.append("\t \t" +getSwitchStatements(n)+"\n");
+		methodString.append(getForStatements(n)+"\n");
+		methodString.append("\t} \n");		
+	}
+	/**
+	 @return <code>StringBuilder</code> that is the type for the method
+	 */
+	public StringBuilder setType(GNode n)
+	{
+		StringBuilder type= new StringBuilder();
+		
+		Node node=n.getNode(2); //VoidType, Type 
+		Object o=n.get(2);
+		StringBuilder s= new StringBuilder();
+		if(node.hasName("Type")) //check to see if the node is a Type subtree
+		{
+			s.append(getPrimitiveType((GNode)node));
+			s.append(getQualIden((GNode)node));
+		}  
+ 		else //the type is a VoidType
+			s.append(node.getName());
+		
+		return s;
+	}
+		/**
+	 @return StringBuilder that gets the parameters of a method
+	 */
+	public StringBuilder getParameters(GNode n)
+	{
+		//creates a new cppParameters class
+		cppParameters param = new cppParameters(n);
+		return param.getString();
+		
+	}//end of getParameters method
+	/**
+	 @return StringBuilder that gets the primitive type of a method
+	 */
+	public StringBuilder getPrimitiveType(GNode n)
+	{
+		//creates a new cppPrimitiveType class
+		cppPrimitiveType pType = new cppPrimitiveType(n);
+		return pType.getString();
+	}
+	/**
+	 @return StringBuilder that gets the Qualified Identifier of a method
+	 */
+	public StringBuilder getQualIden(GNode n)
+	{
+		//creates a new cppQualifiedIdentifier class
+		cppQualifiedIde qi= new cppQualifiedIde(n);
+		return qi.getString();
+	}
+	public StringBuilder getSwitchStatements(GNode n)
+	{
+		cppSwitchStatement switchState = new cppSwitchStatement(n);
+		return switchState.getString();
+	}
+	
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
 	/**
 	 checks to make sure the given GNode is actually an instance of methodDeclaration
 	 */
 	public boolean isMethodDeclaration(GNode n)
-		{
+	{
 		return true;
 	}//end of isMethodDeclaration Method
 	/**
 	 @return the entire string generated for the method
-	 */	public StringBuilder getString()
+	 */	
+	public StringBuilder getString()
 	{
 		return methodString;
 	}
@@ -262,13 +366,347 @@ class cppMethod extends Visitor{
 	}
 	
 }//end of cppMethod class
-//put in code for Constructors
+
+/**
+ creates a class that explores the ForStatement subtree
+ */
+class cppForStatement extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppForStatement(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitForStatement(GNode n)
+	{
+		if(DEBUG){System.out.println("ForStatement");}
+		fString.append(getBasicControl(n));
+		fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
+	}//end of visitCallExpression method
+	public StringBuilder getBlock(GNode n)
+	{
+		cppBlock block =new cppBlock(n);
+		return block.getString();
+	}
+	public StringBuilder getBasicControl(GNode n)
+	{
+		cppBasicControl basicControl=new cppBasicControl(n);
+		return basicControl.getString();
+	}
+	/*public StringBuilder getDeclarator(GNode n)
+	{
+		cppDeclarator decl=new cppDeclarator(n);
+		return decl.getString();
+	}
+	public StringBuilder getRelationalExpression(GNode n)
+	{
+		cppRelationalExpression rel=new cppRelationalExpression(n);
+		return rel.getString();
+	}*/
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+}
+/**
+ creates a class that explores the Block Subtree
+ */
+class cppBlock extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppBlock(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitBlock(GNode n)
+	{
+		if(DEBUG){System.out.println("Block");}
+		fString.append(getExpression(n));
+	}//end of visitCallExpression method
+	public StringBuilder getExpression(GNode n)
+	{
+		cppExpression express= new cppExpression(n);
+		return express.getString();
+	}
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+}
+/**
+ creates a class that explores the RelationsExpression Subtree
+ */
+class cppRelationalExpression extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppRelationalExpression(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitRelationalExpression(GNode n)
+	{
+		if(DEBUG){System.out.println("RelationalExpression");}
+		if(DEBUG){System.out.println(n.getString(1));}
+		fString.append(getPrimaryIdentifier(n)+ " " +n.getString(1) +" "+getLiteral(n));
+		//fString.append(getLiteral(n));
+		//sString.append("switch("+getPrimaryIdentifier(n)+"){\n");
+		
+	}//end of visitCallExpression method
+	public StringBuilder getPrimaryIdentifier(GNode n)
+	{
+		
+		cppPrimaryIdentifier prim=new cppPrimaryIdentifier(n);
+		return prim.getString();
+	}
+	public StringBuilder getLiteral(GNode n)
+	{
+		
+		cppLiteral lit =new cppLiteral(n,2);
+		return lit.getString();
+	}
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+}
+/**
+ creates a calss that explores the BasicControl subtree
+ */
+class cppBasicControl extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;		
+	cppBasicControl(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitBasicForControl(GNode n)
+	{
+		if(DEBUG){System.out.println("BasicControl");}
+		bString.append("\t\t for("+getType(n)+" "+getDeclarator(n)+ ";" +getRelationalExpression(n)+ ";"+ getExpressionList(n)+"){\n");
+	}//end of visitCallExpression method
+	public StringBuilder getModifiers(GNode n)
+	{
+		cppModifier mod= new cppModifier(n);
+		return mod.getString();
+	}
+	public StringBuilder getDeclarator(GNode n)
+	{
+		cppDeclarator decl = new cppDeclarator(n);
+		return decl.getString();
+	}
+	public StringBuilder getRelationalExpression(GNode n)
+	{
+		cppRelationalExpression rel = new cppRelationalExpression(n);
+		return rel.getString();
+	}
+	public StringBuilder getExpressionList(GNode n)
+	{
+		cppExpressionList expression=new cppExpressionList(n);
+		return expression.getString();
+	}
+	public StringBuilder getType(GNode n)
+	{
+		cppType type=new cppType(n);
+		return type.getString();
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}
+}
+/**
+ creates a class that expores the ExpressionList subtree
+ */
+class cppExpressionList extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;		
+	cppExpressionList(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitExpressionList(GNode n)
+	{
+		if(DEBUG){System.out.println("ExpressionList");}
+		//sString.append("switch("+getPrimaryIdentifier(n)+"){\n");
+		bString.append(getPostFixExpression(n));
+		
+	}//end of visitCallExpression method
+	public StringBuilder getPostFixExpression(GNode n)
+	{
+		cppPostFixExpression post= new cppPostFixExpression(n);
+		return post.getString();
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}
+}
+/**
+ creates a class that explores the PostfixExpression subtree
+ */
+class cppPostFixExpression extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;		
+	cppPostFixExpression(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitPostfixExpression(GNode n)
+	{
+		if(DEBUG){System.out.println("PostfixExpression");}
+		if(DEBUG){System.out.println(n.getString(1));}
+		bString.append(getPrimaryIdentifier(n)+n.getString(1));
+		//sString.append("switch("+getPrimaryIdentifier(n)+"){\n");
+		
+	}//end of visitCallExpression method
+	public StringBuilder getPrimaryIdentifier(GNode n)
+	{
+		cppPrimaryIdentifier iden= new cppPrimaryIdentifier(n);
+		return iden.getString();
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}}
+/**
+ Creates a class the explores the switch statement subtree
+ */
+class cppSwitchStatement extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder sString;		
+	cppSwitchStatement(GNode n)
+	{
+		sString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitSwitchStatement(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getName());}
+		sString.append("switch("+getPrimaryIdentifier(n)+"){\n");
+		sString.append(getCaseClause(n));
+		sString.append("\t\t\t}\n");
+	}//end of visitCallExpression method	
+	public StringBuilder getPrimaryIdentifier(GNode n)
+	{
+		cppPrimaryIdentifier primaryId = new cppPrimaryIdentifier(n);
+		return primaryId.getString();	
+	}
+	public StringBuilder getCaseClause(GNode n)
+	{
+		cppCaseClause clause=new cppCaseClause(n);
+		return clause.getString();
+	}
+	public StringBuilder getString()
+	{
+		return sString;
+	}
+}
+/**
+ creates a class that exlores the CaseClause subtree
+ */
+class cppCaseClause extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder cString;		
+	cppCaseClause(GNode n)
+	{
+		cString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitCaseClause(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getName());}
+		cString.append("\t\t\t case "+getLiteral(n)+ ": ");
+		cString.append(getExpressionStatements(n)+ " ");
+		cString.append(getBreakStatement(n)+ "\n");
+	}//end of visitCallExpression method
+	public StringBuilder getLiteral(GNode n)
+	{
+		cppLiteral literal=new cppLiteral(n);
+			return literal.getString();
+	}
+	public StringBuilder getExpressionStatements(GNode n)
+	{
+		cppExpressionStatement expression=new cppExpressionStatement(n);
+			return expression.getString();
+	}
+	public StringBuilder getBreakStatement(GNode n){
+			cppBreakStatement breakstatement=new cppBreakStatement(n);
+			return breakstatement.getString();
+	}
+	public StringBuilder getString()
+	{
+			return cString;
+	}
+}
+/**
+ creates a new class that explores the cppBreakStatement Subtree.
+ There's a currently ignored null value within the breakStatement subtree
+ */
+class cppBreakStatement extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;	
+	cppBreakStatement(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);	
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitBreakStatement(GNode n)
+	{
+		if(DEBUG){System.out.println(n.getName());}
+		bString.append("break;");
+	}//end of visitCallExpression method
+}
 /**
  creates an class that explored the CallExperssion subtree
- */
-class cppExpressionStatement extends Visitor{
+ */class cppExpressionStatement extends Visitor{
 	
-	public final boolean DEBUG = true;
+	public final boolean DEBUG = false;
 	private StringBuilder pString;	
 	private boolean isOut;
 	private String print;
@@ -276,19 +714,28 @@ class cppExpressionStatement extends Visitor{
 	private boolean isSystemOutPrint; //checks the system.out.print case
 	private StringBuilder SystemOut; //System.out Text
 	private GNode arguments;
+	 private boolean foundSwitchStatement;
 	/**
 	 
 	 */
 	cppExpressionStatement(GNode n)
 	{
-		pString=new StringBuilder();
-		isOut=false;
-		isSystem=false;
-		isSystemOutPrint=false;
-		arguments=null;
-		visit(n);
+		if(DEBUG){System.out.println(n.getName());}
+
+			pString=new StringBuilder();
+			isOut=false;
+			isSystem=false;
+			isSystemOutPrint=false;
+				arguments=null;
+			foundSwitchStatement=false;
+			visit(n);
+	
 		
 	}
+	public void visitSwitchStatement(GNode n)
+	 {
+		 foundSwitchStatement=true;
+	 }
 	public void visitCallExpression(GNode n)
 	{
 		if(DEBUG){System.out.println(n.getString(2));}
@@ -304,6 +751,7 @@ class cppExpressionStatement extends Visitor{
 		
 		//testSystemOut();
 	}//end of visitCallExpression method
+	
 	/***
 	 method that creates a new cppSelectionExpression class that checks the isOut and isSystem cases
 	 */
@@ -314,7 +762,10 @@ class cppExpressionStatement extends Visitor{
 		isSystem=cppCall.isSystem();
 	}
 	public void visit(Node n) {
-		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+		for (Object o : n){
+			
+			if (o instanceof Node && !foundSwitchStatement) dispatch((Node)o);
+		}
 	} //end of visit method
 	
 	/**
@@ -486,9 +937,11 @@ class cppPrimaryIdentifier extends Visitor{
 	public final boolean DEBUG = false;
 	private StringBuilder pString;
 	private boolean isSystem;
+	private boolean foundSwitchStatement;
 	cppPrimaryIdentifier(GNode n)
 	{
 		pString= new StringBuilder();
+		foundSwitchStatement=false;
 		isSystem=false;
 		visit(n);
 	}
@@ -496,14 +949,23 @@ class cppPrimaryIdentifier extends Visitor{
 	{
 		if(DEBUG){System.out.println(n.getString(0));}
 		String s=n.getString(0);
-		pString.append(n.getString(0));
-		if(s.compareTo("System")==0)
+				if(s.compareTo("System")==0)
 		{
 			isSystem=true;
 		}
+		else {
+			pString.append(n.getString(0));
+
+		}
+
 	}
+	public void visitSwitchStatement(GNode n)
+	{
+		foundSwitchStatement=true;
+	}	
 	public void visit(Node n){
-		for (Object o : n) if (o instanceof Node) dispatch((Node)o);	
+		if(DEBUG){System.out.println(n.getName());}
+		for (Object o : n) if (o instanceof Node &&!foundSwitchStatement) dispatch((Node)o);	
 	}
 	/**
 	 @return the entire PrimaryIdentifier StringBuilder
@@ -600,25 +1062,59 @@ class cppSubParameters extends Visitor{
 
 /**
  class the visits and explores the FieldDeclaration subtree 
+ put in a new ArrayWriter that writes the Array values
  */
-
-//put in check for array expression
 class cppFieldDeclaration extends Visitor{
 	
-	public final boolean DEBUG = true;
+	public final boolean DEBUG = false;
 	private StringBuilder fieldString;
-	
+	private boolean isArray;
+	private boolean foundMethod; //for Fields outside of the methods
+	private boolean foundConstructor; //for fields outside of constructors
+	private StringBuilder modifier;
+	private StringBuilder type;
+	private StringBuilder declarator;
 	/**Takes Block and sets the fields */
 	cppFieldDeclaration(GNode n){
+		isArray=false;
 		fieldString=new StringBuilder();
+		modifier= new StringBuilder();
+		type=new StringBuilder();
+		declarator= new StringBuilder();
+		foundMethod=false;
+		foundConstructor=false;
 		visit (n);
 	}//end of cppField Constructor
 	public void visitFieldDeclaration(GNode n) {
 		//fix set modifier
-		fieldString.append("\t\t"+setModifier(n)+" "+setType(n)+" "+setDeclarator(n)+"; \n");
+		setModifier(n);
+		setDeclarator(n);
+		setType(n);
+		if(isArray)
+		{
+			if(DEBUG){System.out.println("THIS IS AN ARRAY!!!");}
+			//call ArrayWritere that writes the entire array here
+			ArrayMaker arraym=new ArrayMaker(n);
+			//System.out.println("ARRAY:"+n.getName());
+			fieldString.append(arraym.getStringBuffer());
+			fieldString.append("\t\t ARRAY GOES HEREEEEEEE;\n");
+		}
+		else{ //its not an array just write the text normally
+			fieldString.append("\t\t"+modifier+" "+type+" "+declarator+"; \n");
+		}
 	}//end of visitClassDeclaration Method
+	public void visitMethodDeclaration(GNode n)
+	{
+		foundMethod=true;
+	}
+	public void visitConstructorDeclaration(GNode n)
+	{
+		foundConstructor=true;
+	}
 	public void visit(Node n) {
-		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+		for (Object o : n){
+			if (o instanceof Node && !foundMethod) dispatch((Node)o);
+		}
 	} //end of visit method
 	/**
 	 @return StringBuilder of class
@@ -645,30 +1141,34 @@ class cppFieldDeclaration extends Visitor{
 	/**
 	 @return StringBuilder Type of FieldDeclaration (makes a new cppType class)
 	 */
-	public StringBuilder setType(GNode n)
+	public void setType(GNode n)
 	{
 		//creates a new cppType class and gets the string
 		cppType classType = new cppType(n);
-		return classType.getType();
+		type= classType.getType();
 	}
 	/**
 	 @return StringBuilder of the Modifier of the FieldDeclaration
 	 */
-	public StringBuilder setModifier(GNode n)
+	public void setModifier(GNode n)
 	{
 		cppModifier modifiers=new cppModifier(n);
-		return modifiers.getString();
+		modifier= modifiers.getString();
 		//first child of field Declaration
 	}
 	/**
 	 @return StringBuilder declarator
 	 creates a new cppDeclarator class
 	 */
-	public StringBuilder setDeclarator(GNode n)
+	public void setDeclarator(GNode n)
 	{
 		cppDeclarator decl= new cppDeclarator(n);
-		return decl.getString();
+		isArray=decl.isArray();
+		declarator= decl.getString();
 	}
+	public void testArray(GNode n)
+	{
+			}
 	
 }//end of cppFieldDeclaration Class
 
@@ -680,9 +1180,10 @@ class cppFieldDeclaration extends Visitor{
 class cppDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
-	
+	private boolean isArray;
 	cppDeclarator(GNode n)
 	{
+		isArray=false;
 		declaratorString=new StringBuilder();
 		declaratorString.append(getDeclarator(n));
 		visit(n);
@@ -700,6 +1201,7 @@ class cppDeclarator extends Visitor{
 	public StringBuilder getDeclarator(GNode n)
 	{
 		cppSubDeclarator subDecl = new cppSubDeclarator(n);
+		isArray=subDecl.isArray();
 		return subDecl.getString();
 		
 	}//end of setDeclarator method
@@ -713,6 +1215,10 @@ class cppDeclarator extends Visitor{
 	{
 		return declaratorString;
 	}
+	public boolean isArray()
+	{
+		return isArray;
+	}
 }//end of cppDeclarator type
 /**
  class the visits and explores the Declarator subtree
@@ -722,16 +1228,18 @@ class cppDeclarator extends Visitor{
 class cppSubDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
-	
+	private boolean isArray;
 	cppSubDeclarator(GNode n)
 	{
 		declaratorString = new StringBuilder();
+		isArray=false;
 		visit(n);
 	}
 	public void visitDeclarator(GNode n) {
 		declaratorString.append(n.getString(0));
 		if(DEBUG){System.out.println("Declarator");};
 		cppArray cArray= new cppArray(n);
+		isArray=cArray.isArray();
 		//getLiteral(n);	
 		getExpression(n);
 	}//end of visitClassDeclaration Method
@@ -769,6 +1277,10 @@ class cppSubDeclarator extends Visitor{
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method
+	public boolean isArray()
+	{
+		return isArray;
+	}
 	/**
 	 @return StringBuilder class
 	 */
@@ -782,8 +1294,8 @@ class cppSubDeclarator extends Visitor{
  class the visits and explores the NewArrayExpression Subtree
  */
 class cppArray extends Visitor{
-	public final boolean DEBUG =true;
-	public boolean isArray; 
+	public final boolean DEBUG =false;
+	private boolean isArray; 
 	private StringBuilder aString;
 	
 	cppArray (GNode n){
@@ -805,6 +1317,10 @@ class cppArray extends Visitor{
 		if(DEBUG){System.out.println(type.getString());}
 		return type.getString();
 	}
+	public boolean isArray()
+	{
+		return isArray;
+	}
 	public StringBuilder getSize(GNode n)
 	{
 		cppConcreteDimensions cDim=new cppConcreteDimensions(n);
@@ -817,7 +1333,7 @@ class cppArray extends Visitor{
  Class that visists and explores ContreteDimensions
  */
 class cppConcreteDimensions extends Visitor{
-	public final boolean DEBUG=true;
+	public final boolean DEBUG=false;
 	private StringBuilder cString;
 	cppConcreteDimensions(GNode n)
 	{
@@ -1031,6 +1547,20 @@ class cppExpression extends Visitor{
 		cppExpression cppExp2=new cppExpression(n);	
 		eString.append(cppExp2.getString());	
 	}	
+	public void visitExpression(GNode n)
+	{
+		cppLiteral cppLit =new cppLiteral(n);	
+		eString.append(cppLit.getString());
+		if(DEBUG){System.out.println(cppLit.getString());};
+		cppExpression cppExp=new cppExpression(n);
+		if(DEBUG){System.out.println(n.getString(1));}
+		eString.append(n.getString(1));
+		cppLiteral cppLit2 =new cppLiteral(n,2);
+		eString.append(cppLit2.getString());
+		if(DEBUG){System.out.println(cppLit2.getString());};
+		cppExpression cppExp2=new cppExpression(n);	
+		eString.append(cppExp2.getString());	
+	}	
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	}	
@@ -1226,7 +1756,7 @@ class cppSubModifier extends Visitor{
 		if(DEBUG){System.out.println(n.getName());}
 		for(int i=0; i<n.size();i++)
 		{
-			subModifierString.append(n.getString(i));
+			subModifierString.append(" "+n.getString(i));
 		}
 	}
 }//end of cppsubModifier class
