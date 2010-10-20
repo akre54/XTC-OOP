@@ -264,14 +264,20 @@ class cppMethod extends Visitor{
 		cppWhileStatement whilestate =new cppWhileStatement(n);
 		return whilestate.getString();
 	}
+	public StringBuilder getDoWhileStatement(GNode n)
+	{
+		cppDoWhileStatement doWhile = new cppDoWhileStatement(n);
+		return doWhile.getString();
+	}
 	public void getMethodDetails(GNode n)
 	{
 		StringBuilder fields= setFields(n);
 		methodString.append(fields);
 		methodString.append("\t \t" +getExpressionStatements(n)+"\n");
 		methodString.append("\t \t" +getSwitchStatements(n)+"\n");
-		methodString.append(getForStatements(n)+"\n");
-		methodString.append(getWhileLoop(n)+"\n");
+		methodString.append(getForStatements(n));
+		methodString.append(getWhileLoop(n));
+		methodString.append(getDoWhileStatement(n));
 		methodString.append("\t} \n");		
 	}
 	/**
@@ -404,16 +410,6 @@ class cppForStatement extends Visitor
 		cppBasicControl basicControl=new cppBasicControl(n);
 		return basicControl.getString();
 	}
-	/*public StringBuilder getDeclarator(GNode n)
-	{
-		cppDeclarator decl=new cppDeclarator(n);
-		return decl.getString();
-	}
-	public StringBuilder getRelationalExpression(GNode n)
-	{
-		cppRelationalExpression rel=new cppRelationalExpression(n);
-		return rel.getString();
-	}*/
 	public StringBuilder getString()
 	{
 		return fString;
@@ -436,8 +432,47 @@ class cppWhileStatement extends Visitor
 	public void visitWhileStatement(GNode n)
 	{
 		if(DEBUG){System.out.println("WhileStatement");}
-		fString.append("\t\t while ( "+getEqualityExpression(n)+"){\n");
+		fString.append("\n\t\t while ( "+getEqualityExpression(n)+"){\n");
 		fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
+	}//end of visitCallExpression method
+	public StringBuilder getEqualityExpression(GNode n)
+	{
+		cppEqualityExpression equal = new cppEqualityExpression(n);
+		return equal.getString();
+	}
+	public StringBuilder getBlock(GNode n)
+	{
+		cppBlock block =new cppBlock(n);
+		return block.getString();
+	}
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+	
+}
+
+/**
+ Creates a class that explores the DoWhileStatement Subtree
+ */
+class cppDoWhileStatement extends Visitor
+{
+	
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppDoWhileStatement(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitDoWhileStatement(GNode n)
+	{
+		if(DEBUG){System.out.println("DoWhileStatement");}
+		fString.append("\n\t\t do { \n" +"\t\t\t"+getBlock(n)+"\n");
+		fString.append("\t\t }while ( "+getEqualityExpression(n)+ ")\n\t\t\t }");
 	}//end of visitCallExpression method
 	public StringBuilder getEqualityExpression(GNode n)
 	{
@@ -1447,12 +1482,14 @@ class cppLiteral extends Visitor{
 	private int location;
 	private int count;
 	private String litString;
+	private boolean foundExpression;
 	/**
 	 takes a Gnode and gets the first Literal 
 	 */
 	cppLiteral(GNode n)
 	{
 		foundLiteral=false;
+		foundExpression =false;
 		lString = new StringBuilder();
 		count=0;
 		location=1;
@@ -1531,9 +1568,21 @@ class cppLiteral extends Visitor{
 		litString=n.getString(0);	
 		if(checkBreak()){return;}		
 	}	
+	public void visitAdditiveExpression(GNode n)
+	{
+		foundExpression=true;
+	}
+	public void visitMultiplicativeExpression(GNode n)
+	{
+		foundExpression=true;	
+	}	
+	public void visitExpression(GNode n)
+	{
+		foundExpression=true;	
+	}	
 	public void visit(Node n) {
 		for (Object o : n){
-			if (o instanceof Node) dispatch((Node)o);
+			if (o instanceof Node && !foundExpression) dispatch((Node)o);
 		}
 		
 	} //end of visit method	
@@ -1589,7 +1638,7 @@ class cppLiteral extends Visitor{
  class that visits and explores the Expression subtrees
  */
 class cppExpression extends Visitor{
-	public final boolean DEBUG = false;
+	public final boolean DEBUG = true;
 	private StringBuilder eString;
 	cppExpression(GNode n)
 	{
@@ -1598,7 +1647,7 @@ class cppExpression extends Visitor{
 	}
 	public void visitAdditiveExpression(GNode n)
 	{
-		//if(DEBUG){System.out.println("+ Expression");};
+		if(DEBUG){System.out.println("+ Expression");};
 		//cppLiteral cppLit =new cppLiteral(n);
 		cppLiteral cppLit =new cppLiteral(n);	
 		eString.append(cppLit.getString());
@@ -1614,7 +1663,7 @@ class cppExpression extends Visitor{
 	}
 	public void visitMultiplicativeExpression(GNode n)
 	{
-		//if(DEBUG){System.out.println("/ Expression");};
+		if(DEBUG){System.out.println("/ Expression");};
 		cppLiteral cppLit =new cppLiteral(n);	
 		eString.append(cppLit.getString());
 		if(DEBUG){System.out.println(cppLit.getString());};
