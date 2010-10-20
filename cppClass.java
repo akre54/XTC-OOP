@@ -254,13 +254,18 @@ class cppMethod extends Visitor{
 		getMethodDetails(n);
 
 	}//end of visitClassDeclaration Method
-	
+	public StringBuilder getForStatements(GNode n)
+	{
+		cppForStatement forstate=new cppForStatement(n);
+		return forstate.getString();
+	}
 	public void getMethodDetails(GNode n)
 	{
 		StringBuilder fields= setFields(n);
 		methodString.append(fields);
 		methodString.append("\t \t" +getExpressionStatements(n)+"\n");
 		methodString.append("\t \t" +getSwitchStatements(n)+"\n");
+		methodString.append(getForStatements(n)+"\n");
 		methodString.append("\t} \n");		
 	}
 	/**
@@ -362,6 +367,237 @@ class cppMethod extends Visitor{
 	
 }//end of cppMethod class
 
+/**
+ creates a class that explores the ForStatement subtree
+ */
+class cppForStatement extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppForStatement(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitForStatement(GNode n)
+	{
+		if(DEBUG){System.out.println("ForStatement");}
+		fString.append(getBasicControl(n));
+		fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
+	}//end of visitCallExpression method
+	public StringBuilder getBlock(GNode n)
+	{
+		cppBlock block =new cppBlock(n);
+		return block.getString();
+	}
+	public StringBuilder getBasicControl(GNode n)
+	{
+		cppBasicControl basicControl=new cppBasicControl(n);
+		return basicControl.getString();
+	}
+	/*public StringBuilder getDeclarator(GNode n)
+	{
+		cppDeclarator decl=new cppDeclarator(n);
+		return decl.getString();
+	}
+	public StringBuilder getRelationalExpression(GNode n)
+	{
+		cppRelationalExpression rel=new cppRelationalExpression(n);
+		return rel.getString();
+	}*/
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+}
+/**
+ creates a class that explores the Block Subtree
+ */
+class cppBlock extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppBlock(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitBlock(GNode n)
+	{
+		if(DEBUG){System.out.println("Block");}
+		fString.append(getExpression(n));
+	}//end of visitCallExpression method
+	public StringBuilder getExpression(GNode n)
+	{
+		cppExpression express= new cppExpression(n);
+		return express.getString();
+	}
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+}
+/**
+ creates a class that explores the RelationsExpression Subtree
+ */
+class cppRelationalExpression extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppRelationalExpression(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitRelationalExpression(GNode n)
+	{
+		if(DEBUG){System.out.println("RelationalExpression");}
+		if(DEBUG){System.out.println(n.getString(1));}
+		fString.append(getPrimaryIdentifier(n)+ " " +n.getString(1) +" "+getLiteral(n));
+		//fString.append(getLiteral(n));
+		//sString.append("switch("+getPrimaryIdentifier(n)+"){\n");
+		
+	}//end of visitCallExpression method
+	public StringBuilder getPrimaryIdentifier(GNode n)
+	{
+		
+		cppPrimaryIdentifier prim=new cppPrimaryIdentifier(n);
+		return prim.getString();
+	}
+	public StringBuilder getLiteral(GNode n)
+	{
+		
+		cppLiteral lit =new cppLiteral(n,2);
+		return lit.getString();
+	}
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+}
+/**
+ creates a calss that explores the BasicControl subtree
+ */
+class cppBasicControl extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;		
+	cppBasicControl(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitBasicForControl(GNode n)
+	{
+		if(DEBUG){System.out.println("BasicControl");}
+		bString.append("\t\t for("+getType(n)+" "+getDeclarator(n)+ ";" +getRelationalExpression(n)+ ";"+ getExpressionList(n)+"){\n");
+	}//end of visitCallExpression method
+	public StringBuilder getModifiers(GNode n)
+	{
+		cppModifier mod= new cppModifier(n);
+		return mod.getString();
+	}
+	public StringBuilder getDeclarator(GNode n)
+	{
+		cppDeclarator decl = new cppDeclarator(n);
+		return decl.getString();
+	}
+	public StringBuilder getRelationalExpression(GNode n)
+	{
+		cppRelationalExpression rel = new cppRelationalExpression(n);
+		return rel.getString();
+	}
+	public StringBuilder getExpressionList(GNode n)
+	{
+		cppExpressionList expression=new cppExpressionList(n);
+		return expression.getString();
+	}
+	public StringBuilder getType(GNode n)
+	{
+		cppType type=new cppType(n);
+		return type.getString();
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}
+}
+/**
+ creates a class that expores the ExpressionList subtree
+ */
+class cppExpressionList extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;		
+	cppExpressionList(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitExpressionList(GNode n)
+	{
+		if(DEBUG){System.out.println("ExpressionList");}
+		//sString.append("switch("+getPrimaryIdentifier(n)+"){\n");
+		bString.append(getPostFixExpression(n));
+		
+	}//end of visitCallExpression method
+	public StringBuilder getPostFixExpression(GNode n)
+	{
+		cppPostFixExpression post= new cppPostFixExpression(n);
+		return post.getString();
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}
+}
+/**
+ creates a class that explores the PostfixExpression subtree
+ */
+class cppPostFixExpression extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;		
+	cppPostFixExpression(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitPostfixExpression(GNode n)
+	{
+		if(DEBUG){System.out.println("PostfixExpression");}
+		if(DEBUG){System.out.println(n.getString(1));}
+		bString.append(getPrimaryIdentifier(n)+n.getString(1));
+		//sString.append("switch("+getPrimaryIdentifier(n)+"){\n");
+		
+	}//end of visitCallExpression method
+	public StringBuilder getPrimaryIdentifier(GNode n)
+	{
+		cppPrimaryIdentifier iden= new cppPrimaryIdentifier(n);
+		return iden.getString();
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}}
 /**
  Creates a class the explores the switch statement subtree
  */
@@ -515,6 +751,7 @@ class cppBreakStatement extends Visitor
 		
 		//testSystemOut();
 	}//end of visitCallExpression method
+	
 	/***
 	 method that creates a new cppSelectionExpression class that checks the isOut and isSystem cases
 	 */
@@ -826,7 +1063,6 @@ class cppSubParameters extends Visitor{
 /**
  class the visits and explores the FieldDeclaration subtree 
  put in a new ArrayWriter that writes the Array values
- 
  */
 class cppFieldDeclaration extends Visitor{
 	
@@ -859,7 +1095,7 @@ class cppFieldDeclaration extends Visitor{
 			if(DEBUG){System.out.println("THIS IS AN ARRAY!!!");}
 			//call ArrayWritere that writes the entire array here
 			ArrayMaker arraym=new ArrayMaker(n);
-			System.out.println("ARRAY:"+n.getName());
+			//System.out.println("ARRAY:"+n.getName());
 			fieldString.append(arraym.getStringBuffer());
 			fieldString.append("\t\t ARRAY GOES HEREEEEEEE;\n");
 		}
@@ -1299,6 +1535,20 @@ class cppExpression extends Visitor{
 	public void visitMultiplicativeExpression(GNode n)
 	{
 		//if(DEBUG){System.out.println("/ Expression");};
+		cppLiteral cppLit =new cppLiteral(n);	
+		eString.append(cppLit.getString());
+		if(DEBUG){System.out.println(cppLit.getString());};
+		cppExpression cppExp=new cppExpression(n);
+		if(DEBUG){System.out.println(n.getString(1));}
+		eString.append(n.getString(1));
+		cppLiteral cppLit2 =new cppLiteral(n,2);
+		eString.append(cppLit2.getString());
+		if(DEBUG){System.out.println(cppLit2.getString());};
+		cppExpression cppExp2=new cppExpression(n);	
+		eString.append(cppExp2.getString());	
+	}	
+	public void visitExpression(GNode n)
+	{
 		cppLiteral cppLit =new cppLiteral(n);	
 		eString.append(cppLit.getString());
 		if(DEBUG){System.out.println(cppLit.getString());};
