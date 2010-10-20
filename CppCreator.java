@@ -31,14 +31,23 @@ class CppCreator {
 		}
     }
 
-    public CppCreator (File jFile, String end) {
-		cFile = convertNameToC (jFile, end);
+    public CppCreator (File jFile, String name) {
+		cFile = createCustom (jFile, name);
 		try {
 			outputWriter = new FileWriter(cFile);
 		}
 		catch (IOException a) {
+			System.out.println("error");
 		}
     }
+  private static File createCustom (File input, String newName) {
+	  String path = input.getPath();
+	  String temp = input.getName();
+	  path = path.substring (0,(path.length()-(temp.length()))) + newName;//cuts the last temp number of characters off
+	  File output = new File(path);
+	  return output;
+    }
+	
 
 	public CppCreator (File jFile) {
 		cFile = convertNameToC (jFile);
@@ -70,7 +79,8 @@ class CppCreator {
 		File cfile = new File (input.getParent (), cname);
 		return cfile;
     }
-	
+
+
 	private static File convertNameToC (File input) {
 		String jname = input.getName ();
 		String cname = jname.substring (0,jname.length()-4) + "cpp"; // remove ".java" and add ".cpp"
