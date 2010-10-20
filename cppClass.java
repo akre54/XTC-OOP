@@ -1629,6 +1629,12 @@ class cppExpression extends Visitor{
 	}	
 	public void visitExpression(GNode n)
 	{
+		//Note from patrick: I believe there should be
+		//something like this here:
+		//ArrayMaker appArr = new ArrayMaker (n, true);
+		//if (appArr.getIsArray()) {
+		//eString.append(cppLit.getStringBuffer());
+		//}
 		cppLiteral cppLit =new cppLiteral(n);	
 		eString.append(cppLit.getString());
 		if(DEBUG){System.out.println(cppLit.getString());};
@@ -1639,7 +1645,7 @@ class cppExpression extends Visitor{
 		eString.append(cppLit2.getString());
 		if(DEBUG){System.out.println(cppLit2.getString());};
 		cppExpression cppExp2=new cppExpression(n);	
-		eString.append(cppExp2.getString());	
+		eString.append(cppExp2.getString());
 	}	
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
