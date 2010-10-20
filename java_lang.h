@@ -210,9 +210,10 @@ namespace java {
     struct __Array_VT;
 
     // Definition of convenient type names.
-    typedef __Array<int32_t>* ArrayOfInt;
-    typedef __Array<Object>* ArrayOfObject;
-    typedef __Array<Class>* ArrayOfClass;
+    typedef __Array<int32_t>* ArrayOfint;
+    typedef __Array<Object>* ArrayOfobject;
+    typedef __Array<Class>* ArrayOfclass;
+	typedef __Array<char>* ArrayOfchar;
 
     // The data layout for arrays.
     template <typename T>

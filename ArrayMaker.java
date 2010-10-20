@@ -11,70 +11,107 @@ import xtc.util.Tool;
  */ 
 public class ArrayMaker {
 	private StringBuffer toPrint;
-	public void ArrayMaker (GNode arguments) {
+	int dimension;
+	String size;
+	boolean oneLine = false;
+	boolean isExpression = false;
+
+	/** 
+	 * Takes a FieldDeclaration node of part of an array
+	 * declaration and translates it.
+	 * 
+	 * @param GNode arguments
+	 * @return void
+	 */ 
+	ArrayMaker (GNode arguments) {
+		arrayStringMaker (arguments);
+	}
+
+	/** 
+	 * Takes a node of some array type and
+	 * translates it.
+	 * 
+	 * @param GNode arguments
+	 * @param boolean isExpression Set equal to true if node is at expression statement.
+	 * @return void
+	 */ 
+	ArrayMaker (GNode arguments, boolean arg) {
+		isExpression = arg;
 		arrayStringMaker (arguments);
 	}
 
 	private void arrayStringMaker (GNode n) {
 		Node node = n;
-		toPrint.append("cout << ");
+		toPrint.append("ArrayOf");
 		new Visitor() {
-			boolean isCallExpression = false;
-			boolean hasStrings = false;
-			public void visitArguments(GNode n) {
-				visit(n);
-				toPrint.append(";");
-			}
-			public void visitStringLiteral (GNode n) {
-				toPrint.append(n.getString(0));
+			public void visitType (GNode n) {
+				//Leads to PrimitiveType
 				visit(n);
 			}
-			public void visitAdditiveExpression (GNode n) {
-				if (n.getString(1).equals("+")) {
-					visit(n.getNode(0));
-					toPrint.append("<< ");
-					visit(n.getNode(2));
-				} else { // subtraction
-					visit(n.getNode(0));
-					toPrint.append("- ");
-					visit(n.getNode(2));
-				}
-			}
-			public void visitMultiplicativeExpression (GNode n) {
-				if (n.getString(1).equals("*")) { //multiplication
-					visit(n.getNode(0));
-					toPrint.append("* ");
-					visit(n.getNode(2));
-				} else { // division
-					visit(n.getNode(0));
-					toPrint.append("/ ");
-					visit(n.getNode(2));
-				}
-			}
-			public void visitCallExpression (GNode n) {
-				isCallExpression = true;
+			public void visitQualifiedIdentifier (GNode n) {
 				visit(n);
-				isCallExpression = false;
 			}
-			
-			public void visitPrimaryIdentifier (GNode n) {
-				if (isCallExpression) {
-					toPrint.append(n.getString(0)+".toString()");
+			public void visitPrimitiveType (GNode n) {
+				//Type of the array
+				if (oneLine) {
+					toPrint.append(" = new __Array<");
+					String temp = n.getString(0);
+					if (temp.equals("int")) {
+						toPrint.append("int32_t>");
+					} else if (temp.equals("class")) {
+						toPrint.append("Class>");
+					} else if (temp.equals("object")) {
+						toPrint.append("Object>");
+					}
 				} else {
 					toPrint.append(n.getString(0));
 				}
+				visit(n);
+			}
+			public void visitDimensions (GNode n) {
+				//Number of dimensions
+				//dimension = n.lastIndexOf(n);
+				visit(n);
+			}
+			public void visitDeclarators (GNode n) {
+				//Leads to Declarator
+				visit(n);
+			}
+			public void visitDeclarator (GNode n) {
+				//Has the name of the array
+				toPrint.append(n.getString(0));
+				visit(n);
+			}
+			public void visitExpressionStatement (GNode n) {
+				visit(n);
+			}
+			public void visitExpression (GNode n) {
+				visit(n);
+			}
+			public void visitNewArrayExpression (GNode n) {
+				oneLine = true;
+				visit(n);
+			}
+			public void visitConcreteDimensions (GNode n) {
+				//leads to IntergerLiteral
+				visit(n);
+			}
+			public void visitIniegerLiteral (GNode n) {
+				//Gives array dimensions
+				toPrint.append("("+n.getString(0)+")");
 				visit(n);
 			}
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 			}
 		}.dispatch(node);
+		toPrint.append(";");
 	}
-/** 
- * Returns the complete translation of a Java array
- * 
- * @return StringBuffer
- */ 
+	/** 
+	 * Returns the complete translation of a Java array
+	 * 
+	 * @return StringBuffer
+	 */ 
 	public StringBuffer getStringBuffer () {
 		return toPrint;
 	}

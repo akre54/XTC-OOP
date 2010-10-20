@@ -21,13 +21,13 @@ public class SystemPrint {
 	
 	private void coutStringMaker (GNode n) {
 		Node node = n;
-		toPrint.append("cout << ");
+		toPrint.append("std::cout << ");
 		new Visitor() {
 			boolean isCallExpression = false;
 			public void visitArguments(GNode n) {
 				visit(n);
 				if (isLN) {
-					toPrint.append("<< endl;");
+					toPrint.append("<< std::endl;");
 				} else {
 					toPrint.append(";");
 				}

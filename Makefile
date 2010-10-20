@@ -50,7 +50,8 @@ SOURCE = \
 	CppCreator.java \
 	InheritanceBuilder.java \
 	Vtable_entry.java \
-	InheritanceTree.java
+	InheritanceTree.java \
+	ArrayMaker.java
 
 
 
