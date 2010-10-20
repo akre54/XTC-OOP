@@ -16,7 +16,7 @@ import xtc.util.Tool;
  *for easy writing to .h file VTable
  */
 public class InheritanceBuilder{
-	
+	public final boolean DEBUG=false;
 	
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
