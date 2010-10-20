@@ -381,12 +381,6 @@ class cppMethod extends Visitor{
 /**Creates a class that searchs through the ConditionalStatement Subtree
  if/else statements (currently NonFunctioning)*/
 class cppConditionalStatement extends Visitor{
-
-/**
- creates a class that explores the ForStatement subtree
- */
-class cppForStatement extends Visitor
-{
 	public final boolean DEBUG = false;
 	private StringBuilder fString;		
 	cppConditionalStatement(GNode n)
@@ -493,7 +487,6 @@ class cppWhileStatement extends Visitor{
 }
 /**Creates a class that explores the DoWhileStatement Subtree*/
 class cppDoWhileStatement extends Visitor{
-	
 	public final boolean DEBUG = false;
 	private StringBuilder fString;		
 	cppDoWhileStatement(GNode n)
@@ -700,7 +693,7 @@ class cppPostFixExpression extends Visitor{
 }
 /**creates a class that explores the EqualityExpression Subtree*/
 class cppEqualityExpression extends Visitor{
-	public final boolean DEBUG = true;
+	public final boolean DEBUG = false;
 	private StringBuilder bString;		
 	cppEqualityExpression(GNode n)
 	{
@@ -856,12 +849,23 @@ class cppExpressionStatement extends Visitor{
 	
 		
 	}
+	public void visitExpressionStatement(GNode n)
+	{
+		StringBuilder callString = new StringBuilder();
+		callString = getCallExpression(n);
+		if(!isSystemOutPrint)
+		{
+			pString.append(callString);
+
+		}
+	 }
 	public void visitSwitchStatement(GNode n)
 	 {
 		 foundSwitchStatement=true;
 	 }
-	public void visitCallExpression(GNode n)
+	/*public void visitCallExpression(GNode n)
 	{
+		//getCallExpression(n);
 		if(DEBUG){System.out.println(n.getString(2));}
 		print=n.getString(2);
 		getSelectionExpression(n);
@@ -872,26 +876,31 @@ class cppExpressionStatement extends Visitor{
 		{
 			pString.append(n.getString(2));
 		}
+		pString.append(getCallExpression(n));
 		
 		//testSystemOut();
-	}//end of visitCallExpression method
+	}*///end of visitCallExpression method
 	
 	/***
 	 method that creates a new cppSelectionExpression class that checks the isOut and isSystem cases
 	 */
-	public void getSelectionExpression(GNode n)
+	/*public void getSelectionExpression(GNode n)
 	{
 		cppSelectionExpression cppCall = new cppSelectionExpression(n);
 		isOut=cppCall.isOut();
 		isSystem=cppCall.isSystem();
-	}
+	}*/
 	public void visit(Node n) {
 		for (Object o : n){
 			
 			if (o instanceof Node && !foundSwitchStatement) dispatch((Node)o);
 		}
 	} //end of visit method
-	
+	public StringBuilder getCallExpression(GNode n)
+	{
+		cppCallExpression call = new cppCallExpression(n);
+		return call.getString();
+	}
 	/**
 	 @return the classExpression String
 	 */
@@ -948,6 +957,133 @@ class cppExpressionStatement extends Visitor{
 	}
 	
 }//end of cppExpressionStatemnet class
+/** Class that vists and explores the CallExpression Subtree 
+ current glitch prints out "Out" in System.out.println*/
+class cppCallExpression extends Visitor{
+	public final boolean DEBUG = false;
+	private StringBuilder cString;	
+	private boolean isOut;
+	private String print;
+	private boolean isSystem;
+	private boolean isSystemOutPrint; //checks the system.out.print case
+	private StringBuilder SystemOut; //System.out Text
+	private GNode arguments;
+	private boolean foundSwitchStatement;
+	
+	cppCallExpression(GNode n)
+	{
+		isOut=false;
+		isSystem=false;
+		isSystemOutPrint=false;
+		arguments=null;
+		foundSwitchStatement=false;
+		cString= new StringBuilder();
+		visit(n);
+		//testSystemOut();
+
+			}
+	public void visit(Node n) {
+		for (Object o : n){
+			if (o instanceof Node && !foundSwitchStatement) dispatch((Node)o);
+		}
+	} //end of visit method
+	public void visitSwitchStatement(GNode n)
+	{
+		foundSwitchStatement=true;
+	}
+	
+	public void visitCallExpression(GNode n)
+	{
+		print=n.getString(2);
+		cppArguments cppargs = new cppArguments(n);
+		arguments=cppargs.getArguments();
+		if(DEBUG){System.out.println(n.getName());}
+		if(!isSystemOutPrint)
+		{
+			cString.append(getSelectionExpression(n));
+			
+		}
+	}//end of visitCallExpression method
+	public StringBuilder getPrimaryIdentifier(GNode n)
+	{
+		cppPrimaryIdentifier prim = new cppPrimaryIdentifier(n);
+		return prim.getString();
+	}
+	public String getExpressionName(GNode n)
+	{
+		return n.getString(2);
+	}
+	public StringBuilder getArguments(GNode n)
+	{
+		cppArguments arguments = new cppArguments(n);
+		return arguments.getString();
+	}
+	public StringBuilder getSelectionExpression(GNode n)
+	{
+		cppSelectionExpression cppCall = new cppSelectionExpression(n);
+		isOut=cppCall.isOut();
+		isSystem=cppCall.isSystem();
+		testSystemOut(n);
+		return cppCall.getString();
+	}
+	/**
+	 @return the SystemOutPrint boolean that returns if the SYstem.out.Prinln is in the classExpression
+	 */
+	public boolean isSystemOutPrint()
+	{
+		return isSystemOutPrint;
+	}
+	/** 
+	 @return get the System.out.Print Command print or Println 
+	 */
+	public String getPrint()
+	{
+		return print;
+	}
+	/*****
+	 Test case that calls the SystemPrint class if The System Out Print values are true
+	 */
+	public void testSystemOut(GNode n)
+	{
+		if(isSystem){
+			if(isOut){
+				if(print.compareTo("println")==0){
+					isSystemOutPrint=true;
+					//call constructor for System.out.println
+					if(DEBUG){System.out.println(arguments.getName());}
+					SystemPrint printLn = new SystemPrint(arguments, true);
+					if(DEBUG){System.out.println(printLn.getString());}
+					cString.append(printLn.getString()+"//");
+					
+				}
+				else if(print.compareTo("print")==0){
+					isSystemOutPrint=true;
+					if(DEBUG){System.out.println(arguments.getName());}
+					//call constructor for System.out.print
+					SystemPrint print = new SystemPrint(arguments, false);
+					if(DEBUG){System.out.println(print.getString());}
+					cString.append(print.getString()+ "//");
+				}
+				else {
+					//something is wrong or a case test is missing
+					System.out.println("Error: System.out but no Print or Println check values");
+				}
+				
+			}
+		}
+		else {
+			cString.append(getPrimaryIdentifier(n) + "." + getExpressionName(n)+"("+getArguments(n)+"); \n");
+		}
+
+		
+	}
+	
+	public StringBuilder getString()
+	{
+		return cString;
+	}
+	
+}
 /**class the visits the arguments subtree*/
 class cppArguments extends Visitor{
 	public final boolean DEBUG=true;
@@ -1426,7 +1562,7 @@ class cppSubDeclarator extends Visitor{
 }//end of cppSubDeclarator method
 /** Class that visits and explores the NewClassExpression Subtree*/
 class cppNewClassExpression extends Visitor{
-	public final boolean DEBUG =true;
+	public final boolean DEBUG =false;
 	private StringBuilder aString;
 	private boolean isClassDeclaration;
 	cppNewClassExpression (GNode n){
@@ -1694,9 +1830,7 @@ class cppLiteral extends Visitor{
 	 */
 	
 }//end of cppLiteral class
-/**
- class that visits and explores the Expression subtrees
- */
+/** class that visits and explores the Expression subtrees*/
 class cppExpression extends Visitor{
 	public final boolean DEBUG = false;
 	private StringBuilder eString;
@@ -1931,7 +2065,6 @@ class cppModifier extends Visitor{
 	 }*/
 	
 }//end of cppModifier class
-/***NOTTTTTT WORKINGGGGGGGG :( ****/
 /**Class that visit and explores the subModifier subtree*/
 class cppSubModifier extends Visitor{
 	
