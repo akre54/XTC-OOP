@@ -259,6 +259,11 @@ class cppMethod extends Visitor{
 		cppForStatement forstate=new cppForStatement(n);
 		return forstate.getString();
 	}
+	public StringBuilder getWhileLoop(GNode n)
+	{
+		cppWhileStatement whilestate =new cppWhileStatement(n);
+		return whilestate.getString();
+	}
 	public void getMethodDetails(GNode n)
 	{
 		StringBuilder fields= setFields(n);
@@ -266,6 +271,7 @@ class cppMethod extends Visitor{
 		methodString.append("\t \t" +getExpressionStatements(n)+"\n");
 		methodString.append("\t \t" +getSwitchStatements(n)+"\n");
 		methodString.append(getForStatements(n)+"\n");
+		methodString.append(getWhileLoop(n)+"\n");
 		methodString.append("\t} \n");		
 	}
 	/**
@@ -412,6 +418,42 @@ class cppForStatement extends Visitor
 	{
 		return fString;
 	}
+}
+/**Creates a class that explores the WhileStatement Subtree
+ */
+class cppWhileStatement extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder fString;		
+	cppWhileStatement(GNode n)
+	{
+		fString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitWhileStatement(GNode n)
+	{
+		if(DEBUG){System.out.println("WhileStatement");}
+		fString.append("\t\t while ( "+getEqualityExpression(n)+"){\n");
+		fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
+	}//end of visitCallExpression method
+	public StringBuilder getEqualityExpression(GNode n)
+	{
+		cppEqualityExpression equal = new cppEqualityExpression(n);
+		return equal.getString();
+	}
+	public StringBuilder getBlock(GNode n)
+	{
+		cppBlock block =new cppBlock(n);
+		return block.getString();
+	}
+	public StringBuilder getString()
+	{
+		return fString;
+	}
+	
 }
 /**
  creates a class that explores the Block Subtree
@@ -597,7 +639,45 @@ class cppPostFixExpression extends Visitor
 	public StringBuilder getString()
 	{
 		return bString;
-	}}
+	}
+}
+/**
+ creates a class that explores the EqualityExpression Subtree
+ */
+class cppEqualityExpression extends Visitor
+{
+	public final boolean DEBUG = false;
+	private StringBuilder bString;		
+	cppEqualityExpression(GNode n)
+	{
+		bString= new StringBuilder();
+		visit(n);
+	}
+	public void visit(Node n) {
+		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+	} //end of visit method
+	public void visitEqualityExpression(GNode n)
+	{
+		if(DEBUG){System.out.println("EqualityExpression");}
+		bString.append(getPrimaryIdentifier(n)+""+n.getString(1)+ ""+ getLiteral(n,2));
+	}//end of visitCallExpression method
+	public StringBuilder getPrimaryIdentifier(GNode n)
+	{
+		cppPrimaryIdentifier iden= new cppPrimaryIdentifier(n);
+		return iden.getString();
+	}
+	public StringBuilder getLiteral(GNode n ,int location)
+	{
+		cppLiteral lit = new cppLiteral(n, location);
+		return lit.getString();
+		
+	}
+	public StringBuilder getString()
+	{
+		return bString;
+	}
+
+}
 /**
  Creates a class the explores the switch statement subtree
  */
