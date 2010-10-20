@@ -20,7 +20,7 @@ public class InheritanceBuilder{
 	
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
-
+	private File source;
 
 	
 	InheritanceBuilder(File jfile){
@@ -28,6 +28,7 @@ public class InheritanceBuilder{
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
 		 */
+		source = jfile;
 		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
 		h_classdef.write("/* Object-Oriented Programming\n"+
 						  "* Copyright (C) 2010 Robert Grimm\n"+
@@ -221,9 +222,13 @@ public class InheritanceBuilder{
 	 */		
 	private void write_all_methods(InheritanceTree t){
 		//loops through local methods and prints out in proper syantax
-		System.out.println("this class has"+t.local.size()+" local methods");
-		for(int index =0;index<t.local.size();index++){
-			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+"("+t.className);
+		System.out.println("Writing all methods...");
+		for(int index = 0;index<t.local.size();index++){
+			if (t.local.get(index).name.equals("main")) {
+				System.out.println("Writing main...");
+				buildMain(t.local.get(index));
+			}
+			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+" ("+t.className);
 			
 			for(int j=0; j<t.local.get(index).params.size();j++){
 				h_classdef.write(", "+t.local.get(index).params.get(j));
@@ -232,6 +237,24 @@ public class InheritanceBuilder{
 			
 		}
 	}
+
+	/** 
+	 * Handles main method.
+	 * Creates a file called main.cpp that contains:
+	 * main(int argc, char *argv[])
+	 * 
+	 * @param GNode A method declaration GNode
+	 */ 
+	private void buildMain(Vtable_entry n) {
+		CppCreator mainWriter = new CppCreator(source, "main.cpp");
+		mainWriter.write("using xtc::oop;\n"
+						 +"#include \""+h_classdef.cFile.getName()+"\";\n"
+						 +"main(int argc, char *argv[]) {\n"
+						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"(argv[]);\n"
+						 +"NAMEmain->__vptr->main(NAMEmain);\n}");
+		mainWriter.close();
+	}
+	
 	
 	
 	/**
@@ -287,7 +310,7 @@ public class InheritanceBuilder{
 			
 		}
 	}
-	
+
 	
 	/**
 	 *writes to the ccp_methoddef all of GNode's methods functionality
