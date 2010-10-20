@@ -1,4 +1,4 @@
-package oop;
+package xtc.oop;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -23,7 +23,8 @@ public class ArrayMaker {
 	 * @param GNode arguments
 	 * @return void
 	 */ 
-	ArrayMaker (GNode arguments) {
+	public ArrayMaker (GNode arguments) {
+		toPrint=new StringBuffer();
 		arrayStringMaker (arguments);
 	}
 
@@ -35,7 +36,7 @@ public class ArrayMaker {
 	 * @param boolean isExpression Set equal to true if node is at expression statement.
 	 * @return void
 	 */ 
-	ArrayMaker (GNode arguments, boolean arg) {
+	public ArrayMaker (GNode arguments, boolean arg) {
 		isExpression = arg;
 		arrayStringMaker (arguments);
 	}

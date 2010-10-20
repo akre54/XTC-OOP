@@ -28,7 +28,7 @@ public class InheritanceBuilder{
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
 		 */
-		h_classdef = (new CppCreator(jfile,"_classdef","h"));
+		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
 		h_classdef.write("/* Object-Oriented Programming\n"+
 						  "* Copyright (C) 2010 Robert Grimm\n"+
 						  "*\n"+
@@ -54,7 +54,9 @@ public class InheritanceBuilder{
 						 "#include <stdint.h>\n"+
 						 "#include <string>\n\n"+
 						 
-						 "namespace oop {\n\n"
+						 "namespace xtc {\n"+
+						 "\tnamespace oop{\n\n"+
+						 "\ttypedef std::string String;\n\n"
 						 );
 							 
 		
@@ -87,7 +89,8 @@ public class InheritanceBuilder{
 							
 							"#include <sstream>\n\n"+
 							
-							"namespace oop {\n\n"
+							"namespace xtc {\n"+
+							"\tnamespace oop{\n\n"
 							);
 		
 		
@@ -97,132 +100,116 @@ public class InheritanceBuilder{
 	 * writes to the h_classdef file GNode n's class declaration and Vtable
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
 	 */
-	public void addClassdef(GNode n,InheritanceTree t){
+	public void addClassdef(InheritanceTree t){
 		
 		String ClassName = t.className;
 		
 		h_classdef.write(
-			"struct __"+ClassName+"; \n"+/**/
-			"struct __"+ClassName+"_VT;\n\n"+/**/
+			"\tstruct __"+ClassName+"; \n"+/**/
+			"\tstruct __"+ClassName+"_VT;\n\n"+/**/
 						 
-			"typedef __"+ClassName+" = "+ClassName+";\n\n"+/**/
+			"\ttypedef __"+ClassName+" = "+ClassName+";\n\n"+/**/
 		
-			"struct __"+ClassName+"{ \n"+/**/
-			"__"+ClassName+"_VT __vptr;\n");
+			"\tstruct __"+ClassName+"{ \n"+/**/
+			"\t   __"+ClassName+"_VT __vptr;\n");
 						 
 				/* FEILDS ---> ex: int x;  */
-				write_all_feilds(n); h_classdef.write("\n\n"+
+		        write_all_feilds(t); h_classdef.write("\n\n");
 				
 				/*CONSTRUCTOR initializer syntax  */
-				ClassName+"():__vpt(&__vtable)"+ write_all_assigned_feilds(n)+"{};\n\n"+
+				write_all_constructors(t); //write all CONSTRUCTORs;
+				
 						 
 				/*  */
-				"static Class __class();\n\n");/**/
+				h_classdef.write("\t   static Class __class();\n\n");/**/
 				
 				write_all_methods(t);  h_classdef.write("\n\n"+
 						 
 				/*create instance of VTABLE*/
-				"private: \n static __"+ClassName+"_VT __vtable;\n"+/**/
-			"};\n\n\n"+                      
+				"\t   private: \n\t   static __"+ClassName+"_VT __vtable;\n"+/**/
+			"\t};\n\n\n"+                      
 		/*-------------------------end of struct __ClassName in .h file-------------------------*/	
 						 
 		/* ---------------------start of stuct __ClassName_VT in .h file -------------------*/
 			
-			"struct __"+ClassName+"_VT{\n");
+			"\tstruct __"+ClassName+"_VT{\n");
 				
 				/* DECLARE METHOD PTRS ---> ",methodreturnType (*methodname)(methodparameters)",\n" */
 				write_all_method_ptrs(t); h_classdef.write("\n\n"+/**/
 						
 						 
-				"__"+ClassName+"_VT():\n");
+				"\t   __"+ClassName+"_VT():\n");
 						 
 						/* INITIALIZE METHOD PTRS ---> methodname"(&__"+ClassName+"::"+methodname+"),\n" */
 				write_assign_method_ptrs(t); h_classdef.write( /**/
 				"{}\n"+
 						 
 						 
-			"};\n\n"/* -----------end of stuct __ClassName_VT in .h file -------------------*/
+			"\t};\n\n"/* -----------end of stuct __ClassName_VT in .h file -------------------*/
 						 
 		);// end of writing
+		
+		
+		// define method in methoddef.cpp
+		addMethodDec(t);
 					
 	}//end of addClassdef
 	
 	
-	/*
-	 * will return a concatinated string of all feild declarations in GNode n
+	/**
+	 * will write a string of all feild declarations in this class.
 	 */
-	private void write_all_feilds(GNode n){
-		Node node = n;
-		new Visitor(){
-			
-			boolean is_field = false;
+	private void write_all_feilds(InheritanceTree t){
+		//loops through local methods and prints out in proper syantax
+		for(int index =1;index<t.fields.size();index++){
 			
 			
-			public void visitClassBody(GNode n){
-				visit(n);
+			for(int j=0; j<t.fields.get(index).modifiers.size();j++){
+				h_classdef.write("\t   "+t.fields.get(index).modifiers.get(j)+" ");
 			}
-			public void visitFieldDeclaration(GNode n){
-				is_field = true;
-				visit(n);
-				is_field = false;
-				h_classdef.write(";\n");
-			}
-			//if not looking in FieldDeclaration's subtree ignore methods
-				
-			public void visitModifier(GNode n){
-				if(is_field){		
-					h_classdef.write(n.getString(0)+" ");
-						visit(n);
-				}
-					
-			}
-			public void visitPrimitiveType(GNode n){
-				if(is_field){
-					String type = n.getString(0);
-					if(type.equals("int"))type="int_32_t";
-					if(type.equals("boolean"))type="bool";
-					h_classdef.write(type+" ");
-					
-				}
-			}
-			public void visitDeclarator(GNode n){//variable name
-				if(is_field){
-					h_classdef.write(n.getString(0));
-
-					//visit(n);
-				}
-			}
-			public void visitQualifiedIdentifier(GNode n){//type
-				if(is_field){
-					h_classdef.write(n.getString(0)+" ");
-
-				//visit(n);
-				
-				}
-			}
+			h_classdef.write(t.fields.get(index).type+" "+t.fields.get(index).var_name);
+			if(t.fields.get(index).value.equals(""))h_classdef.write(";\n");
+			else h_classdef.write("="+t.fields.get(index).value+";\n");
 			
-			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-			}
-		}.dispatch(node);
+		}
 		
 	}
 	
 	
-	/*
-	 * will return a concatinated string of all initalized feilds in GNode n
-	 * syntax --->   ","feildname+"("+initial value+")"
+	/**
+	 * will write all the constructor's into the datalayout for this class.
+	 * 
+	 *
 	 */	
-	private String write_all_assigned_feilds(GNode n){
-		
-		
-		
-		return ",feild(initalize)";
+	private void write_all_constructors(InheritanceTree t){
+		for(int index =0;index<t.constructors.size();index++){
+			h_classdef.write("\t   ");
+			//loop through constructor modifiers
+			for(int i =0;i<t.constructors.get(index).modifiers.size();i++){	
+				h_classdef.write(t.constructors.get(index).modifiers.get(i)+" ");
+			}		
+			//write className
+			h_classdef.write(t.className+"(");
+			//loop through formal parameter 
+			for(int i =0;i<t.constructors.get(index).fparams.size();i++){
+				if(i>0)h_classdef.write(",");//comma
+				//loop through formal parameter's modifiers
+				for(int j =0;j<t.constructors.get(index).fparams.get(i).modifiers.size();j++){	
+					h_classdef.write(t.constructors.get(index).fparams.get(i).modifiers.get(j)+" ");
+				}
+				//writes formal parameter's type and name
+				h_classdef.write(t.constructors.get(index).fparams.get(i).type+" "
+								 +t.constructors.get(index).fparams.get(i).var_name);
+			}
+			h_classdef.write("):__vpt(&__vtable){\n\t\t");
+				h_classdef.write("**body**");//body of the constructor
+			h_classdef.write("\n\t   };\n\n");
+		}
 	}
 	
 	
-	/*
-	 * will print string of all method declarations in this class
+	/**
+	 * will print string of all local method declarations in this class
 	 * syntax --->  "static "+ returntype +" "+methodName+" ("+className+","+..other paramaterTypes,..+");\n"
 	 *
 	 *
@@ -230,18 +217,18 @@ public class InheritanceBuilder{
 	private void write_all_methods(InheritanceTree t){
 		//loops through local methods and prints out in proper syantax
 		for(int index =1;index<t.local.size();index++){
-			h_classdef.write("static "+t.local.get(index).returntype+" "+t.local.get(index).name+" ("+t.className);
+			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+" ("+t.className);
 			
 			for(int j=0; j<t.local.get(index).params.size();j++){
 				h_classdef.write(", "+t.local.get(index).params.get(j));
 			}
 			h_classdef.write(");\n");
-
+			
 		}
 	}
 	
 	
-	/*
+	/**
 	 * will print a string of all methods ptr declarations from superclass's Vtable
 	 * +  method ptr declarations of PUBLIC NON-STATIC methods in this class. 
 	 *
@@ -249,10 +236,10 @@ public class InheritanceBuilder{
 	 */	
 	private void write_all_method_ptrs(InheritanceTree t){
 		//ptr for __class()
-		h_classdef.write("Class __isa;\n");
+		h_classdef.write("\t\tClass __isa;\n");
 		//loops through vtable adn prints out in proper syntax
 		for(int index =1;index<t.Vt_ptrs.size();index++){
-			h_classdef.write(t.Vt_ptrs.get(index).returntype+" (*"+t.Vt_ptrs.get(index).name+")("+t.className);
+			h_classdef.write("\t\t"+t.Vt_ptrs.get(index).returntype+" (*"+t.Vt_ptrs.get(index).name+")("+t.className);
 			
 			for(int j=0; j<t.Vt_ptrs.get(index).params.size();j++){
 				h_classdef.write(", "+t.Vt_ptrs.get(index).params.get(j));
@@ -265,7 +252,7 @@ public class InheritanceBuilder{
 	
 	/*
 	 * prints out string of all initalized method ptrs from superclass's Vtable 
-	 * + initialized method ptrs of public methods in this class to the .h file.
+	 * + initialized method ptrs of public and protected methods in this class to the .h file.
 	 *
 	 * syntax --->  methodname"(&__"+ClassName+"::"+methodname+"),\n"
 	 * or syntax ---> methodname+"(("+returntype+"(*)("+classname+","+...other params+"))&__"+ownerclass+"::"+methodname+")"
@@ -273,17 +260,17 @@ public class InheritanceBuilder{
 	 */	
 	private void write_assign_method_ptrs(InheritanceTree t){
 		//ptr for __class()
-		h_classdef.write(t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
+		h_classdef.write("\t\t   "+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
 		
 		//loops through vtable and prints out in proper syntax
 		for(int index =1;index<t.Vt_ptrs.size();index++){
 			//syntax for an overwritten method
 			if((t.Vt_ptrs.get(index).ownerClass).equals(t.className)){
-				h_classdef.write(",\n"+t.Vt_ptrs.get(index).name+"(&__"+t.className+"::"+t.Vt_ptrs.get(index).name+")");
+				h_classdef.write(",\n\t\t   "+t.Vt_ptrs.get(index).name+"(&__"+t.className+"::"+t.Vt_ptrs.get(index).name+")");
 			}
 			//syntax for a method that needs a this class casting
 			else{
-				h_classdef.write(",\n"+t.Vt_ptrs.get(index).name+"(("+t.Vt_ptrs.get(index).returntype+"(*)("+t.className);
+				h_classdef.write(",\n\t\t   "+t.Vt_ptrs.get(index).name+"(("+t.Vt_ptrs.get(index).returntype+"(*)("+t.className);
 				
 				for(int j=0; j<t.Vt_ptrs.get(index).params.size();j++){
 					h_classdef.write(", "+t.Vt_ptrs.get(index).params.get(j));
@@ -296,17 +283,38 @@ public class InheritanceBuilder{
 	}
 	
 	
-	/*
+	/**
 	 *writes to the ccp_methoddef all of GNode's methods functionality
 	 *same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.cc from class notes
-	 *
+	 * syntax -->  returntype+" __"+className+"::__"+methodname+"("+className+"__this,"+other params+"){"
+	 *    CALLS TO CPPMETHOD to build the body
+	 *	 then ends method "}"
 	 */
-	public void addMethodDec(GNode n){
+	private void addMethodDec(InheritanceTree t){
+
+		
+		for(int index=0;index<t.local.size();index++){
+			//method syntax and __this parameter
+			cpp_methoddef.write("\t"+t.local.get(index).returntype+" __"+t.className+
+								"::"+t.local.get(index).name+"("+t.className+" __this");
+			for(int i=0;i<t.local.get(index).params.size();i++){
+				//writes each parameter and variable
+				cpp_methoddef.write(","+t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
+			
+			}
+			//calls to CppMethod to create the body of the method
+			cpp_methoddef.write("){\n");
+			cpp_methoddef.write("\t\t ***BODY CALL***");
+			cpp_methoddef.write("\n\t}\n\n");
+		}
+		
+		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
+							"\t//===========================================================================\n\n");
 	}
 	public void close(){
-		h_classdef.write("}//ends oop namespace");
+		h_classdef.write("\t}//ends oop namespace\n}//ends xtc namespace");
 		h_classdef.close();
-		cpp_methoddef.write("}//ends oop namespace");
+		cpp_methoddef.write("\t}//ends oop namespace\n}//ends xtc namespace");
 		cpp_methoddef.close();
 	}
 	//--------------end of methods -------------------------

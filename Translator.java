@@ -48,7 +48,7 @@ import xtc.util.Tool;
  * @version 1
  */
 public class Translator extends Tool {
-	public final boolean DEBUG=false;
+	public final boolean DEBUG=true;
 
 	File inputFile = null;
 
@@ -96,7 +96,7 @@ public class Translator extends Tool {
 			throw new IllegalArgumentException(file + ": file too large");
 		}
 		inputFile = file;
-		System.out.println("using this method");
+		//System.out.println("using this method");
 		return file;
 	}
 
@@ -114,13 +114,15 @@ public class Translator extends Tool {
 		if (runtime.test("translate")) {
 			runtime.console().p("translating...").pln().flush();
 			
+			
+			
 			/* adams dependency instance and method */
 			
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
 			
 			//creates the Class class as subclass of Object class
-			InheritanceTree Class = new InheritanceTree(Object);
+			final InheritanceTree Class = new InheritanceTree(Object);
 			
 			
 			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile);
@@ -131,17 +133,19 @@ public class Translator extends Tool {
 				InheritanceTree supr;
 				
 				public void visitCompilationUnit(GNode n){
+					//Paiges testing class
+					cppClass classtester=new cppClass(n);
 					visit(n);
 				}
 				
 				public void visitClassDeclaration(GNode n){
 					//if no extenstion it's superclass is Object
-					supr=Object;
+					supr=Class;
 					visit(n);
 					
 					//if the super class has been defined make the subclass
 					if(supr!=null){
-						inherit.addClassdef(n,(new InheritanceTree(n,supr)));
+						inherit.addClassdef((new InheritanceTree(n,supr)));
 					}
 					
 				}
