@@ -8,12 +8,12 @@ public class ConstructorDec{
 	
 	public ArrayList<String> modifiers;
 	public ArrayList<Fparam> fparams;
-	public GNode node;
+	public GNode cnode;
 	
 	ConstructorDec(ArrayList<String> mod,ArrayList<Fparam> fp,GNode n){
 		modifiers = mod;
 		fparams = fp;
-		node = n;
+		cnode = n;
 	}
 }
 class Fparam{

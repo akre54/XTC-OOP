@@ -495,7 +495,7 @@ class cppDoWhileStatement extends Visitor
  */
 class cppBlock extends Visitor
 {
-	public final boolean DEBUG = false;
+	public final boolean DEBUG = true;
 	private StringBuilder fString;		
 	cppBlock(GNode n)
 	{
@@ -516,7 +516,7 @@ class cppBlock extends Visitor
 		return express.getString();
 	}
 	public StringBuilder getString()
-	{
+	{	
 		return fString;
 	}
 }
