@@ -49,6 +49,8 @@ import xtc.util.Tool;
 	making objects of classes
 	-missing visitors
 	System.out.println
+ -get values outside of Methods - getClassDeclarations outside of the Method Strings without 
+ getting values inside a MethodDeclaration
 
 */
 
@@ -88,6 +90,7 @@ public class cppClass extends Visitor{
 		 */
 		 
 		classString.append("Class "+ getClassName(n)+ "{ \n");
+		classString.append(setFields(n));
 		StringBuilder methods=setMethods(n);
 		classString.append(methods+ "\n");
 		classString.append("} \n");
@@ -109,6 +112,15 @@ public class cppClass extends Visitor{
 		return true;
 	}//end of isClassDeclaration method
 	
+	/**
+	 @return Stringbuilder that gets the fields inside a class declaration (but outside methods)
+	 */
+	public StringBuilder setFields(GNode n)
+	{
+		//creates a new cppFieldDeclaration class
+		cppFieldDeclaration classFields= new cppFieldDeclaration(n);
+		return classFields.getString();
+	}
 	/**
 	 @return the className of the given classDeclaration's node
 	 */	
@@ -600,25 +612,51 @@ class cppSubParameters extends Visitor{
 
 /**
  class the visits and explores the FieldDeclaration subtree 
+ put in a new ArrayWriter that writes the Array values
+ 
  */
-
-//put in check for array expression
 class cppFieldDeclaration extends Visitor{
 	
 	public final boolean DEBUG = true;
 	private StringBuilder fieldString;
-	
+	private boolean isArray;
+	private boolean foundMethod; //for Fields outside of the methods
+	private StringBuilder modifier;
+	private StringBuilder type;
+	private StringBuilder declarator;
 	/**Takes Block and sets the fields */
 	cppFieldDeclaration(GNode n){
+		isArray=false;
 		fieldString=new StringBuilder();
+		modifier= new StringBuilder();
+		type=new StringBuilder();
+		declarator= new StringBuilder();
+		foundMethod=false;
 		visit (n);
 	}//end of cppField Constructor
 	public void visitFieldDeclaration(GNode n) {
 		//fix set modifier
-		fieldString.append("\t\t"+setModifier(n)+" "+setType(n)+" "+setDeclarator(n)+"; \n");
+		setModifier(n);
+		setDeclarator(n);
+		setType(n);
+		if(isArray)
+		{
+			if(DEBUG){System.out.println("THIS IS AN ARRAY!!!");}
+			//call ArrayWritere that writes the entire array here
+			fieldString.append("\t\t ARRAY GOES HEREEEEEEE;\n");
+		}
+		else{ //its not an array just write the text normally
+			fieldString.append("\t\t"+modifier+" "+type+" "+declarator+"; \n");
+		}
 	}//end of visitClassDeclaration Method
+	public void visitMethodDeclaration(GNode n)
+	{
+		foundMethod=true;
+	}
 	public void visit(Node n) {
-		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+		for (Object o : n){
+			if (o instanceof Node && !foundMethod) dispatch((Node)o);
+		}
 	} //end of visit method
 	/**
 	 @return StringBuilder of class
@@ -645,30 +683,34 @@ class cppFieldDeclaration extends Visitor{
 	/**
 	 @return StringBuilder Type of FieldDeclaration (makes a new cppType class)
 	 */
-	public StringBuilder setType(GNode n)
+	public void setType(GNode n)
 	{
 		//creates a new cppType class and gets the string
 		cppType classType = new cppType(n);
-		return classType.getType();
+		type= classType.getType();
 	}
 	/**
 	 @return StringBuilder of the Modifier of the FieldDeclaration
 	 */
-	public StringBuilder setModifier(GNode n)
+	public void setModifier(GNode n)
 	{
 		cppModifier modifiers=new cppModifier(n);
-		return modifiers.getString();
+		modifier= modifiers.getString();
 		//first child of field Declaration
 	}
 	/**
 	 @return StringBuilder declarator
 	 creates a new cppDeclarator class
 	 */
-	public StringBuilder setDeclarator(GNode n)
+	public void setDeclarator(GNode n)
 	{
 		cppDeclarator decl= new cppDeclarator(n);
-		return decl.getString();
+		isArray=decl.isArray();
+		declarator= decl.getString();
 	}
+	public void testArray(GNode n)
+	{
+			}
 	
 }//end of cppFieldDeclaration Class
 
@@ -680,9 +722,10 @@ class cppFieldDeclaration extends Visitor{
 class cppDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
-	
+	private boolean isArray;
 	cppDeclarator(GNode n)
 	{
+		isArray=false;
 		declaratorString=new StringBuilder();
 		declaratorString.append(getDeclarator(n));
 		visit(n);
@@ -700,6 +743,7 @@ class cppDeclarator extends Visitor{
 	public StringBuilder getDeclarator(GNode n)
 	{
 		cppSubDeclarator subDecl = new cppSubDeclarator(n);
+		isArray=subDecl.isArray();
 		return subDecl.getString();
 		
 	}//end of setDeclarator method
@@ -713,6 +757,10 @@ class cppDeclarator extends Visitor{
 	{
 		return declaratorString;
 	}
+	public boolean isArray()
+	{
+		return isArray;
+	}
 }//end of cppDeclarator type
 /**
  class the visits and explores the Declarator subtree
@@ -722,16 +770,18 @@ class cppDeclarator extends Visitor{
 class cppSubDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
-	
+	private boolean isArray;
 	cppSubDeclarator(GNode n)
 	{
 		declaratorString = new StringBuilder();
+		isArray=false;
 		visit(n);
 	}
 	public void visitDeclarator(GNode n) {
 		declaratorString.append(n.getString(0));
 		if(DEBUG){System.out.println("Declarator");};
 		cppArray cArray= new cppArray(n);
+		isArray=cArray.isArray();
 		//getLiteral(n);	
 		getExpression(n);
 	}//end of visitClassDeclaration Method
@@ -769,6 +819,10 @@ class cppSubDeclarator extends Visitor{
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method
+	public boolean isArray()
+	{
+		return isArray;
+	}
 	/**
 	 @return StringBuilder class
 	 */
@@ -783,7 +837,7 @@ class cppSubDeclarator extends Visitor{
  */
 class cppArray extends Visitor{
 	public final boolean DEBUG =true;
-	public boolean isArray; 
+	private boolean isArray; 
 	private StringBuilder aString;
 	
 	cppArray (GNode n){
@@ -804,6 +858,10 @@ class cppArray extends Visitor{
 		cppPrimitiveType type = new cppPrimitiveType(n);
 		if(DEBUG){System.out.println(type.getString());}
 		return type.getString();
+	}
+	public boolean isArray()
+	{
+		return isArray;
 	}
 	public StringBuilder getSize(GNode n)
 	{
@@ -1226,7 +1284,7 @@ class cppSubModifier extends Visitor{
 		if(DEBUG){System.out.println(n.getName());}
 		for(int i=0; i<n.size();i++)
 		{
-			subModifierString.append(n.getString(i));
+			subModifierString.append(" "+n.getString(i));
 		}
 	}
 }//end of cppsubModifier class
