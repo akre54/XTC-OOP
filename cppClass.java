@@ -73,6 +73,7 @@ public class cppClass extends Visitor{
 	 */
 	cppClass(Node n)
 	{
+		//System.out.println("Lalalal");
 		visit(n);
 		if(DEBUG){System.out.println(classString);}
 		
@@ -278,7 +279,13 @@ class cppMethod extends Visitor{
 		methodString.append(getWhileLoop(n));
 		methodString.append(getDoWhileStatement(n));
 		methodString.append(getConditionalStatement(n));
+		methodString.append("\t\t"+getBlock(n)+" \n");
 		methodString.append("\t} \n");		
+	}
+	public StringBuilder getBlock(GNode n)
+	{
+			cppBlock block =new cppBlock(n);
+			return block.getString();
 	}
 	/**
 	 @return <code>StringBuilder</code> that is the type for the method
@@ -394,7 +401,11 @@ class cppConditionalStatement extends Visitor{
 	public void visitConditionalStatement(GNode n)
 	{
 		if(DEBUG){System.out.println("ConditionalStatement");}
-		//fString.append("\t\t if ("+ getRelationalExpression(n)+"){ \n");
+		
+		//cppConditionalStatement(n);
+		//cppConditionalStatement condi = new ConditionalStatement(n);
+
+		//fString.append("\t\t if ("+getRelationalExpression(n)+"){ \n");
 		//fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
 	}//end of visitCallExpression method
 	public StringBuilder getBlock(GNode n)
@@ -434,7 +445,7 @@ class cppForStatement extends Visitor{
 	{
 		if(DEBUG){System.out.println("ForStatement");}
 		fString.append(getBasicControl(n));
-		fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
+		fString.append("\t\t\t"+getBlock(n)+ "\n\t\t\t }");
 	}//end of visitCallExpression method
 	public StringBuilder getBlock(GNode n)
 	{
@@ -525,6 +536,7 @@ class cppBlock extends Visitor{
 	private StringBuilder fString;		
 	cppBlock(GNode n)
 	{
+		
 		fString= new StringBuilder();
 		visit(n);
 	}
@@ -535,7 +547,14 @@ class cppBlock extends Visitor{
 	{
 		if(DEBUG){System.out.println("Block");}
 		fString.append(getExpression(n));
+		fString.append(getExpressionStatement(n));
 	}//end of visitCallExpression method
+	public StringBuilder getExpressionStatement(GNode n)
+	{
+		cppExpressionStatement express = new cppExpressionStatement(n);
+		return express.getString();
+		
+	}
 	public StringBuilder getExpression(GNode n)
 	{
 		cppExpression express= new cppExpression(n);
@@ -831,6 +850,9 @@ class cppExpressionStatement extends Visitor{
 	private boolean isSystemOutPrint; //checks the system.out.print case
 	private StringBuilder SystemOut; //System.out Text
 	private GNode arguments;
+	private boolean isArray;
+	public ArrayMaker arraym;
+	private GNode  expression;
 	 private boolean foundSwitchStatement;
 	/**
 	 
@@ -845,9 +867,35 @@ class cppExpressionStatement extends Visitor{
 			isSystemOutPrint=false;
 				arguments=null;
 			foundSwitchStatement=false;
+			expression =n;
 			visit(n);
 	
 		
+	}
+	public void visitNewArrayExpression(GNode n)
+	{
+		isArray=true;
+		arraym = new ArrayMaker (n, true);
+		pString.append(arraym.getStringBuffer());
+	}
+	public void visitExpression(GNode n)//not being reached
+	{
+		//pString.append("ZOMG!");
+		cppExpression express=new cppExpression(n);
+		isArray=express.isArray;
+		pString.append(express.getString());
+		pString.append(isArray);
+		if( isArray)
+		{
+			getArray(n);
+		}
+		//cppSelectionExpression select =new cppSelectionExpression(n);
+		//System.out.println(select.getString());
+	}
+	public StringBuffer getArray(GNode n)
+	{
+		ArrayMaker arraym= new ArrayMaker(n, true);
+		return arraym.getStringBuffer();
 	}
 	public void visitExpressionStatement(GNode n)
 	{
@@ -901,11 +949,12 @@ class cppExpressionStatement extends Visitor{
 		cppCallExpression call = new cppCallExpression(n);
 		return call.getString();
 	}
-	/**
+	/**+
 	 @return the classExpression String
 	 */
 	public StringBuilder getString()
 	{
+		//pString.append);
 		return pString;
 	}
 	/**
@@ -1040,7 +1089,7 @@ class cppCallExpression extends Visitor{
 	{
 		return print;
 	}
-	/*****
+	/******
 	 Test case that calls the SystemPrint class if The System Out Print values are true
 	 */
 	public void testSystemOut(GNode n)
@@ -1066,13 +1115,40 @@ class cppCallExpression extends Visitor{
 				}
 				else {
 					//something is wrong or a case test is missing
-					System.out.println("Error: System.out but no Print or Println check values");
+						System.out.println("Error: System.out but no Print or Println check values");
 				}
 				
 			}
 		}
 		else {
-			cString.append(getPrimaryIdentifier(n) + "." + getExpressionName(n)+"("+getArguments(n)+"); \n");
+			//run a check for a primaryIdentifier
+			//String s;
+			//String s=n.getString(0);
+			Node node=n.getNode(0);
+			if(node !=null) //primaryIdentifier node is not empty
+			{
+				cString.append(getPrimaryIdentifier(n) + "->__vptr->"+ getExpressionName(n)+"(");;
+			}
+			else{
+				
+				cString.append(getExpressionName(n)+"(");
+			
+			}
+			//run a check for 
+			
+			
+			
+			//cString.append("Arguements:"+getArguments(n));
+			String arguments =getArguments(n).toString();
+			//System.out.println("Arguments:"+arguments);
+		   if(arguments.equals(""))
+			   {
+				   cString.append("); \n");
+				}
+			else {
+				//cString.append(","+getArguments(n)+");\n");
+			}
+
 		}
 
 		
@@ -1086,7 +1162,7 @@ class cppCallExpression extends Visitor{
 }
 /**class the visits the arguments subtree*/
 class cppArguments extends Visitor{
-	public final boolean DEBUG=true;
+	public final boolean DEBUG=false;
 	private StringBuilder aString;
 	private GNode arguments;
 	cppArguments(GNode n)
@@ -1113,7 +1189,7 @@ class cppArguments extends Visitor{
 	}
 	public StringBuilder getLiteral(GNode n)
 	{
-		cppLiteral lit = new cppLiteral(n);
+		cppLiteral2 lit = new cppLiteral2(n);
 		return lit.getString();
 	}
 	public StringBuilder getString()
@@ -1123,13 +1199,14 @@ class cppArguments extends Visitor{
 }//end of cppArguments method
 /**Class that visits and explores the SelectionExpression subtree*/
 class cppSelectionExpression extends Visitor{
-	public final boolean DEBUG = false;
+	public final boolean DEBUG = true;
 	private StringBuilder sString;
 	private boolean isOut;
 	private boolean isSystem;
 	private GNode arguments; 
 	cppSelectionExpression(GNode n)
 	{
+		if(DEBUG){System.out.println("Selection Expression");}
 		sString=new StringBuilder();
 		isOut=false;
 		isSystem=false;
@@ -1144,7 +1221,7 @@ class cppSelectionExpression extends Visitor{
 		{
 			isOut=true;
 		}
-		getPrimaryIdentifer(n);
+		sString.append(getLiteral(n)+".");
 		sString.append(n.getString(1));
 	}//end of visitSelectionExpression Method
 	/**
@@ -1165,13 +1242,19 @@ class cppSelectionExpression extends Visitor{
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 	} //end of visit method	
+	public StringBuilder getLiteral(GNode n)
+	{
+		cppLiteral2 literal =new cppLiteral2(n);
+		return literal.getString();
+	}
 	/**
 	 creates a new cppPrimaryIdentifer class
 	 */
-	public void getPrimaryIdentifer(GNode n)
+	public StringBuilder getPrimaryIdentifer(GNode n)
 	{
 		cppPrimaryIdentifier PrimId= new cppPrimaryIdentifier(n);
 		isSystem=PrimId.isSystem();
+		return PrimId.getString();
 	}
 	/**
 	 @return the isSystem Boolean for the System.out.print test case
@@ -1324,6 +1407,7 @@ class cppFieldDeclaration extends Visitor{
 	public final boolean DEBUG = false;
 	private StringBuilder fieldString;
 	private boolean isArray;
+	private boolean isArray2;
 	private boolean foundMethod; //for Fields outside of the methods
 	private boolean foundConstructor; //for fields outside of constructors
 	private boolean isClassDeclaration; //for creating new classes
@@ -1333,6 +1417,7 @@ class cppFieldDeclaration extends Visitor{
 	/**Takes Block and sets the fields */
 	cppFieldDeclaration(GNode n){
 		isArray=false;
+		isArray2=false;
 		fieldString=new StringBuilder();
 		modifier= new StringBuilder();
 		type=new StringBuilder();
@@ -1352,13 +1437,24 @@ class cppFieldDeclaration extends Visitor{
 			//call ArrayWritere that writes the entire array here
 			ArrayMaker arraym=new ArrayMaker(n);
 			//System.out.println("ARRAY:"+n.getName());
-			fieldString.append(arraym.getStringBuffer());
-			fieldString.append("\t\t ARRAY GOES HEREEEEEEE;\n");
+			fieldString.append("\t\t"+arraym.getStringBuffer()+"\n");
+			//fieldString.append("\t\t ARRAY GOES HEREEEEEEE;\n");
+		}
+		else if(isArray2)
+		{
+			if(DEBUG){System.out.println("THIS IS AN ARRAY!!!");}
+			//call ArrayWritere that writes the entire array here
+			//ArrayMaker arraym=new ArrayMaker(n);
+			//System.out.println("ARRAY:"+n.getName());
+		//	fieldString.append("\t\t"+arraym.getStringBuffer()+"\n");
+			//fieldString.append("\t\t ARRAY GOES HEREEEEEEE;\n");		
 		}
 		else{//its not an array just write the text normally
 			if(isClassDeclaration)
 			{
-				fieldString.append("\t\t NEW CLASS IMPLEMENTATION GOES HERE;\n");
+				fieldString.append("\t\t"+modifier+" "+type+" "+declarator
+						/*getNewClassExpression(n)+"("+*//*getArguments(n)*/
+								   +"; \n");
 			}
 			else{//just write the text normally
 				fieldString.append("\t\t"+modifier+" "+type+" "+declarator+"; \n");
@@ -1438,7 +1534,7 @@ class cppDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
 	private boolean isArray;
-	private boolean isClassDeclaration;
+	public boolean isClassDeclaration;
 	cppDeclarator(GNode n)
 	{
 		isArray=false;
@@ -1488,27 +1584,36 @@ class cppSubDeclarator extends Visitor{
 	public final boolean DEBUG=false;
 	private StringBuilder declaratorString;
 	private boolean isArray;
-	private boolean isClassDeclaration;
+	public boolean isClassDeclaration;
+	private StringBuilder classEx;
 	cppSubDeclarator(GNode n)
 	{
 		declaratorString = new StringBuilder();
 		isArray=false;
 		isClassDeclaration = false;
+		classEx=new StringBuilder();
 		visit(n);
 	}
 	public void visitDeclarator(GNode n) {
 		declaratorString.append(n.getString(0));
 		if(DEBUG){System.out.println("Declarator");};
-		StringBuilder classEx =new StringBuilder();
+		//StringBuilder classEx =new StringBuilder();
 		classEx.append(getNewClassExpression(n));
+		classEx.append(getCallExpression(n));
 		cppArray cArray= new cppArray(n);
 		isArray=cArray.isArray();
 		//getLiteral(n);	
 		getExpression(n);
 	}//end of visitClassDeclaration Method
+	public StringBuilder getCallExpression(GNode n)
+	{
+		cppCallExpression call = new cppCallExpression(n);
+		return call.getString();
+	}
 	public StringBuilder getNewClassExpression(GNode n){
 		cppNewClassExpression classExpress = new cppNewClassExpression(n);
-		isClassDeclaration=classExpress.isClassDeclaration();
+		//isClassDeclaration=classExpress.isClassDeclaration();
+		isClassDeclaration=true;
 		return classExpress.getString();
 	}
 	public boolean isClassDeclaration()
@@ -1529,6 +1634,10 @@ class cppSubDeclarator extends Visitor{
 				cppExpression cppEx = new cppExpression(n);
 				if(DEBUG){System.out.println("Expression:"+cppEx.getString()+"\n");}
 				declaratorString.append("= "+cppEx.getString());
+				if(isClassDeclaration)
+				{
+					declaratorString.append(classEx);
+				}			
 			}
 			else {
 				getLiteral(n);			
@@ -1541,7 +1650,7 @@ class cppSubDeclarator extends Visitor{
 	public void getLiteral(GNode n)
 	{
 		if(DEBUG){System.out.println("PRENODE:"+n.getName());}
-		cppLiteral cppLit =new cppLiteral(n);
+		cppLiteral cppLit =new cppLiteral(n,1);
 		declaratorString.append("= "+cppLit.getString());		
 	}
 	public void visit(Node n) {
@@ -1564,7 +1673,7 @@ class cppSubDeclarator extends Visitor{
 class cppNewClassExpression extends Visitor{
 	public final boolean DEBUG =false;
 	private StringBuilder aString;
-	private boolean isClassDeclaration;
+	public boolean isClassDeclaration;
 	cppNewClassExpression (GNode n){
 		isClassDeclaration =false;
 		aString=new StringBuilder();
@@ -1576,7 +1685,8 @@ class cppNewClassExpression extends Visitor{
 	public void visitNewClassExpression(GNode n) {
 		isClassDeclaration =true;
 		if(DEBUG){System.out.println("Class Expression");}
-		aString.append("NEW CLASS DECLARATION HEREEEEEE"/*getPrimitiveType(n)+ "="*/);
+		aString.append("new __"+getQualIden(n)+ "(" +getArguments(n)+")");
+		//aString.append("NEW CLASS DECLARATION HEREEEEEE"/*getPrimitiveType(n)+ "="*/);
 		//aString.append("new"+getArguments(n)+ ")");
 	}//end of visitClassDeclaration Method
 	public StringBuilder getPrimitiveType(GNode n){
@@ -1666,6 +1776,130 @@ class cppConcreteDimensions extends Visitor{
 	}
 }
 /** class that visits and explores the Literal subtree.*/
+class cppLiteral2 extends Visitor{
+	public final boolean DEBUG =true;
+	private StringBuilder lString;
+	cppLiteral2(GNode n)
+	{
+		lString = new StringBuilder();
+		visit(n);
+	}
+	/**
+	 @return StringBuilder for class 
+	 */
+	public StringBuilder getString()
+	{
+		return lString;
+	}//end of getString
+	public void setlString(String l)
+	{
+	//	String str= lString.toString();
+	//	if(str.equals("")) //if the string is just append to it
+	//	{
+			lString.append(l);
+	//	}
+	//	else { //else the string has another value on it append to it
+			
+	//		lString.append(","+l);
+	//	}
+
+	}
+	/**
+	 @return boolean that checks if the loop should break because of given counter and locaiton
+	 */
+	public void visitBooleanLiteral(GNode n)
+	{
+		//if(DEBUG){System.out.println(n.getString(0));}
+		//foundLiteral=true;
+		//count++;
+		setlString(n.getString(0));		
+		//if(checkBreak()){return;}
+		//cppExpression cppEx = new cppExpression(n);
+	}
+	public void visitIntegerLiteral(GNode n)
+	{
+		lString.append(n.getString(0));
+		//setlString(n.getString(0));	
+	}
+	public void visitStringLiteral(GNode n)
+	{
+		setlString(n.getString(0));	
+	}	
+	public void visitPrimaryIdentifier(GNode n)
+	{
+		setlString(n.getString(0));		
+	}	
+	/*public void visitAdditiveExpression(GNode n)
+	{
+		foundExpression=true;
+	}
+	public void visitMultiplicativeExpression(GNode n)
+	{
+		foundExpression=true;	
+	}	
+	public void visitExpression(GNode n)
+	{
+		foundExpression=true;	
+	}	
+	public void visitRelationalExpression(GNode n)
+	{
+		foundExpression=true;	
+	}	*/
+
+	public void visit(Node n) {
+		for (Object o : n){
+			if (o instanceof Node) dispatch((Node)o);
+		}
+		
+	}
+}//end of visit method	
+	/*public void interface Visitor<R, E extends Throwable> {
+	 
+	 R visitLiteral(GNode n) throws E;
+	 R visitAdditionExpression(GNode n) throws E;
+	 R visitMultiplicativeExpression(GNode n) throws E;
+	 
+	 }*/	
+	
+	
+	/*
+	 For Declarations: 
+	 -StringLiteral (literally ="thisString")
+	 BooleanLiteral
+	 -IntegerLiteral
+	 -FloatingPointLiteral
+	 -CharacterLiteral
+	 NullLiteral
+	 Literal?
+	 MultiplicativeExpression -Even for Division (just changes sign in the middle)
+	 IntergerLiteral(4) 
+	 *
+	 IntegerLiteral(3)
+	 AdditiveExpression
+	 IntegerLiteral(4)
+	 +
+	 IntergerLiteral(3)
+	 AdditiveExpression - even for Subtraction (just chages sign in the middle
+	 PrimaryIdentifier("additionTest")
+	 +
+	 PrimaryIdentifier("multiplicationTest")
+	 AdditiveExpression
+	 IntergerLiteral(12)
+	 +
+	 MultiplicativeExpression
+	 IntegerLiteral(3)
+	 /
+	 IntegerLiteral(2)
+	 AdditiveExpression
+	 StringLiteral("te")
+	 +
+	 StringLiteral("xt")
+	 
+	 //create method that takes the GNode of the expression
+	 //make a visitor for the literals (base)
+	 //make a visitor for Expression
+	 */
+	
 class cppLiteral extends Visitor{
 	public final boolean DEBUG =false;
 	private StringBuilder lString;
@@ -1673,6 +1907,7 @@ class cppLiteral extends Visitor{
 	private int location;
 	private int count;
 	private String litString;
+	private boolean countTest;
 	private boolean foundExpression;
 	/**
 	 takes a Gnode and gets the first Literal 
@@ -1682,18 +1917,19 @@ class cppLiteral extends Visitor{
 		foundLiteral=false;
 		foundExpression =false;
 		lString = new StringBuilder();
-		count=0;
-		location=1;
+		//count=0;
+		countTest=false;
+		//location=1;
 		visit(n);
 	}//end of cppLiteral Constructor
-	/**
-	 takes a value and get Literal GNode at the given positon
+	/*takes a value and get Literal GNode at the given positon
 	 */
 	cppLiteral(GNode n, int value)
 	{
 		foundLiteral=false;
 		lString = new StringBuilder();
 		location=value;
+		countTest=true;
 		count=0;
 		visit(n);
 	}//end of cppLiteral Constructor	
@@ -1709,21 +1945,27 @@ class cppLiteral extends Visitor{
 	 */
 	public boolean checkBreak()
 	{
-		if(DEBUG){System.out.println("Count: "+count);}
-		if(DEBUG){System.out.println("Location: "+location);}		
-		if((foundLiteral) && (count==location))
-		{
-			if(DEBUG){System.out.println("String: "+litString);}
-			lString.append(litString);
-			return true;
+		
+		if(countTest){
+			//if(DEBUG){System.out.println("Count: "+count);}
+			//if(DEBUG){System.out.println("Location: "+location);}		
+			if((foundLiteral) && (count==location))
+			{
+				//if(DEBUG){System.out.println("String: "+litString);}
+				lString.append(litString);
+				return true;
+			}
+			else {
+				return false;
+			}
+			
 		}
-		else {
+		else{
+			//if(DEBUG){System.out.println("String: "+litString);}
+			//lString.append(litString);
 			return false;
 		}
 	}
-	/**
-	 visit BooleanLiteral
-	 */
 	public void visitBooleanLiteral(GNode n)
 	{
 		if(DEBUG){System.out.println(n.getString(0));}
@@ -1775,138 +2017,112 @@ class cppLiteral extends Visitor{
 	{
 		foundExpression=true;	
 	}	
-
+	
 	public void visit(Node n) {
 		for (Object o : n){
 			if (o instanceof Node && !foundExpression) dispatch((Node)o);
 		}
-		
-	} //end of visit method	
-	/*public void interface Visitor<R, E extends Throwable> {
-	 
-	 R visitLiteral(GNode n) throws E;
-	 R visitAdditionExpression(GNode n) throws E;
-	 R visitMultiplicativeExpression(GNode n) throws E;
-	 
-	 }*/	
-	
-	
-	/*
-	 For Declarations: 
-	 -StringLiteral (literally ="thisString")
-	 BooleanLiteral
-	 -IntegerLiteral
-	 -FloatingPointLiteral
-	 -CharacterLiteral
-	 NullLiteral
-	 Literal?
-	 MultiplicativeExpression -Even for Division (just changes sign in the middle)
-	 IntergerLiteral(4) 
-	 *
-	 IntegerLiteral(3)
-	 AdditiveExpression
-	 IntegerLiteral(4)
-	 +
-	 IntergerLiteral(3)
-	 AdditiveExpression - even for Subtraction (just chages sign in the middle
-	 PrimaryIdentifier("additionTest")
-	 +
-	 PrimaryIdentifier("multiplicationTest")
-	 AdditiveExpression
-	 IntergerLiteral(12)
-	 +
-	 MultiplicativeExpression
-	 IntegerLiteral(3)
-	 /
-	 IntegerLiteral(2)
-	 AdditiveExpression
-	 StringLiteral("te")
-	 +
-	 StringLiteral("xt")
-	 
-	 //create method that takes the GNode of the expression
-	 //make a visitor for the literals (base)
-	 //make a visitor for Expression
-	 */
-	
-}//end of cppLiteral class
+	}
+}
 /** class that visits and explores the Expression subtrees*/
 class cppExpression extends Visitor{
 	public final boolean DEBUG = false;
 	private StringBuilder eString;
+	public boolean isArray;
 	cppExpression(GNode n)
 	{
+		//if(DEBUG){System.out.println("IN cppEXPRESSION");}
 		eString=new StringBuilder();
+		isArray=false;
 		visit(n);
+	}
+	cppExpression(GNode n, boolean arrayer)
+	{
+		eString=new StringBuilder();
+		isArray=arrayer;
+		visit(n);
+	}
+	public void visitExpression(GNode n)
+	{
+		cppSelectionExpression select =new cppSelectionExpression(n);
+		eString.append(select.getString());
+		eString.append(n.getString(1));
+		eString.append(getLiteral(n,2));
+	}
+	/*public void visitNewArrayExpression(GNode n)
+	{
+		
+	}*/
+	public void setExpression(GNode n)
+	{
+		//if(DEBUG){System.out.println("+ Expression");};
+		//cppLiteral cppLit =new cppLiteral(n);
+		cppLiteral cppLit =new cppLiteral(n,1);	
+		eString.append(cppLit.getString());
+		
+		if(DEBUG){System.out.println(cppLit.getString());};
+		cppExpression cppExp=new cppExpression(n);
+		eString.append(cppExp.getString());
+		if(DEBUG){System.out.println(n.getString(1));}
+		eString.append(n.getString(1));
+		cppLiteral cppLit2 =new cppLiteral(n,2);
+		eString.append(cppLit2.getString());
+		
+		if(DEBUG){System.out.println(cppLit2.getString());};
+		cppExpression cppExp2=new cppExpression(n);	
+		eString.append(cppExp2.getString());
+	}
+	public void visitSelectionExpression(GNode n)
+	{
+		cppPrimaryIdentifier id = new cppPrimaryIdentifier(n);
+		eString.append(id.getString()+".");
+		eString.append(n.getString(1)+" ");
 	}
 	public void visitAdditiveExpression(GNode n)
 	{
-		if(DEBUG){System.out.println("+ Expression");};
-		//cppLiteral cppLit =new cppLiteral(n);
-		cppLiteral cppLit =new cppLiteral(n);	
-		eString.append(cppLit.getString());
-		if(DEBUG){System.out.println(cppLit.getString());};
-		cppExpression cppExp=new cppExpression(n);
-		if(DEBUG){System.out.println(n.getString(1));}
-		eString.append(n.getString(1));
-		cppLiteral cppLit2 =new cppLiteral(n,2);
-		eString.append(cppLit2.getString());
-		if(DEBUG){System.out.println(cppLit2.getString());};
-		cppExpression cppExp2=new cppExpression(n);	
-		eString.append(cppExp2.getString());	
+		setExpression(n);
 	}
 	public void visitMultiplicativeExpression(GNode n)
 	{
-		if(DEBUG){System.out.println("+ Expression");};
-		//cppLiteral cppLit =new cppLiteral(n);
-		cppLiteral cppLit =new cppLiteral(n);	
-		eString.append(cppLit.getString());
-		if(DEBUG){System.out.println(cppLit.getString());};
-		cppExpression cppExp=new cppExpression(n);
-		if(DEBUG){System.out.println(n.getString(1));}
-		eString.append(n.getString(1));
-		cppLiteral cppLit2 =new cppLiteral(n,2);
-		eString.append(cppLit2.getString());
-		if(DEBUG){System.out.println(cppLit2.getString());};
-		cppExpression cppExp2=new cppExpression(n);	
-		eString.append(cppExp2.getString());	
+		setExpression(n);	
 		
-	}	
-	public void visitExpression(GNode n)
+	}
+	/*public void visitExpression(GNode n)
 	{
-		if(DEBUG){System.out.println("+ Expression");};
+		if(DEBUG){System.out.println("PRIM");};
+		eString.append("RAWR");
 		//cppLiteral cppLit =new cppLiteral(n);
 		//Note from patrick: I believe there should be
 		//something like this here:
-		//ArrayMaker appArr = new ArrayMaker (n, true);
-		//if (appArr.getIsArray()) {
-		//eString.append(cppLit.getStringBuffer());
+		//cppPrimaryIdentifier id= new cppPrimaryIdentifier(n);
+		//eString.append("test"+id.getString());
+		cppArray arraym = new cppArray(n);
+		isArray=arraym.isArray();
+		
+		/*if (isArray) {
+			eString.append(("ARRAY!"));
+			ArrayMaker appArr = new ArrayMaker (n, true);
+			cppPrimaryIdentifier ident = new cppPrimaryIdentifier(n);
+			eString.append(ident.getString());
+			eString.append(appArr.getStringBuffer());
+		}
+		else{
+			cppLiteral cppLit =new cppLiteral(n);	
+			eString.append(cppLit.getString());
+			if(DEBUG){System.out.println(cppLit.getString());};
+			cppExpression cppExp=new cppExpression(n);
+			if(DEBUG){System.out.println(n.getString(1));}
+			eString.append(n.getString(1));
+			cppLiteral cppLit2 =new cppLiteral(n,2);
+			eString.append(cppLit2.getString());
+			if(DEBUG){System.out.println(cppLit2.getString());};
+			cppExpression cppExp2=new cppExpression(n);	
+			eString.append(cppExp2.getString());			
 		//}
-		cppLiteral cppLit =new cppLiteral(n);	
-		eString.append(cppLit.getString());
-		if(DEBUG){System.out.println(cppLit.getString());};
-		cppExpression cppExp=new cppExpression(n);
-		if(DEBUG){System.out.println(n.getString(1));}
-		eString.append(n.getString(1));
-		cppLiteral cppLit2 =new cppLiteral(n,2);
-		eString.append(cppLit2.getString());
-		if(DEBUG){System.out.println(cppLit2.getString());};
-		cppExpression cppExp2=new cppExpression(n);	
-		eString.append(cppExp2.getString());		}	
+	}	*/
 	public void visitRelationalExpression(GNode n)
 	{
-		//cppLiteral cppLit =new cppLiteral(n);
-		cppLiteral cppLit =new cppLiteral(n);	
-		eString.append(cppLit.getString());
-		if(DEBUG){System.out.println(cppLit.getString());};
-		cppExpression cppExp=new cppExpression(n);
-		if(DEBUG){System.out.println(n.getString(1));}
-		eString.append(n.getString(1));
-		cppLiteral cppLit2 =new cppLiteral(n,2);
-		eString.append(cppLit2.getString());
-		if(DEBUG){System.out.println(cppLit2.getString());};
-		cppExpression cppExp2=new cppExpression(n);	
-		eString.append(cppExp2.getString());	
+		setExpression(n);	
 	}//end of visitCallExpression method
 	
 	public StringBuilder getLiteral(GNode n, int location)
@@ -2098,7 +2314,11 @@ class cppSubModifier extends Visitor{
 		if(DEBUG){System.out.println(n.getName());}
 		for(int i=0; i<n.size();i++)
 		{
-			subModifierString.append(" "+n.getString(i));
+			String s=n.getString(i);
+			if (s.equals("final")) {
+				s="const";
+			}
+			subModifierString.append(" "+s);
 		}
 	}
 }//end of cppsubModifier class
