@@ -129,12 +129,15 @@ public class InheritanceTree{
 		
 		//local arraylist defined
 		local = new ArrayList<Vtable_entry>(0);
+		
 
 		//copies the superclass's Vtable into virtual Vtable
 		Vt_ptrs = new ArrayList<Vtable_entry>(supr.Vt_ptrs);
 		
 		//change __isa methods to point to this class
 		Vt_ptrs.get(0).ownerClass = className;
+		//add __isa to local methods
+		local.add(new Vtable_entry("Class","__class",new ArrayList<String>(0),className,new ArrayList<String>(0)));
 		
 		//defines arraylist of the virtual methods of this class
 		ArrayList<Vtable_entry> virtual = addvirtualptrs(n);

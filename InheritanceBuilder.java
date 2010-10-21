@@ -337,8 +337,9 @@ public class InheritanceBuilder{
 	 */
 	private void addMethodDec(InheritanceTree t){
 
-		
-		for(int index=0;index<t.local.size();index++){
+		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
+							"::"+t.local.get(0).name+"(){\n}\n");
+		for(int index=1;index<t.local.size();index++){
 			//method syntax and __this parameter
 			cpp_methoddef.write("\t"+t.local.get(index).returntype+" __"+t.className+
 								"::"+t.local.get(index).name+"("+t.className+" __this");
