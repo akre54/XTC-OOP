@@ -60,17 +60,17 @@ public class ArrayMaker {
 			public void visitPrimitiveType (GNode n) {
 				//Type of the array
 				if (oneLine) {
-					toPrint.append(" = new __Array<");
+					toPrint.append(" = new __Array <");
 					String temp = n.getString(0);
 					if (temp.equals("int")) {
-						toPrint.append("int32_t>");
+						toPrint.append("int32_t> ");
 					} else if (temp.equals("class")) {
-						toPrint.append("Class>");
+						toPrint.append("Class> ");
 					} else if (temp.equals("object")) {
-						toPrint.append("Object>");
+						toPrint.append("Object> ");
 					}
 				} else {
-					toPrint.append(n.getString(0));
+					toPrint.append(n.getString(0)+" ");
 				}
 				visit(n);
 			}
