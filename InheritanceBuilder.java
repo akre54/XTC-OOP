@@ -58,6 +58,8 @@ public class InheritanceBuilder{
 						 "using java::lang::Object;\n"+
 						 "using java::lang::__Object;\n"+
 						 "using java::lang::Class;\n"+
+
+						 "using java::lang::__Class;\n"+
 						 "using java::lang::String;\n"+
 						 
 						 "namespace xtc {\n"+
@@ -193,7 +195,7 @@ public class InheritanceBuilder{
 	 */	
 	private void write_all_constructors(InheritanceTree t){
 		if(t.constructors.size()==0){
-			h_classdef.write("\t   "+t.className+"():__vpt(&__vtable){\n\t\t\n\t   };\n\n");
+			h_classdef.write("\t   __"+t.className+"():__vptr(&__vtable){\n\t\t\n\t   };\n\n");
 		}
 		else{
 			for(int index =0;index<t.constructors.size();index++){
@@ -215,7 +217,7 @@ public class InheritanceBuilder{
 					h_classdef.write(t.constructors.get(index).fparams.get(i).type+" "
 									 +t.constructors.get(index).fparams.get(i).var_name);
 				}
-				h_classdef.write("):__vpt(&__vtable){\n\t\t");
+				h_classdef.write("):__vptr(&__vtable){\n\t\t");
 			
 			//**  cppBlock is called on constructor's block node  **//
 					cppConstructor cblock = new cppConstructor(t.constructors.get(index).cnode);

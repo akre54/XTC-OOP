@@ -40,9 +40,9 @@ public class InheritanceTree{
 									 className,new ArrayList<String>(0)));
 		
 		//add hashcode to Vtable
-		ArrayList<String> hashcode = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("int32_t","hashcode",
-									 hashcode,"Object",new ArrayList<String>(0)));
+		ArrayList<String> hashCode = new ArrayList<String>(0);
+		Vt_ptrs.add(new Vtable_entry("int32_t","hashCode",
+									 hashCode,"Object",new ArrayList<String>(0)));
 		//add equals to Vtable
 		ArrayList<String> equals = new ArrayList<String>(0);
 		Vt_ptrs.add(new Vtable_entry("bool","equals",
