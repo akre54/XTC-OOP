@@ -22,8 +22,7 @@ class ConditionalMaker {
 		Node node = n;
 		toPrint.append("if (");
 		new Visitor() {
-			public void visitEqualityExpression(GNode n) {
-				System.out.println("RAWR");
+			public void visitEqualityExpression (GNode n) {
 				cppEqualityExpression equal = new cppEqualityExpression(n);
 				toPrint.append(equal.getString());
 			}
@@ -36,6 +35,9 @@ class ConditionalMaker {
 			 	toPrint.append(n.getString(0));	
 			 	visit(n);
 			 }
+			public void visitRelationalExpression (GNode n) {
+				visit(n);
+			}
 			public void visitConditionalStatement (GNode n) {
 				doubleBlock = false;
 				toPrint.append("\nelse if (");	
@@ -44,7 +46,7 @@ class ConditionalMaker {
 			}
 			public void visitBlock (GNode n) {
 				if (doubleBlock) {
-					toPrint.append("\nelse ");	
+					toPrint.append("\nelse {");	
 				} else {
 					doubleBlock = true;
 				}

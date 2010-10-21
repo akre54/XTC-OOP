@@ -1,4 +1,5 @@
 package xtc.oop;
+import java.util.ArrayList;
 
 import java.io.File;
 import xtc.tree.GNode;
@@ -23,7 +24,7 @@ public class InheritanceBuilder{
 	private File source;
 
 	
-	InheritanceBuilder(File jfile){
+	InheritanceBuilder(File jfile,ArrayList<String> files){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
@@ -52,8 +53,11 @@ public class InheritanceBuilder{
 						 
 						 "#pragma once\n\n"+
 						 
-						 "#include <stdint.h>\n"+
-						 "#include <string>\n\n"+
+						 "#include \"java_lang.h\"\n"+
+						 "using java::lang::Object;\n"+
+						 "using java::lang::__Object;\n"+
+						 "using java::lang::Class;\n"+
+						 "using java::lang::String;\n"+
 						 
 						 "namespace xtc {\n"+
 						 "\tnamespace oop{\n\n"+
@@ -86,9 +90,12 @@ public class InheritanceBuilder{
 							"* USA.\n"+
 							"*/\n\n"+
 							
-							"#include \""+h_classdef.cFile.getName()+"\"\n\n"+
-							
-							"#include <sstream>\n\n"+
+							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
+						for(int i=0;i<files.size();i++){
+							cpp_methoddef.write("#include \""+files.get(i)+"\"\n");
+						}
+							cpp_methoddef.write("#include <sstream>\n\n"+
+											"using xtc::oop::demo;\n"+
 							
 							"namespace xtc {\n"+
 							"\tnamespace oop{\n\n"
@@ -109,7 +116,7 @@ public class InheritanceBuilder{
 			"\tstruct __"+ClassName+"; \n"+/**/
 			"\tstruct __"+ClassName+"_VT;\n\n"+/**/
 						 
-			"\ttypedef __"+ClassName+" = "+ClassName+";\n\n"+/**/
+			"\ttypedef __"+ClassName+" "+ClassName+";\n\n"+/**/
 		
 			"\tstruct __"+ClassName+"{ \n"+/**/
 			"\t   __"+ClassName+"_VT __vptr;\n");
@@ -228,7 +235,7 @@ public class InheritanceBuilder{
 				System.out.println("Writing main...");
 				buildMain(t.local.get(index));
 			}
-			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+" ("+t.className);
+			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+"("+t.className);
 			
 			for(int j=0; j<t.local.get(index).params.size();j++){
 				h_classdef.write(", "+t.local.get(index).params.get(j));
@@ -247,11 +254,12 @@ public class InheritanceBuilder{
 	 */ 
 	private void buildMain(Vtable_entry n) {
 		CppCreator mainWriter = new CppCreator(source, "main.cpp");
-		mainWriter.write("using xtc::oop;\n"
-						 +"#include \""+h_classdef.cFile.getName()+"\";\n"
-						 +"main(int argc, char *argv[]) {\n"
-						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"(argv[]);\n"
-						 +"NAMEmain->__vptr->main(NAMEmain);\n}");
+		mainWriter.write("#include <iostream>\n\n"+
+						 "#include \""+h_classdef.cFile.getName()+"\"\n\n"+
+						 "using namespace xtc::oop;\n\n\n"
+						 +"int main(int argc, char *argv[]){\n\t\n"
+						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\t\n"
+						 +"NAMEmain.main(argv[]);\t\nreturn 0;}");
 		mainWriter.close();
 	}
 	
