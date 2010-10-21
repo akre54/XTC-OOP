@@ -56,7 +56,8 @@ SOURCE = \
 	InstanceField.java \
 	ConstructorDec.java \
 	ArrayMaker.java \
-	SystemPrint.java
+	SystemPrint.java \
+	ConditionalMaker.java
 
 
 

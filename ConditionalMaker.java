@@ -18,13 +18,13 @@ class ConditionalMaker {
 		conditionalStringMaker (n);
 	}
 	
-	private conditionalStingMaker (GNode n) {
+	private void conditionalStringMaker (GNode n) {
 		Node node = n;
 		toPrint.append("if (");
 		new Visitor() {
 			public void visitEqualityExpression (GNode n) {
 				cppEqualityExpression equal = new cppEqualityExpression(n);
-				return equal.getString();
+				toPrint.append(equal.getString());
 			}
 			// public void visitPrimaryIdentifier (GNode n) {
 			// 	toPrint.append(n.getString(0));	
@@ -49,7 +49,7 @@ class ConditionalMaker {
 				}
 				toPrint.append("{");
 				cppBlock bk = new cppBlock(n);
-				toPrint.append(bk.getSting());
+				toPrint.append(bk.getString());
 				toPrint.append("}");
 			}
 			public void visit(Node n) {
