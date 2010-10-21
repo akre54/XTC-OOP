@@ -38,7 +38,7 @@ public class DependencyTree {
         }
 */
 
-    public DependencyTree(GNode n) {
+    public DependencyTree(Node n) {
 
         new Visitor() {
 
