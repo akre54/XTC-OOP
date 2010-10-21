@@ -252,9 +252,9 @@ public class InheritanceBuilder{
 		CppCreator mainWriter = new CppCreator(source, "main.cpp");
 		mainWriter.write("using xtc::oop;\n"
 						 +"#include \""+h_classdef.cFile.getName()+"\";\n"
-						 +"main(int argc, char *argv[]) {\n"
-						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"(argv[]);\n"
-						 +"NAMEmain->__vptr->main(NAMEmain);\n}");
+						 +"int main(int argc, char *argv[]) {\n"
+						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n"
+						 +"NAMEmain->__vptr->main(argv[]);\nreturn 0;\n}");
 		mainWriter.close();
 	}
 	
