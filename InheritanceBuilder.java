@@ -116,7 +116,7 @@ public class InheritanceBuilder{
 			"\tstruct __"+ClassName+"; \n"+/**/
 			"\tstruct __"+ClassName+"_VT;\n\n"+/**/
 						 
-			"\ttypedef __"+ClassName+" "+ClassName+";\n\n"+/**/
+			"\ttypedef __"+ClassName+"* "+ClassName+";\n\n"+/**/
 		
 			"\tstruct __"+ClassName+"{ \n"+/**/
 			"\t   __"+ClassName+"_VT __vptr;\n");
