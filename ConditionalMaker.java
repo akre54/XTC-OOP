@@ -26,6 +26,15 @@ class ConditionalMaker {
 				cppEqualityExpression equal = new cppEqualityExpression(n);
 				toPrint.append(equal.getString());
 			}
+			 public void visitPrimaryIdentifier (GNode n) {
+			 	toPrint.append(n.getString(0));	
+			 	opporator = n.getString(0);
+			 	visit(n);
+			 }
+			 public void IngegerLiteral (GNode n) {
+			 	toPrint.append(n.getString(0));	
+			 	visit(n);
+			 }
 			public void visitRelationalExpression (GNode n) {
 				visit(n);
 			}
