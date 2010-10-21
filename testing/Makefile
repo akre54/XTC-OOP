@@ -4,7 +4,7 @@ SHELL = /bin/sh
 .SUFFIXES: .c .o .h .cpp
 
 PRE = demo
-OBJS = main.cpp $(PRE)_dataLayout.h $(PRE)_methoddef.cpp
+OBJS = main.cpp *_dataLayout.h *_methoddef.cpp
 CC = g++
 DEBUG = -g
 FLAGS = $(DEBUG)
@@ -13,8 +13,13 @@ all : tester
 
 tester : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o tester
+
 clean:
-	\rm *.o *~ tester
+	rm *.o *.h *.cpp *~
+	java xtc.oop.Translator -translate $(PRE).java
+	$(CC) $(LFLAGS) $(OBJS) -o tester
+
 translate:
 	\java xtc.oop.Translator -translate $(PRE).java
 	$(CC) $(LFLAGS) $(OBJS) -o tester
+
