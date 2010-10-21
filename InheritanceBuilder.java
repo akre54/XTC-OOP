@@ -1,4 +1,5 @@
 package xtc.oop;
+import java.util.ArrayList;
 
 import java.io.File;
 import xtc.tree.GNode;
@@ -23,7 +24,7 @@ public class InheritanceBuilder{
 	private File source;
 
 	
-	InheritanceBuilder(File jfile){
+	InheritanceBuilder(File jfile,ArrayList<String> files){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
@@ -86,9 +87,11 @@ public class InheritanceBuilder{
 							"* USA.\n"+
 							"*/\n\n"+
 							
-							"#include \""+h_classdef.cFile.getName()+"\"\n\n"+
-							
-							"#include <sstream>\n\n"+
+							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
+						for(int i=0;i<files.size();i++){
+							cpp_methoddef.write("#include \""+files.get(i)+"\"\n");
+						}
+							cpp_methoddef.write("#include <sstream>\n\n"+
 							
 							"namespace xtc {\n"+
 							"\tnamespace oop{\n\n"

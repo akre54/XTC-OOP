@@ -117,8 +117,7 @@ public class Translator extends Tool {
 			
 			
 			
-			/* adams dependency instance and method */
-			
+			DependencyTree dependency= new DependencyTree(node);
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
 			
@@ -126,7 +125,7 @@ public class Translator extends Tool {
 			final InheritanceTree Class = new InheritanceTree(Object);
 			
 			
-			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile);
+			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
 				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
 			final ArrayList<GNode> ToTree = new ArrayList<GNode>(0);
 			
