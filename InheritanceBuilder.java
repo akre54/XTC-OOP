@@ -267,7 +267,7 @@ public class InheritanceBuilder{
 						 "using namespace xtc::oop;\n\n\n"
 						 +"int main(int argc, char *argv[]){\n\t\n"
 						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\t\n"
-						 +"NAMEmain.main(argv[]);\t\nreturn 0;}");
+						 +"NAMEmain.main();\t\nreturn 0;}");
 		mainWriter.close();
 	}
 	
