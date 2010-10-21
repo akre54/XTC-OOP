@@ -15,7 +15,7 @@ tester : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o tester
 
 clean:
-	rm *.o *.h *.cpp *~
+	rm -f *.o *.h *.cpp *~
 	java xtc.oop.Translator -translate $(PRE).java
 	$(CC) $(LFLAGS) $(OBJS) -o tester
 
