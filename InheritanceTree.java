@@ -40,23 +40,19 @@ public class InheritanceTree{
 									 className,new ArrayList<String>(0)));
 		
 		//add hashcode to Vtable
-		ArrayList<String> hashcode = new ArrayList<String>(0);
-		hashcode.add("Object");
-		Vt_ptrs.add(new Vtable_entry("int32_t","hashcode",
-									 hashcode,"Object",new ArrayList<String>(0)));
+		ArrayList<String> hashCode = new ArrayList<String>(0);
+		Vt_ptrs.add(new Vtable_entry("int32_t","hashCode",
+									 hashCode,"Object",new ArrayList<String>(0)));
 		//add equals to Vtable
 		ArrayList<String> equals = new ArrayList<String>(0);
-		equals.add("Object");
 		Vt_ptrs.add(new Vtable_entry("bool","equals",
 									 equals,"Object",new ArrayList<String>(0)));
 		//add getClass to Vtable
 		ArrayList<String> getClass = new ArrayList<String>(0);
-		getClass.add("Object");
 		Vt_ptrs.add(new Vtable_entry("Class","getClass",
 									 getClass,"Object",new ArrayList<String>(0)));
 		//add toString to Vtable
 		ArrayList<String> toString = new ArrayList<String>(0);
-		toString.add("Object");
 		Vt_ptrs.add(new Vtable_entry("String","toString",
 									 toString,"Object",new ArrayList<String>(0)));
 
@@ -81,33 +77,26 @@ public class InheritanceTree{
 		//change __isa field to point to this class's feild
 		Vt_ptrs.get(0).ownerClass = className;
 		
+		//change toString to point to class name
+		Vt_ptrs.get(4).ownerClass = className;
+
 		//adds virtual Class methods ptrs to virtual Vtable
-		ArrayList<String> toString = new ArrayList<String>(0);
-		toString.add("Class");
-		Vt_ptrs.add(new Vtable_entry("String","toString",
-									 toString,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getName = new ArrayList<String>(0);
-		getName.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","getName",
 									 getName,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getSuperclass = new ArrayList<String>(0);
-		getSuperclass.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","getSuperclass",
 									 getSuperclass,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getComponentType = new ArrayList<String>(0);
-		getComponentType.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","getComponentType",
 									 getComponentType,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isPrimitive = new ArrayList<String>(0);
-		isPrimitive.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","isPrimitive",
 									 isPrimitive,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isArray = new ArrayList<String>(0);
-		isArray.add("Class");
 		Vt_ptrs.add(new Vtable_entry("String","isArray",
 									 isArray,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isInstance = new ArrayList<String>(0);
-		isInstance.add("Class");
 		isInstance.add("Object");
 		Vt_ptrs.add(new Vtable_entry("String","isInstance",
 									 isInstance,"Class",new ArrayList<String>(0)));

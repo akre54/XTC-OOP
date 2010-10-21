@@ -54,9 +54,12 @@ public class InheritanceBuilder{
 						 "#pragma once\n\n"+
 						 
 						 "#include \"java_lang.h\"\n"+
+
 						 "using java::lang::Object;\n"+
 						 "using java::lang::__Object;\n"+
 						 "using java::lang::Class;\n"+
+
+						 "using java::lang::__Class;\n"+
 						 "using java::lang::String;\n"+
 						 
 						 "namespace xtc {\n"+
@@ -119,7 +122,7 @@ public class InheritanceBuilder{
 			"\ttypedef __"+ClassName+"* "+ClassName+";\n\n"+/**/
 		
 			"\tstruct __"+ClassName+"{ \n"+/**/
-			"\t   __"+ClassName+"_VT __vptr;\n");
+			"\t   __"+ClassName+"_VT* __vptr;\n");
 						 
 				/* FEILDS ---> ex: int x;  */
 		        write_all_feilds(t); h_classdef.write("\n\n");
@@ -191,32 +194,37 @@ public class InheritanceBuilder{
 	 *
 	 */	
 	private void write_all_constructors(InheritanceTree t){
-		for(int index =0;index<t.constructors.size();index++){
-			h_classdef.write("\t   ");
-			//loop through constructor modifiers
-			for(int i =0;i<t.constructors.get(index).modifiers.size();i++){	
-				h_classdef.write(t.constructors.get(index).modifiers.get(i)+" ");
-			}		
-			//write className
-			h_classdef.write(t.className+"(");
-			//loop through formal parameter 
-			for(int i =0;i<t.constructors.get(index).fparams.size();i++){
-				if(i>0)h_classdef.write(",");//comma
-				//loop through formal parameter's modifiers
-				for(int j =0;j<t.constructors.get(index).fparams.get(i).modifiers.size();j++){	
-					h_classdef.write(t.constructors.get(index).fparams.get(i).modifiers.get(j)+" ");
+		if(t.constructors.size()==0){
+			h_classdef.write("\t   __"+t.className+"():__vptr(&__vtable){\n\t\t\n\t   };\n\n");
+		}
+		else{
+			for(int index =0;index<t.constructors.size();index++){
+				h_classdef.write("\t   ");
+				//loop through constructor modifiers
+				for(int i =0;i<t.constructors.get(index).modifiers.size();i++){	
+					h_classdef.write(t.constructors.get(index).modifiers.get(i)+" ");
+				}		
+				//write className
+				h_classdef.write(t.className+"(");
+				//loop through formal parameter 
+				for(int i =0;i<t.constructors.get(index).fparams.size();i++){
+					if(i>0)h_classdef.write(",");//comma
+					//loop through formal parameter's modifiers
+					for(int j =0;j<t.constructors.get(index).fparams.get(i).modifiers.size();j++){	
+						h_classdef.write(t.constructors.get(index).fparams.get(i).modifiers.get(j)+" ");
+					}
+					//writes formal parameter's type and name
+					h_classdef.write(t.constructors.get(index).fparams.get(i).type+" "
+									 +t.constructors.get(index).fparams.get(i).var_name);
 				}
-				//writes formal parameter's type and name
-				h_classdef.write(t.constructors.get(index).fparams.get(i).type+" "
-								 +t.constructors.get(index).fparams.get(i).var_name);
-			}
-			h_classdef.write("):__vpt(&__vtable){\n\t\t");
+				h_classdef.write("):__vptr(&__vtable){\n\t\t");
 			
 			//**  cppBlock is called on constructor's block node  **//
-				cppConstructor cblock = new cppConstructor(t.constructors.get(index).cnode);
-				h_classdef.write(cblock.getString().toString());//write body of the constructor
+					cppConstructor cblock = new cppConstructor(t.constructors.get(index).cnode);
+					h_classdef.write(cblock.getString().toString());//write body of the constructor
+					h_classdef.write("\n\t   };\n\n");
 			
-			h_classdef.write("\n\t   };\n\n");
+			}
 		}
 	}
 	
