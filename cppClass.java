@@ -90,8 +90,8 @@ public class cppClass extends Visitor{
 		 
 		classString.append("Class "+ getClassName(n)+ "{ \n");
 		classString.append(setFields(n));
-		StringBuilder constructor = setConstructor(n);
-		classString.append(constructor);
+		//StringBuilder constructor = setConstructor(n);
+		//classString.append(constructor);
 		StringBuilder methods=setMethods(n);
 		classString.append(methods+ "\n");
 		classString.append("} \n");
@@ -128,6 +128,30 @@ public class cppClass extends Visitor{
 		cppFieldDeclaration classFields= new cppFieldDeclaration(n);
 		return classFields.getString();
 	}
+	public StringBuilder getSwitchStatements(GNode n)
+	{
+		cppSwitchStatement switchState = new cppSwitchStatement(n);
+		return switchState.getString();
+	}	public StringBuilder getConditionalStatement(GNode n)
+	{
+		cppConditionalStatement cond=new cppConditionalStatement(n);
+		return cond.getString();
+	}
+	public StringBuilder getForStatements(GNode n)
+	{
+		cppForStatement forstate=new cppForStatement(n);
+		return forstate.getString();
+	}
+	public StringBuilder getWhileLoop(GNode n)
+	{
+		cppWhileStatement whilestate =new cppWhileStatement(n);
+		return whilestate.getString();
+	}
+	public StringBuilder getDoWhileStatement(GNode n)
+	{
+		cppDoWhileStatement doWhile = new cppDoWhileStatement(n);
+		return doWhile.getString();
+	}
 	/**
 	 @return the className of the given classDeclaration's node
 	 */	
@@ -146,78 +170,6 @@ public class cppClass extends Visitor{
 		return aMethod.getString();
 	}//end of setMethods method
 }//end of cppClass
-class cppConstructor extends Visitor{
-	public final boolean DEBUG = false;
-	private StringBuilder methodString;
-	cppConstructor(GNode n)
-	{
-		methodString= new StringBuilder();
-		visit(n);
-	}
-	public void visitConstructorDeclaration(GNode n){
-		methodString.append("\t"+ getConstructorName(n)+"("+getParameters(n)+")" +"{ \n");
-		StringBuilder fields= setFields(n);
-		methodString.append(fields);
-		methodString.append("\t \t" +getExpressionStatements(n)+"\n");
-		methodString.append("\t} \n");	
-	}
-	public String getConstructorName(GNode n)
-	{
-		return n.getString(2);
-	}
-	public StringBuilder getParameters(GNode n)
-	{
-		//creates a new cppParameters class
-		cppParameters param = new cppParameters(n);
-		return param.getString();
-		
-	}//end of getParameters method
-	/**
-	 @return StringBuilder that gets the primitive type of a method
-	 */
-	public StringBuilder getPrimitiveType(GNode n)
-	{
-		//creates a new cppPrimitiveType class
-		cppPrimitiveType pType = new cppPrimitiveType(n);
-		return pType.getString();
-	}
-	/**
-	 @return StringBuilder that gets the Qualified Identifier of a method
-	 */
-	public StringBuilder getQualIden(GNode n)
-	{
-		//creates a new cppQualifiedIdentifier class
-		cppQualifiedIde qi= new cppQualifiedIde(n);
-		return qi.getString();
-	}
-	
-	public void visit(Node n) {
-		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-	} //end of visit method
-	public StringBuilder getString()
-	{
-		return methodString;
-	}
-	/**
-	 @return StringBuilder that returns the fields of a method
-	 */
-	public StringBuilder setFields(GNode n)
-	{
-		//creates a new cppFieldDeclaration class
-		cppFieldDeclaration methodFields= new cppFieldDeclaration(n);
-		return methodFields.getString();
-	}
-	/**
-	 creates the expressionStatement class
-	 **Review this **
-	 */
-	public StringBuilder getExpressionStatements(GNode n)
-	{
-		cppExpressionStatement cppEx= new cppExpressionStatement(n);
-		return cppEx.getString();
-	}
-	
-}
 /**Creates a Class that searches through the MethodDeclaration Nodes in a subtree
  *Also takes a MethodDeclaration Class*/
 class cppMethod extends Visitor{
@@ -249,7 +201,19 @@ class cppMethod extends Visitor{
 		getMethodDetails(n);
 
 	}//end of visitClassDeclaration Method
-	public StringBuilder getConditionalStatement(GNode n)
+	public void visitConstructorDeclaration(GNode n){
+		methodString.append("\t"+ getConstructorName(n)+"("+getParameters(n)+")" +"{ \n");
+		getMethodDetails(n);
+	}
+	public String getConstructorName(GNode n)
+	{
+		return n.getString(2);
+	}
+	public StringBuilder getSwitchStatements(GNode n)
+	{
+		cppSwitchStatement switchState = new cppSwitchStatement(n);
+		return switchState.getString();
+	}	public StringBuilder getConditionalStatement(GNode n)
 	{
 		cppConditionalStatement cond=new cppConditionalStatement(n);
 		return cond.getString();
@@ -279,7 +243,7 @@ class cppMethod extends Visitor{
 		methodString.append(getWhileLoop(n));
 		methodString.append(getDoWhileStatement(n));
 		methodString.append(getConditionalStatement(n));
-		methodString.append("\t\t"+getBlock(n)+" \n");
+		//methodString.append("\t\t"+getBlock(n)+" \n");
 		methodString.append("\t} \n");		
 	}
 	public StringBuilder getBlock(GNode n)
@@ -335,11 +299,7 @@ class cppMethod extends Visitor{
 		cppQualifiedIde qi= new cppQualifiedIde(n);
 		return qi.getString();
 	}
-	public StringBuilder getSwitchStatements(GNode n)
-	{
-		cppSwitchStatement switchState = new cppSwitchStatement(n);
-		return switchState.getString();
-	}
+	
 	
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
@@ -401,28 +361,9 @@ class cppConditionalStatement extends Visitor{
 	public void visitConditionalStatement(GNode n)
 	{
 		if(DEBUG){System.out.println("ConditionalStatement");}
-		
-		//cppConditionalStatement(n);
-		//cppConditionalStatement condi = new ConditionalStatement(n);
-
-		//fString.append("\t\t if ("+getRelationalExpression(n)+"){ \n");
-		//fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
+		ConditionalMaker condtional = new ConditionalMaker(n);
+		fString.append(condtional.getStringBuffer());
 	}//end of visitCallExpression method
-	public StringBuilder getBlock(GNode n)
-	{
-		cppBlock block =new cppBlock(n);
-		return block.getString();
-	}
-	public StringBuilder getExpression(GNode n)
-	{
-		cppExpression express = new cppExpression(n);
-		return express.getString();
-	}
-	public StringBuilder getConditionalExpression(GNode n)
-	{
-		cppConditionalStatement cond =new cppConditionalStatement(n);
-		return cond.getString();
-	}
 	public StringBuilder getString()
 	{
 		return fString;
@@ -445,8 +386,13 @@ class cppForStatement extends Visitor{
 	{
 		if(DEBUG){System.out.println("ForStatement");}
 		fString.append(getBasicControl(n));
-		fString.append("\t\t\t"+getBlock(n)+ "\n\t\t\t }");
+		fString.append("\t\t\t"+getBlock(n)+ "\n\t\t\t }\n");
 	}//end of visitCallExpression method
+	public StringBuilder getExpressionStatements(GNode n)
+	{
+		cppExpressionStatement express = new cppExpressionStatement(n);
+		return express.getString();
+	}
 	public StringBuilder getBlock(GNode n)
 	{
 		cppBlock block =new cppBlock(n);
@@ -478,7 +424,7 @@ class cppWhileStatement extends Visitor{
 	{
 		if(DEBUG){System.out.println("WhileStatement");}
 		fString.append("\n\t\t while ( "+getEqualityExpression(n)+"){\n");
-		fString.append("\t\t\t "+getBlock(n)+ "\n\t\t\t }");
+		fString.append(getBlock(n)+ "\n\t\t\t }");
 	}//end of visitCallExpression method
 	public StringBuilder getEqualityExpression(GNode n)
 	{
@@ -533,22 +479,126 @@ class cppDoWhileStatement extends Visitor{
 /**creates a class that explores the Block Subtree*/
 class cppBlock extends Visitor{
 	public final boolean DEBUG = false;
+	private boolean foundBlock;
 	private StringBuilder fString;		
 	cppBlock(GNode n)
 	{
-		
 		fString= new StringBuilder();
-		visit(n);
+		//fString.append("Block");
+		String name=n.getName();
+		foundBlock =false;
+		if (name.equals("Block")) {
+			fString.append("BLOCK");
+			setBlockText(n);
+		}
+		else{
+			visit(n);
+		}
+	}
+	public void visitSwitchStatement(GNode n)
+	{
+		foundBlock=true;
+	}	
+	public void visitConditionalStatement(GNode n)
+	{
+		foundBlock=true;
+	}
+	public void visitForStatement(GNode n)
+	{
+		System.out.println("RAER");
+		//if(DEBUG){System.out.println("ForStatement");}
+		//fString.append(getBasicControl(n));
+		//fString.append("\t\t\t"+getBlock(n)+ "\n\t\t\t }\n");
+	}//end of visitCallExpression method void visitForStatement(GNode n)
+	{
+		//ystem.out.println("For Statement");
+		foundBlock=true;
+	}
+	public void visitWhileStatement(GNode n)
+	{
+		foundBlock=true;
+	}
+	public void visitDoWhileStatement(GNode n)
+	{
+		foundBlock=true;
+	}
+	public StringBuilder getSwitchStatements(GNode n)
+	{
+		cppSwitchStatement switchState = new cppSwitchStatement(n);
+		return switchState.getString();
+	}	public StringBuilder getConditionalStatement(GNode n)
+	{
+		cppConditionalStatement cond=new cppConditionalStatement(n);
+		return cond.getString();
+	}
+	public StringBuilder getForStatements(GNode n)
+	{
+		cppForStatement forstate=new cppForStatement(n);
+		return forstate.getString();
+	}
+	public StringBuilder getWhileLoop(GNode n)
+	{
+		cppWhileStatement whilestate =new cppWhileStatement(n);
+		return whilestate.getString();
+	}
+	public StringBuilder getDoWhileStatement(GNode n)
+	{
+		cppDoWhileStatement doWhile = new cppDoWhileStatement(n);
+		return doWhile.getString();
 	}
 	public void visit(Node n) {
-		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+		//System.out.println(n.getName());
+		if(!foundBlock){
+			for (Object o : n) if ((o instanceof Node)) dispatch((Node)o);
+		}
 	} //end of visit method
+	/*public void visitClassDeclaration(GNode n)
+	{
+		foundStop =true;
+	}
+	public void visitMethodDeclaration(GNode n)
+	{
+		foundStop=true;
+	}
+	public void visitConstructorDeclaration(GNode n)
+	{
+		foundStop=true;
+	}
+	public void visitForStatement(GNode n)
+	{
+		foundStop=true;
+	}
+	public void visitWhileStatement(GNode n)
+	{
+		foundStop=true;
+	}
+	public void visitDoWhileStatement(GNode n)
+	{
+		foundStop=true;
+	}*/
 	public void visitBlock(GNode n)
 	{
 		if(DEBUG){System.out.println("Block");}
-		fString.append(getExpression(n));
-		fString.append(getExpressionStatement(n));
+		setBlockText(n);
+		foundBlock =true;
+		//fString.append(getExpression(n));
+		
 	}//end of visitCallExpression method
+	public void setBlockText(GNode n)
+	{
+		fString.append(getExpressionStatement(n));
+		fString.append(getFieldDeclaration(n));
+		fString.append(getForStatements(n));
+		fString.append(getWhileLoop(n));
+		fString.append(getDoWhileStatement(n));
+		fString.append(getConditionalStatement(n));
+		fString.append("\t \t" +getSwitchStatements(n)+"\n");
+	}
+	public StringBuilder getFieldDeclaration(GNode n)
+	{
+		cppFieldDeclaration field = new cppFieldDeclaration(n);
+		return field.getString();
+	}
 	public StringBuilder getExpressionStatement(GNode n)
 	{
 		cppExpressionStatement express = new cppExpressionStatement(n);
@@ -716,8 +766,16 @@ class cppEqualityExpression extends Visitor{
 	private StringBuilder bString;		
 	cppEqualityExpression(GNode n)
 	{
+		String name= n.getName();
 		bString= new StringBuilder();
-		visit(n);
+		//bString.append("LLALAAL"+name);
+		if(name.equals("EqualityExpression"))
+		{
+			bString.append("EXPRESSION");
+		}
+		else {
+			visit(n);
+		}
 	}
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
@@ -841,7 +899,6 @@ class cppBreakStatement extends Visitor{
 }
 /**creates an class that explored the CallExperssion subtree*/
 class cppExpressionStatement extends Visitor{
-	
 	public final boolean DEBUG = false;
 	private StringBuilder pString;	
 	private boolean isOut;
@@ -906,6 +963,8 @@ class cppExpressionStatement extends Visitor{
 			pString.append(callString);
 
 		}
+		cppPostFixExpression postfix = new cppPostFixExpression(n);
+		pString.append(postfix.getString());
 	 }
 	public void visitSwitchStatement(GNode n)
 	 {
@@ -1127,7 +1186,7 @@ class cppCallExpression extends Visitor{
 			Node node=n.getNode(0);
 			if(node !=null) //primaryIdentifier node is not empty
 			{
-				cString.append(getPrimaryIdentifier(n) + "->__vptr->"+ getExpressionName(n)+"(");;
+				cString.append(getPrimaryIdentifier(n) + "->__vptr->"+ getExpressionName(n)+"("+getPrimaryIdentifier(n));;
 			}
 			else{
 				
