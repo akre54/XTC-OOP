@@ -22,4 +22,3 @@ clean:
 translate:
 	\java xtc.oop.Translator -translate $(PRE).java
 	$(CC) $(LFLAGS) $(OBJS) -o tester
-
