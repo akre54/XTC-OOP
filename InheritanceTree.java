@@ -131,7 +131,7 @@ public class InheritanceTree{
 		local = new ArrayList<Vtable_entry>(0);
 		
 
-		//copies the superclass's Vtable into virtual Vtable
+		//copies the superclass's Vtable into virtual arraylist
 		Vt_ptrs = new ArrayList<Vtable_entry>(supr.Vt_ptrs);
 		
 		//change __isa methods to point to this class
@@ -221,17 +221,22 @@ public class InheritanceTree{
 				
 				//go into tree to get info
 				visit(n);
-				System.out.println("methods!!! - "+methodname);
 				
-				//test to see if the modifier was public (if it should be virtual)
-				if(is_virtual) virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));
-				//add it to local no matter what 	
-				local.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));
-								
+				//test to see if the modifier was public or protected(if it should be virtual)
+				if(is_virtual) {
+					virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));
+					//add it to local with true as isvirtual field
+					local.add(new Vtable_entry(true,retrn,methodname,params,className,pnames,n));
+
+				}
+				else{
+					//add it to local with false as isvirtual field	
+					local.add(new Vtable_entry(false,retrn,methodname,params,className,pnames,n));
+				}			
 			}
 			public void visitModifier(GNode n){
 				 //notes that private/protected/staic methods are not virtual and should not go into Vtable
-				 if((n.getString(0).equals("private"))||(n.getString(0).equals("protected"))||(n.getString(0).equals("static")))
+				 if((n.getString(0).equals("private"))||(n.getString(0).equals("static")))
 					 is_virtual=false;
 			}
 			public void visitVoidType(GNode n){
@@ -239,7 +244,7 @@ public class InheritanceTree{
 			}
 			public void visitQualifiedIdentifier(GNode n){
 				String type=n.getString(0);
-				if(n.getString(0).equals("int")) type="int_32_t";
+				if(n.getString(0).equals("int")) type="int32_t";
 				if(n.getString(0).equals("boolean")) type="bool";
 				if(is_fparam) params.add(type);
 				else retrn = type;
@@ -309,7 +314,7 @@ public class InheritanceTree{
 			public void visitPrimitiveType(GNode n){
 				if(is_field){
 					String type = n.getString(0);
-					if(type.equals("int"))type="int_32_t";
+					if(type.equals("int"))type="int32_t";
 					if(type.equals("boolean"))type="bool";
 					
 				}

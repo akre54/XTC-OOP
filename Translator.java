@@ -366,7 +366,7 @@ public class Translator extends Tool {
 				
 				public void visitClassDeclaration(GNode n){
 					//if no extenstion it's superclass is Object
-					supr=Class;
+					supr=Object;
 					visit(n);
 					
 					//if the super class has been defined make the subclass
