@@ -10,9 +10,20 @@ public class Vtable_entry{
 	public String ownerClass;
 	public ArrayList<String> pnames;
 	public GNode mnode;
+	public boolean isVirtual;
 	
 	Vtable_entry(String rtype, String mname, ArrayList<String> paramstypes, 
 				 String sclass,ArrayList<String> paramnames,GNode node){
+		name = mname;
+		returntype = rtype;
+		params = new ArrayList<String>(paramstypes);
+		ownerClass = sclass;
+		pnames = paramnames;
+		mnode=node;
+	}
+	Vtable_entry(boolean virtual, String rtype, String mname, ArrayList<String> paramstypes, 
+				 String sclass,ArrayList<String> paramnames,GNode node){
+		isVirtual = virtual;
 		name = mname;
 		returntype = rtype;
 		params = new ArrayList<String>(paramstypes);
@@ -29,4 +40,5 @@ public class Vtable_entry{
 		pnames = paramnames;
 		
 	}
+
 }

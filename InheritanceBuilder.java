@@ -9,12 +9,12 @@ import xtc.tree.Visitor;
 import xtc.util.Tool;
 
 /*
- * edited by Liz Pelka 10-15-2010
+ * 
  *
- *creates a c++ class defintion headerfile and a c++ method definition .cpp file
- *also creates an ArrayList<String> for each class to simulate virtual tables
- *these ArrayLists will actually hold method ptr and ptr assignment statements
- *for easy writing to .h file VTable
+ *creates a c++ class datalayout headerfile and a c++ method definition .cpp file
+ *then populates these files with the proper information stored in each InheritanceTree object
+ *
+ *
  */
 public class InheritanceBuilder{
 	public final boolean DEBUG=false;
@@ -64,7 +64,9 @@ public class InheritanceBuilder{
 						 
 						 "namespace xtc {\n"+
 						 "\tnamespace oop{\n\n"+
-						 "\ttypedef std::string String;\n\n"
+						 "\ttypedef std::string String;\n"
+						// "\ttypedef std::bool boolean;\n"+
+						 //"\ttypedef std::int32_t int;\n\n"
 						 );
 							 
 		
@@ -102,6 +104,9 @@ public class InheritanceBuilder{
 							
 							"namespace xtc {\n"+
 							"\tnamespace oop{\n\n"
+							//"\ttypedef std::bool boolean;\n"+
+							//"\ttypedef std::int32_t int;\n\n"
+
 							);
 		
 		
@@ -131,8 +136,8 @@ public class InheritanceBuilder{
 				write_all_constructors(t); 
 				
 						 
-				/* avoid static field initializer fiasco with  _class() */
-				h_classdef.write("\t   static Class __class();\n\n");
+				/* avoid static field initializer fiasco with  __class() */
+				//h_classdef.write("\t   static Class __class();\n\n");
 		
 		        /*  ALL INSTANCE METHODS    */
 				write_all_methods(t);  h_classdef.write("\n\n"+
@@ -194,10 +199,6 @@ public class InheritanceBuilder{
 	 *
 	 */	
 	private void write_all_constructors(InheritanceTree t){
-		if(t.constructors.size()==0){
-			h_classdef.write("\t   __"+t.className+"():__vptr(&__vtable){\n\t\t\n\t   };\n\n");
-		}
-		else{
 			for(int index =0;index<t.constructors.size();index++){
 				h_classdef.write("\t   ");
 				//loop through constructor modifiers
@@ -225,7 +226,7 @@ public class InheritanceBuilder{
 					h_classdef.write("\n\t   };\n\n");
 			
 			}
-		}
+		
 	}
 	
 	
@@ -237,19 +238,25 @@ public class InheritanceBuilder{
 	 */		
 	private void write_all_methods(InheritanceTree t){
 		//loops through local methods and prints out in proper syantax
-		System.out.println("Writing all methods...");
 		for(int index = 0;index<t.local.size();index++){
 			if (t.local.get(index).name.equals("main")) {
-				System.out.println("Writing main...");
 				buildMain(t.local.get(index));
+				h_classdef.write("\t   static int32_t "+t.local.get(index).name+"(int32_t, char**);");
 			}
-			h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+"("+t.className);
-			
-			for(int j=0; j<t.local.get(index).params.size();j++){
-				h_classdef.write(", "+t.local.get(index).params.get(j));
+			else{
+				h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+"(");
+				if(t.local.get(index).isVirtual) //adds this class parameter if virtual
+					h_classdef.write(t.className+",");
+
+				for(int j=0; j<t.local.get(index).params.size();j++){
+					//first param is printed without ","
+					if (j==0)
+						h_classdef.write(t.local.get(index).params.get(j));
+					
+					h_classdef.write(", "+t.local.get(index).params.get(j));
+				}
+				h_classdef.write(");\n");
 			}
-			h_classdef.write(");\n");
-			
 		}
 	}
 
@@ -265,9 +272,9 @@ public class InheritanceBuilder{
 		mainWriter.write("#include <iostream>\n\n"+
 						 "#include \""+h_classdef.cFile.getName()+"\"\n\n"+
 						 "using namespace xtc::oop;\n\n\n"
-						 +"int main(int argc, char *argv[]){\n\t\n"
-						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\t\n"
-						 +"NAMEmain->main(NAMEmain);\t\nreturn 0;}");
+						 +"int32_t main(int argc, char *argv[]){\n\n\t"
+						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n\t"
+						 +"NAMEmain->main(argc,argv);\t\nreturn 0;\n}");
 		mainWriter.close();
 	}
 	
@@ -282,7 +289,7 @@ public class InheritanceBuilder{
 	private void write_all_method_ptrs(InheritanceTree t){
 		//ptr for __class()
 		h_classdef.write("\t\tClass __isa;\n");
-		//loops through vtable adn prints out in proper syntax
+		//loops through vtable and prints out in proper syntax
 		for(int index =1;index<t.Vt_ptrs.size();index++){
 			h_classdef.write("\t\t"+t.Vt_ptrs.get(index).returntype+" (*"+t.Vt_ptrs.get(index).name+")("+t.className);
 			
@@ -309,7 +316,7 @@ public class InheritanceBuilder{
 		
 		//loops through vtable and prints out in proper syntax
 		for(int index =1;index<t.Vt_ptrs.size();index++){
-			//syntax for an overwritten method
+			//syntax for an overridden method
 			if((t.Vt_ptrs.get(index).ownerClass).equals(t.className)){
 				h_classdef.write(",\n\t\t   "+t.Vt_ptrs.get(index).name+"(&__"+t.className+"::"+t.Vt_ptrs.get(index).name+")");
 			}
@@ -340,23 +347,37 @@ public class InheritanceBuilder{
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
 							"::"+t.local.get(0).name+"(){\n}\n");
 		for(int index=1;index<t.local.size();index++){
-			//method syntax and __this parameter
-			cpp_methoddef.write("\t"+t.local.get(index).returntype+" __"+t.className+
-								"::"+t.local.get(index).name+"("+t.className+" __this");
-			for(int i=0;i<t.local.get(index).params.size();i++){
-				//writes each parameter and variable
-				cpp_methoddef.write(","+t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
+			if(t.local.get(index).name.equals("main")){
+				cpp_methoddef.write("\tint32_t __"+t.className+
+									"::"+t.local.get(index).name+"(int32_t argc, char* argv[]){\n");
+				//call to cppMethod to write the body of the main method
+				cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+				cpp_methoddef.write(mblock.getString().toString());
 			
 			}
-			//calls to CppMethod to create the body of the method
-			cpp_methoddef.write("){\n");
 			
-			//**  cppBlock is called on method's block node  **//
-			cppMethod mblock = new cppMethod(t.local.get(index).mnode);
-			cpp_methoddef.write(mblock.getString().toString());//write body of the method
+			else{
+				//method syntax
+				cpp_methoddef.write("\t"+t.local.get(index).returntype+" __"+t.className+
+									"::"+t.local.get(index).name+"(");
+				//__this parameter if virtual method
+				if(t.local.get(index).isVirtual) cpp_methoddef.write(t.className+" __this,");
+				for(int i=0;i<t.local.get(index).params.size();i++){
+					if (i==0)//first parameter printed without ","
+						cpp_methoddef.write(t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
+					//writes each parameter and variable
+					cpp_methoddef.write(","+t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
+					
+				}
+				//calls to CppMethod to create the body of the method
+				cpp_methoddef.write("){\n");
 			
-			cpp_methoddef.write("\n\n");
-		}
+				//**  cppBlock is called on method's block node  **//
+				cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+				cpp_methoddef.write(mblock.getString().toString());//write body of the method
+				}
+				cpp_methoddef.write("\n\n");
+			}
 		
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
 							"\t//===========================================================================\n\n");
@@ -385,11 +406,3 @@ public class InheritanceBuilder{
 
 
 
-/*
-MY LOGIC FOR INHERITANCE
- 
-
- 
- 
- 
- */
