@@ -66,7 +66,7 @@ import xtc.util.Tool;
 /**Takes a classDeclaration GNode and  generates the basic class values*/
 public class cppClass extends Visitor{ 
 	
-	public final boolean DEBUG = true;
+	public final boolean DEBUG = false;
 	private StringBuilder classString = new StringBuilder();
 	/**
 	 Constructor takes an Compilation Unit and searches all ClassDeclarations in the AST
