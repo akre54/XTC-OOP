@@ -376,7 +376,7 @@ public class Translator extends Tool {
 					else ToTree.add(n);
 					
 				}
-				public void visitExtention(GNode n){
+				public void visitExtension(GNode n){
 					//find's super class
 					//searches for InheritanceTree with same name as extention
 					//returns null if no tree exists yet

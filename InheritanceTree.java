@@ -133,6 +133,7 @@ public class InheritanceTree{
 
 		//copies the superclass's Vtable into virtual arraylist
 		Vt_ptrs = new ArrayList<Vtable_entry>(supr.Vt_ptrs);
+
 		
 		//change __isa methods to point to this class
 		Vt_ptrs.get(0).ownerClass = className;
@@ -147,6 +148,7 @@ public class InheritanceTree{
 		
 		//add virtual methods to vtable
 		Vt_ptrs.addAll(virtual);
+
 			
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
@@ -221,7 +223,6 @@ public class InheritanceTree{
 				
 				//go into tree to get info
 				visit(n);
-				
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if(is_virtual) {
 					virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));
@@ -244,16 +245,24 @@ public class InheritanceTree{
 			}
 			public void visitQualifiedIdentifier(GNode n){
 				String type=n.getString(0);
+				if(is_fparam) params.add(type);
+				else retrn = type;
+			}
+			public void visitPrimitiveType(GNode n){
+				String type=n.getString(0);
 				if(n.getString(0).equals("int")) type="int32_t";
 				if(n.getString(0).equals("boolean")) type="bool";
 				if(is_fparam) params.add(type);
 				else retrn = type;
 			}
 			public void visitFormalParameter(GNode n){//variable name
+				is_fparam =true;
 				pnames.add(n.getString(3));
 				visit(n);
+				is_fparam=false;
 					
 			}
+
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 			}

@@ -206,7 +206,7 @@ public class InheritanceBuilder{
 					h_classdef.write(t.constructors.get(index).modifiers.get(i)+" ");
 				}		
 				//write className
-				h_classdef.write(t.className+"(");
+				h_classdef.write("__"+t.className+"(");
 				//loop through formal parameter 
 				for(int i =0;i<t.constructors.get(index).fparams.size();i++){
 					if(i>0)h_classdef.write(",");//comma
@@ -241,19 +241,21 @@ public class InheritanceBuilder{
 		for(int index = 0;index<t.local.size();index++){
 			if (t.local.get(index).name.equals("main")) {
 				buildMain(t.local.get(index));
-				h_classdef.write("\t   static int32_t "+t.local.get(index).name+"(int32_t, char**);");
+				h_classdef.write("\t   static int32_t "+t.local.get(index).name+"(int32_t, char**);\n");
 			}
 			else{
 				h_classdef.write("\t   static "+t.local.get(index).returntype+" "+t.local.get(index).name+"(");
 				if(t.local.get(index).isVirtual) //adds this class parameter if virtual
-					h_classdef.write(t.className+",");
-
+					h_classdef.write(t.className);
 				for(int j=0; j<t.local.get(index).params.size();j++){
+					//first param is printed with ","
+					if ((j==0)&&(t.local.get(index).isVirtual))
+						h_classdef.write(","+t.local.get(index).params.get(j));
 					//first param is printed without ","
-					if (j==0)
-						h_classdef.write(t.local.get(index).params.get(j));
-					
-					h_classdef.write(", "+t.local.get(index).params.get(j));
+					else if ((j==0)&&(!t.local.get(index).isVirtual))
+						h_classdef.write(t.local.get(index).params.get(j));	
+					else
+						h_classdef.write(", "+t.local.get(index).params.get(j));
 				}
 				h_classdef.write(");\n");
 			}
@@ -361,12 +363,19 @@ public class InheritanceBuilder{
 				cpp_methoddef.write("\t"+t.local.get(index).returntype+" __"+t.className+
 									"::"+t.local.get(index).name+"(");
 				//__this parameter if virtual method
-				if(t.local.get(index).isVirtual) cpp_methoddef.write(t.className+" __this,");
+				if(t.local.get(index).isVirtual) cpp_methoddef.write(t.className+" __this");
+
 				for(int i=0;i<t.local.get(index).params.size();i++){
-					if (i==0)//first parameter printed without ","
+					
+					if ((i==0)&&(t.local.get(index).isVirtual))//first parameter printed with ","
+						cpp_methoddef.write(","+t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
+					else if ((i==0)&&(!t.local.get(index).isVirtual))//first parameter printed without ","
 						cpp_methoddef.write(t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
+
+					
 					//writes each parameter and variable
-					cpp_methoddef.write(","+t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
+					else
+						cpp_methoddef.write(","+t.local.get(index).params.get(i)+" "+t.local.get(index).pnames.get(i));
 					
 				}
 				//calls to CppMethod to create the body of the method

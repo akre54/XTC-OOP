@@ -18,7 +18,7 @@ public class Vtable_entry{
 		returntype = rtype;
 		params = new ArrayList<String>(paramstypes);
 		ownerClass = sclass;
-		pnames = paramnames;
+		pnames = new ArrayList<String>(paramnames);
 		mnode=node;
 	}
 	Vtable_entry(boolean virtual, String rtype, String mname, ArrayList<String> paramstypes, 
@@ -28,7 +28,7 @@ public class Vtable_entry{
 		returntype = rtype;
 		params = new ArrayList<String>(paramstypes);
 		ownerClass = sclass;
-		pnames = paramnames;
+		pnames = new ArrayList<String>(paramnames);
 		mnode=node;
 	}
 	Vtable_entry(String rtype, String mname, ArrayList<String> paramstypes, 
@@ -37,7 +37,7 @@ public class Vtable_entry{
 		returntype = rtype;
 		params = new ArrayList<String>(paramstypes);
 		ownerClass = sclass;
-		pnames = paramnames;
+		pnames = new ArrayList<String>(paramnames);
 		
 	}
 
