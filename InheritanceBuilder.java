@@ -347,7 +347,7 @@ public class InheritanceBuilder{
 	private void addMethodDec(InheritanceTree t){
 
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
-							"::"+t.local.get(0).name+"(){\n}\n");
+							"::"+t.local.get(0).name+"(){\n\t}\n");
 		for(int index=1;index<t.local.size();index++){
 			if(t.local.get(index).name.equals("main")){
 				cpp_methoddef.write("\tint32_t __"+t.className+
@@ -355,7 +355,8 @@ public class InheritanceBuilder{
 				//call to cppMethod to write the body of the main method
 				cppMethod mblock = new cppMethod(t.local.get(index).mnode);
 				cpp_methoddef.write(mblock.getString().toString());
-			
+				cpp_methoddef.write("\n\t   }\n\n");
+
 			}
 			
 			else{
@@ -384,9 +385,10 @@ public class InheritanceBuilder{
 				//**  cppBlock is called on method's block node  **//
 				cppMethod mblock = new cppMethod(t.local.get(index).mnode);
 				cpp_methoddef.write(mblock.getString().toString());//write body of the method
-				}
-				cpp_methoddef.write("\n\n");
+				cpp_methoddef.write("\n\t   }\n\n");
 			}
+				cpp_methoddef.write("\n\n");
+		}
 		
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
 							"\t//===========================================================================\n\n");

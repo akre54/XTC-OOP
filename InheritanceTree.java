@@ -207,6 +207,7 @@ public class InheritanceTree{
 			boolean is_fparam=false;
 			boolean is_virtual=false;
 			ArrayList<String> pnames = new ArrayList<String>(0);
+			GNode block;
 			
 			
 			public void visitClassDeclaration(GNode n){
@@ -219,21 +220,25 @@ public class InheritanceTree{
 				methodname = n.getString(3);
 				params.clear();
 				pnames.clear();
+				block=null;
 				is_virtual = true;
 				
 				//go into tree to get info
 				visit(n);
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if(is_virtual) {
-					virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,n));
+					virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,block));
 					//add it to local with true as isvirtual field
-					local.add(new Vtable_entry(true,retrn,methodname,params,className,pnames,n));
+					local.add(new Vtable_entry(true,retrn,methodname,params,className,pnames,block));
 
 				}
 				else{
 					//add it to local with false as isvirtual field	
-					local.add(new Vtable_entry(false,retrn,methodname,params,className,pnames,n));
+					local.add(new Vtable_entry(false,retrn,methodname,params,className,pnames,block));
 				}			
+			}
+			public void visitBlock(GNode n){
+				block = n;
 			}
 			public void visitModifier(GNode n){
 				 //notes that private/protected/staic methods are not virtual and should not go into Vtable
@@ -412,20 +417,25 @@ public class InheritanceTree{
 			ArrayList<Fparam> fp = new ArrayList<Fparam>(0);
 			boolean is_fparam;
 			boolean is_constr;
+			GNode block;
 			
 			public void visitConstructorDeclaration(GNode n){
 				is_constr = true;
 				//clear arraylists
 				mods.clear();
 				fp.clear();
+				block = null;
 
 				//get info from tree
 				visit(n);
 				
 				//add constructordec to c
-				c.add(new ConstructorDec(mods,fp,n));
+				c.add(new ConstructorDec(mods,fp,block));
 				
 				is_constr =false;
+			}
+			public void visitBlock(GNode n){
+				block = n;
 			}
 			public void visitFormalParameter(GNode n){
 				is_fparam =true;
