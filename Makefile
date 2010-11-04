@@ -46,6 +46,7 @@ PACKAGE     = xtc.oop
 PACKAGE_LOC = xtc/oop
 
 SOURCE = \
+	CppPrinter.java\
 	Translator.java \
 	CppCreator.java \
 	cppClass.java \
@@ -57,7 +58,8 @@ SOURCE = \
 	ConstructorDec.java \
 	ArrayMaker.java \
 	SystemPrint.java \
-	ConditionalMaker.java
+	ConditionalMaker.java 
+	
 
 
 

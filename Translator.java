@@ -115,225 +115,29 @@ public class Translator extends Tool {
 	public void process(Node node) {
 		
 		
+		
 		//Some Testing Environments
 		if(runtime.test("testing"))
 		{
 			runtime.console().p("Testing...").pln().flush();
 			
 			/*Create a new visitor to visit the CompilationUnit */
-			
-			
-			//runtime.console().format(node).pln().flush();
-			
 			new Visitor(){
-				LinkedList<String> operand;
-				LinkedList<String> operator;
-				boolean makeStack=false;
-				public void visitMethodDeclaration(GNode n){
-				
-					//System.out.println(n.getTokenText());
-				   //create an interator over all the children
-					/*System.out.println(n.getName());
-					Iterator nChildren = n.iterator();
-					while(nChildren.hasNext())
-					{
-						Object o= nChildren;
-						System.out.println(o.toString());
-						if (o==null) {
-							System.out.println("NULL");
-							nChildren=(Iterator)nChildren.next();
-							o= nChildren;
-						}
-						if (nChildren!=null) {
-						
-							
-							System.out.println("NOOO");
-							if(o instanceof GNode)//SOURCE OF NULL POINTER EXCEPTION
-							{
-								
-								System.out.println("GNODE!");
-							}
-						}
-						
-						nChildren=(Iterator)nChildren.next();
-						
-					}
-					visit(n);*/
-					//System.out.println(n.size());
-					//System.out.println("Before Visit:" +n.getName());
-					visit(n);
-				}
-				public void visitWhileStatement(GNode n)
+				public void visitBlock(GNode n)
 				{
-					System.out.print("\nWhile");
-					visit(n);
-					System.out.print("} \n");
+					CppPrinter print= new CppPrinter(n);
+					System.out.println(print.getString());
 				}
-		
-				public void visitEqualityExpression(GNode n)
-				{
-					System.out.print("(");
-					if (n.get(0)!=null) {
-						Node q= n.getNode(0);
-						visit(q);
-					}
-					System.out.print(n.getString(1));
-					if(n.get(2)!=null)
-					{
-						Node r= n.getNode(2);
-						visit(r);
-					}
-					System.out.print("){ \n");
-					//visit(n);
-				}
-			public void visitExpression(GNode n)
-				{
-					//when you hit an expression create two stacks (1 Operand Stack and
-					//1 Operator Stack. When you reach the end of that sub tree (after visit(n) 
-					//put code to pop and push off the stack until they're empty
-					//System.out.print("(");
-					
-					makeStack=true;
-					operand= new LinkedList<String>();
-					operator= new LinkedList<String>();
-					if (n.get(0)!=null) {
-						Node q= n.getNode(0);
-						//System.out.print(q.getName());
-						visit(q);
-					}
-				    operator.add(n.getString(1));//	System.out.print(n.getString(1));
-					if(n.get(2)!=null)
-					{
-						Node r= n.getNode(2);
-						//System.out.print(r.getName());
-						visit(r);
-					}
-				//	System.out.print("; \n");
-				//	visit(n);
-					
-					Iterator iter = operator.iterator();
-					Iterator operIter=operand.iterator();
-					System.out.print(operand);
-					System.out.print(operator);
-					//pop and print the stack
-				/*	while (iter.hasNext()) {
-						System.out.print(operIter+ " ");
-						operIter.next();
-						System.out.print(""+iter);
-						iter.next();
-						System.out.print(""+operIter);
-						operIter.next();
-					}*/
-					//System.out.print("; \n");
-					makeStack=false;
-				}
-				public void visitAdditiveExpression(GNode n)
-				{
-			
-					if (n.get(0)!=null) {
-						Node q= n.getNode(0);
-					//System.out.print(q.getName());
-						visit(q);
-					}
-				    operator.add(n.getString(1));//	System.out.print(n.getString(1));
-						if(n.get(2)!=null)
-						{
-							Node r= n.getNode(2);
-					//System.out.print(r.getName());
-							visit(r);
-						}
-					//	System.out.print("; \n");
-					//visit(n);
-			
-					
-				
-				}
-				public void visitFieldDeclaration(GNode n)
-				{
-					visit(n);
-					System.out.print(";\n");
-				}
-				public void visitDeclarator(GNode n)
-				{
-					
-					//System.out.print("DECLARATOR SIZE:"+n.size());
-					System.out.print(" " +n.getString(0));
-					//System.out.print(n.getString(1));
-					//System.out.print(" = ");
-					if(n.get(1)!=null)
-					{
-						System.out.print(n.getString(1));
-					}
-					if(n.get(2)!=null)
-					{
-						System.out.print(" = ");
-						Node newNode= n.getNode(2);
-						visit(newNode);
-					}
-					
-					
-					
-				}
-			
 				public void visit(Node n)
 				{
-					//get the size of the Node (aka find all the children
-					//inn the visit methodget the object of each if its a node call visit(n)
-					//System.out.println(n.size());
-					for (int i=0; i<n.size(); i++) {
-						Object k=n.get(i);
-						if(k instanceof Node)
-						{
-						}
-						else {
-							if(n.getString(i)!=null)
-							{
-								if (makeStack) {
-									operand.add(n.getString(i));
-								}
-								else {
-									System.out.print(" " +n.getString(i));
-								}
-
-								
-							}
-							
-						}
-
-						
-					}
-					
 					for(Object o:n) {
 						if(o instanceof Node) dispatch((Node) o);
-						//else{
-							//System.out.println(n.getName());
-							
-						//}
+						
 					}
 				}
 			}.dispatch(node);
-		//	}.dispatch(node);
-		//	xtc.lang.jeannie.AstSimplifier simple =new xtc.lang.jeannie.AstSimplifier("Java");
-		//	xtc.lang.jeannie.CodeGenerator generator = new xtc.lang.jeannie.CodeGenerator();
-			/*{
-				//new Visitor() {
-					//int count = 0;
-					
-					public Node visitCompilationUnit(GNode n) {
-						System.out.println(n.getName());
-						runtime.console().format(n).pln().flush();
-						return n;
-					}
-				//	public void visit(Node n) {
-				//		System.out.println(n.getName());
-				//		for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-				//	}
-					
-			};*///.dispatch(node);
-		//Node simpleNode =visitCompilationUnit(node);
 			
 		}
-			
 		
 		
 		// Handle the translate option
