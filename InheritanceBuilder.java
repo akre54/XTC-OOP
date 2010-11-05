@@ -352,8 +352,11 @@ public class InheritanceBuilder{
 			if(t.local.get(index).name.equals("main")){
 				cpp_methoddef.write("\tint32_t __"+t.className+
 									"::"+t.local.get(index).name+"(int32_t argc, char* argv[]){\n");
+				
+				
 				//call to cppMethod to write the body of the main method
-				cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+				//cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+				CppPrinter mblock=new CppPrinter(t.local.get(index).mnode);
 				cpp_methoddef.write(mblock.getString().toString());
 				cpp_methoddef.write("\n\t   }\n\n");
 
@@ -383,7 +386,8 @@ public class InheritanceBuilder{
 				cpp_methoddef.write("){\n");
 			
 				//**  cppBlock is called on method's block node  **//
-				cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+				//cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+				CppPrinter mblock=new CppPrinter(t.local.get(index).mnode);
 				cpp_methoddef.write(mblock.getString().toString());//write body of the method
 				cpp_methoddef.write("\n\t   }\n\n");
 			}
