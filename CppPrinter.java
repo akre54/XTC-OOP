@@ -31,21 +31,7 @@ import xtc.tree.Visitor;
 
 import xtc.util.Tool;
 /*To Include:
-
-o.name="cat"
- ifStatement
-
-
-ContinueStatement
-
-SynchronizedStatement
-
-AssetStatement
-
  
- ConditionalExpression (? Expression : ConditionalExpression ()) ????
-
-
  CastExpression ??? 
  PrimaryExpression ??
  
@@ -60,6 +46,70 @@ public class CppPrinter extends Visitor{
 		printer = new StringBuilder();
 		visit(n);
 		if(DEBUG){System.out.println(printer);}
+	}
+	public void CastExpression(GNode n)
+	{
+		/*
+		 f0 -> "(" Type() ")" UnaryExpression()
+		 | "(" Type() ")" UnaryExpressionNotPlusMinus()		
+		 */
+		printer.append("CAST");
+		/*Node type =n.getNode(0);
+		printer.append("(");
+		dispatch(type);
+		printer.append(")");
+		//s2 = (String) v.elementAt(0);
+		Node call = n.getNode(1);
+		dispatch(call);
+	*/
+	}
+	public void AssetStatement(GNode n)
+	{
+		printer.append("assert ");
+		Node express=n.getNode(0);
+		dispatch(express);
+		printer.append("[ :");
+		Node express2=n.getNode(1);
+		dispatch(express2);
+		printer.append("]; ");
+		
+	}
+	public void visitSelectionExpression(GNode n)
+	{
+		Node prim = n.getNode(0);
+		dispatch(prim);
+		printer.append(".");
+		Object o =n.get(1);
+		if(o instanceof String)
+		{
+			printer.append((String)o);
+		}
+		else {
+			dispatch((Node) o);
+		}
+	}
+	public void visitConditionalExpression(GNode n)
+	{
+		printer.append("(");
+		Node express = n.getNode(0);
+		dispatch(express);
+		printer.append(") ? ");
+		Node one = n.getNode(1);
+		dispatch(one);
+		printer.append(" : ");
+		Node two = n.getNode(2);
+		dispatch(two);
+	}
+	public void visitSychronizedStatement(GNode n)
+	{
+		printer.append("sychronized (");
+		Node expression=n.getNode(0);
+		dispatch(expression);
+		printer.append("){\n");
+		Node block = n.getNode(1);
+		dispatch(block);
+		printer.append("}\n");
+		
 	}
 	public void visitLabeledStatement(GNode n)
 	{
@@ -123,10 +173,6 @@ public class CppPrinter extends Visitor{
 				dispatch((Node) o);
 			}
 		}
-	}
-	public void visitConditionalExpression(GNode n)
-	{
-		printer.append("CONDITIOANL");
 	}
 	public void visitUnaryExpression(GNode n)
 	{
@@ -292,18 +338,34 @@ public class CppPrinter extends Visitor{
 	}
 	public void visitConditionalStatement(GNode n)
 	{
-		printer.append("if");
+		printer.append("if(");
 		Node express=n.getNode(0);
 		dispatch(express);
-		//printer.append("{\n");
+		printer.append("){\n");
 		Node block = n.getNode(1);
 		dispatch(block);
-		//printer.append("}\n");
+		printer.append("}\n");
+		for(int i=2;i<n.size();i++)
+		{
+			printer.append("else ");
+			Node cond =n.getNode(i);
+			if(cond.getName().equals("Block")){
+				printer.append("{ \n");
+				dispatch(cond);
+				printer.append("} \n");
+			}
+			else
+			{
+				dispatch(cond);
+			}
+			
+		}
 		
 	}
 	public void visitCallExpression(GNode n)
 	{
-		printer.append("CALLEXPRESSION");
+		//printer.append("CALLEXPRESSION");
+		visit(n);
 	}
 	
 	public void visitDefaultClause(GNode n)
