@@ -4,7 +4,7 @@
 # tool to compare the output of both files
 #
 # for OOP fall 10 by The Group
- 
+clear
 echo "Java to CPP Translation"
 D="1";
 while [ $D ]; do
@@ -13,6 +13,10 @@ echo "Enter the testing directory (return blank to quit):"
 	if [ $D ]; then
 		echo Cleaning directory $D/
 		cd $D
+		echo
+		echo demo.java:
+		more demo.java
+		echo
 		#clean out previous translations
 		make -f ../Makefile clean
 		cp ../java_lang.cpp ./
