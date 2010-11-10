@@ -14,11 +14,12 @@ public class InheritanceTree{
 	
 	public final String className;
 	public ArrayList<InstanceField> fields;
-	public ArrayList<Vtable_entry> Vt_ptrs;
-	public ArrayList<Vtable_entry> local;//all methods defined IN THIS CLASS virtual or not!
+	public ArrayList<ConstructorDec> constructors;
+	public ArrayList<Declaration> local;//all methods defined IN THIS CLASS virtual or not!
+	public ArrayList<Declaration> Vt_ptrs;
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
-	public ArrayList<ConstructorDec> constructors;
+
 
 	/**
 	 * The constructor for creating the Object class Inheritance tree.
@@ -33,27 +34,27 @@ public class InheritanceTree{
 		superclass = null;
 		
 		//creates Vtable arraylist
-		Vt_ptrs = new ArrayList<Vtable_entry>(0);
+		Vt_ptrs = new ArrayList<Declaration>(0);
 		
 		//add __isa to Vtable
-		Vt_ptrs.add(new Vtable_entry("Class", "__isa",new ArrayList<String>(0),
+		Vt_ptrs.add(new Declaration("Class", "__isa",new ArrayList<String>(0),
 									 className,new ArrayList<String>(0)));
 		
 		//add hashcode to Vtable
 		ArrayList<String> hashCode = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("int32_t","hashCode",
+		Vt_ptrs.add(new Declaration("int32_t","hashCode",
 									 hashCode,"Object",new ArrayList<String>(0)));
 		//add equals to Vtable
 		ArrayList<String> equals = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("bool","equals",
+		Vt_ptrs.add(new Declaration("bool","equals",
 									 equals,"Object",new ArrayList<String>(0)));
 		//add getClass to Vtable
 		ArrayList<String> getClass = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("Class","getClass",
+		Vt_ptrs.add(new Declaration("Class","getClass",
 									 getClass,"Object",new ArrayList<String>(0)));
 		//add toString to Vtable
 		ArrayList<String> toString = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("String","toString",
+		Vt_ptrs.add(new Declaration("String","toString",
 									 toString,"Object",new ArrayList<String>(0)));
 
 		//subclass are initalized to a 0 element arraylist
@@ -72,7 +73,7 @@ public class InheritanceTree{
 		className = "Class";
 		
 		//copies the superclass's Vtable into virtual Vtable
-		Vt_ptrs = new ArrayList<Vtable_entry>(supr.Vt_ptrs);
+		Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
 		
 		//change __isa field to point to this class's feild
 		Vt_ptrs.get(0).ownerClass = className;
@@ -82,23 +83,23 @@ public class InheritanceTree{
 
 		//adds virtual Class methods ptrs to virtual Vtable
 		ArrayList<String> getName = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("String","getName",
+		Vt_ptrs.add(new Declaration("String","getName",
 									 getName,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getSuperclass = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("String","getSuperclass",
+		Vt_ptrs.add(new Declaration("String","getSuperclass",
 									 getSuperclass,"Class",new ArrayList<String>(0)));
 		ArrayList<String> getComponentType = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("String","getComponentType",
+		Vt_ptrs.add(new Declaration("String","getComponentType",
 									 getComponentType,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isPrimitive = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("String","isPrimitive",
+		Vt_ptrs.add(new Declaration("String","isPrimitive",
 									 isPrimitive,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isArray = new ArrayList<String>(0);
-		Vt_ptrs.add(new Vtable_entry("String","isArray",
+		Vt_ptrs.add(new Declaration("String","isArray",
 									 isArray,"Class",new ArrayList<String>(0)));
 		ArrayList<String> isInstance = new ArrayList<String>(0);
 		isInstance.add("Object");
-		Vt_ptrs.add(new Vtable_entry("String","isInstance",
+		Vt_ptrs.add(new Declaration("String","isInstance",
 									 isInstance,"Class",new ArrayList<String>(0)));
 		
 		//subclass are initalized to a 0 element arraylist
@@ -128,20 +129,20 @@ public class InheritanceTree{
 		constructors = addConstructors(n);
 		
 		//local arraylist defined
-		local = new ArrayList<Vtable_entry>(0);
+		local = new ArrayList<Declaration>(0);
 		
 
 		//copies the superclass's Vtable into virtual arraylist
-		Vt_ptrs = new ArrayList<Vtable_entry>(supr.Vt_ptrs);
+		Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
 
 		
 		//change __isa methods to point to this class
 		Vt_ptrs.get(0).ownerClass = className;
 		//add __isa to local methods
-		local.add(new Vtable_entry("Class","__class",new ArrayList<String>(0),className,new ArrayList<String>(0)));
+		local.add(new Declaration("Class","__class",new ArrayList<String>(0),className,new ArrayList<String>(0)));
 		
 		//defines arraylist of the virtual methods of this class
-		ArrayList<Vtable_entry> virtual = addvirtualptrs(n);
+		ArrayList<Declaration> virtual = addvirtualptrs(n);
 		
 		//checks if virtual methods overwrite superclass methods
 		check_for_overwrites(virtual);
@@ -158,11 +159,11 @@ public class InheritanceTree{
 
 	}
 	/**
-	 *cycles through all Vtable_entrys to see if virtual methods 
+	 *cycles through all Declarations to see if virtual methods 
 	 * overwrite the superclass method.
-	 *@param ArrayList<Vtable_entry> ... always the virtual Vtable_entrys
+	 *@param ArrayList<Declaration> ... always the virtual Declarations
 	 */
-	private void check_for_overwrites(ArrayList<Vtable_entry> virtual){
+	private void check_for_overwrites(ArrayList<Declaration> virtual){
 		for(int l = 0; l<virtual.size();l++){
 			int index = contains(virtual.get(l));
 			if(index!=-1)
@@ -173,10 +174,10 @@ public class InheritanceTree{
 		}
 	}
 	/**
-	 * helper method used in check_for_overwrites() for testing for equal Vtable_entrys.
-	 *@param Vtable_entry
+	 * helper method used in check_for_overwrites() for testing for equal Declarations.
+	 *@param Declaration
 	 */
-	private int contains(Vtable_entry virtual){
+	private int contains(Declaration virtual){
 		//starts at i =1 to ignore __isa feild that was already replaced
 		for(int i = 1; i < Vt_ptrs.size();i++){
 			if((Vt_ptrs.get(i).name.equals(virtual.name))
@@ -187,15 +188,15 @@ public class InheritanceTree{
 		return -1;
 	}
 	/**
-	 * uses visitors to create the Vtable_entrys for virtual methods.
+	 * uses visitors to create the Declarations for virtual methods.
 	 * also documents local methods that are not virtual for definition later
 	 *@param GNode (always a classDeclaration)
 	 */
-	public ArrayList<Vtable_entry> addvirtualptrs(GNode n){
+	private ArrayList<Declaration> addvirtualptrs(GNode n){
 		// cast to a node
 		Node node = n;
-		//declare a virutal arraylist<Vtable_entry>
-		final ArrayList<Vtable_entry> virtual = new ArrayList<Vtable_entry>(0);
+		//declare a virutal arraylist<Declaration>
+		final ArrayList<Declaration> virtual = new ArrayList<Declaration>(0);
 
 		new Visitor(){
 			
@@ -227,14 +228,14 @@ public class InheritanceTree{
 				visit(n);
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if(is_virtual) {
-					virtual.add(new Vtable_entry(retrn,methodname,params,className,pnames,block));
+					virtual.add(new Declaration(retrn,methodname,params,className,pnames,block));
 					//add it to local with true as isvirtual field
-					local.add(new Vtable_entry(true,retrn,methodname,params,className,pnames,block));
+					local.add(new Declaration(true,retrn,methodname,params,className,pnames,block));
 
 				}
 				else{
 					//add it to local with false as isvirtual field	
-					local.add(new Vtable_entry(false,retrn,methodname,params,className,pnames,block));
+					local.add(new Declaration(false,retrn,methodname,params,className,pnames,block));
 				}			
 			}
 			public void visitBlock(GNode n){
@@ -283,7 +284,7 @@ public class InheritanceTree{
 	 *		is how they will be stored here.
 	 *
 	 */
-	public ArrayList<InstanceField> addfielddeclarations(GNode n){
+	private ArrayList<InstanceField> addfielddeclarations(GNode n){
 		Node node = n;
 		final ArrayList<InstanceField> f = new ArrayList<InstanceField>(0);
 		new Visitor(){

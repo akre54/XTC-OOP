@@ -27,11 +27,11 @@ namespace xtc {
 	namespace oop{
 
 	Class __demo::__class(){
-}
+	}
 	int32_t __demo::main(int32_t argc, char* argv[]){
-	 	
-	 	
-	} 
+
+	   }
+
 
 
 	__demo_VT __demo::__vtable;
