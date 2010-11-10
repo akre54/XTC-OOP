@@ -52,7 +52,7 @@ SOURCE = \
 	cppClass.java \
 	ArrayMaker.java\
 	InheritanceBuilder.java \
-	Vtable_entry.java \
+	Declaration.java \
 	InheritanceTree.java \
 	InstanceField.java \
 	ConstructorDec.java \
