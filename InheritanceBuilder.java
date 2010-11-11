@@ -269,7 +269,7 @@ public class InheritanceBuilder{
 	 * 
 	 * @param GNode A method declaration GNode
 	 */ 
-	private void buildMain(Vtable_entry n) {
+	private void buildMain(Declaration n) {
 		CppCreator mainWriter = new CppCreator(source, "main.cpp");
 		mainWriter.write("#include <iostream>\n\n"+
 						 "#include \""+h_classdef.cFile.getName()+"\"\n\n"+
