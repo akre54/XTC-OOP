@@ -5,28 +5,36 @@
 #
 # for OOP fall 10 by The Group
 clear
-echo "Java to CPP Translation"
+echo "Java to C++ Translation"
 D="1";
 while [ $D ]; do
+echo "Enter the filename (____.java , default is demo)"
+read P
+if [ $P ]; then
+echo
+else
+	P="demo";
+fi
 echo "Enter the testing directory (return blank to quit):"
-	read D
-	if [ $D ]; then
-		echo Cleaning directory $D/
-		cd $D
-		echo
-		echo demo.java:
-		more demo.java
-		echo
+read D
+if [ $D ]; then
+	echo Cleaning directory $D/
+	cd $D
+	echo
+	echo demo.java:
+	more demo.java
+	echo
 		#clean out previous translations
-		make -f ../Makefile clean
-		cp ../java_lang.cpp ./
-		cp ../java_lang.h ./
-		make -f ../Makefile
+	make -f ../Makefile clean
+	cp ../java_lang.cpp ./
+	cp ../java_lang.h ./
+	make -f ../Makefile PRE=$P
 		#sdiff will output both files to command line, more useful here than diff
-		sdiff java.out.txt cpp.out.txt
-		echo DONE
-		cd ../
-	else
-		D=""
-	fi
+	sdiff java.out.txt cpp.out.txt
+	echo DONE
+	cd ../
+	PRE="";
+else
+	D="";
+fi
 done
