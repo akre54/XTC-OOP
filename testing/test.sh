@@ -11,7 +11,7 @@ while [ $D ]; do
 echo "Enter the filename (____.java , default is demo)"
 read P
 if [ $P ]; then
-echo
+	echo
 else
 	P="demo";
 fi
@@ -21,8 +21,8 @@ if [ $D ]; then
 	echo Cleaning directory $D/
 	cd $D
 	echo
-	echo demo.java:
-	more demo.java
+	echo $P.java:
+	more $P.java
 	echo
 		#clean out previous translations
 	make -f ../Makefile clean
