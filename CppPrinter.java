@@ -31,7 +31,8 @@ import xtc.tree.Visitor;
 
 import xtc.util.Tool;
 
-public class CppPrinter extends Visitor{
+public class CppPrinter extends Visitor
+{
 	private StringBuilder printer;
 	public final boolean DEBUG = false;
 	public CppPrinter(GNode n)
@@ -427,16 +428,16 @@ public class CppPrinter extends Visitor{
 	public void visitInitializer(GNode n)
 	{
 		printer.append("static ");
-		Node block= n.get(1);
+		Node block= n.getNode(1);
 		dispatch(block);
 	}
 	public void visitLocalVariableDeclaration(GNode n)
 	{
 		printer.append("final ");
-		Node type= n.get(1);
+		Node type= n.getNode(1);
 		for(int i=2;i<n.size();i++)
 		{
-			Node vd = n.get(i);
+			Node vd = n.getNode(i);
 			dispatch(vd);
 			if(i>2 && i<n.size()-1)
 			{
@@ -528,7 +529,7 @@ public class CppPrinter extends Visitor{
 		 */
 		
 		
-	}
+	//}
 	public void setUnary(GNode n)
 	{
 		for(int i=0;i<n.size();i++)
