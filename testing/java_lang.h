@@ -210,10 +210,9 @@ namespace java {
     struct __Array_VT;
 
     // Definition of convenient type names.
-    typedef __Array<int32_t>* ArrayOfint;
-    typedef __Array<Object>* ArrayOfobject;
-    typedef __Array<Class>* ArrayOfclass;
-	typedef __Array<char>* ArrayOfchar;
+    typedef __Array<int32_t>* ArrayOfInt;
+    typedef __Array<Object>* ArrayOfObject;
+    typedef __Array<Class>* ArrayOfClass;
 
     // The data layout for arrays.
     template <typename T>
@@ -228,6 +227,16 @@ namespace java {
       }
 
       static Class __class();
+
+      T& operator[](int idx) {
+        if (0 > idx || idx >= length) throw ArrayIndexOutOfBoundsException();
+        return __data[idx];
+      }
+
+      const T& operator[](int idx) const {
+        if (0 > idx || idx >= length) throw ArrayIndexOutOfBoundsException();
+        return __data[idx];
+      }
 
     private:
       static __Array_VT<T> __vtable;

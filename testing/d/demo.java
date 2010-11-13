@@ -1,8 +1,8 @@
 import java.applet.Applet;
 import mypack.*;
-import mypack.extrapack.*; 
+import mypack.extrapack.*;
 
-public class TestABCApplet
+public class demo
 {
 	public static void main(String[] args) {
 		init();

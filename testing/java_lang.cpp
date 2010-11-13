@@ -155,14 +155,6 @@ namespace java {
                                    __Class::__class());
       return k;
     }
-	// Template specialization for arrays of char.
-    template<>
-    Class __Array<char>::__class() {
-      static Class k = new __Class("[Ljava.lang.Class;",
-                                   __Array<char>::__class(),
-                                   __Class::__class());
-      return k;
-    }
 
   }
 }

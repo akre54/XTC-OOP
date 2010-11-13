@@ -1,4 +1,4 @@
-package xtc.oop;
+package xtc.oop.translate;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -10,10 +10,10 @@ import xtc.util.Tool;
  * a string.
  * 
  */ 
-public class SystemPrint {
+public class PrintMaker {
 	private boolean isLN = false;
 	private StringBuffer toPrint;
-	public SystemPrint (GNode arguments, boolean isLine) {
+	public PrintMaker (GNode arguments, boolean isLine) {
 		isLN = isLine;
 		toPrint= new StringBuffer();
 		coutStringMaker (arguments);

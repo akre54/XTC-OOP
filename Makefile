@@ -50,16 +50,17 @@ SOURCE = \
 	Translator.java \
 	CppCreator.java \
 	cppClass.java \
-	ArrayMaker.java\
+	translate/ArrayMaker.java\
 	InheritanceBuilder.java \
-	Vtable_entry.java \
+	Declaration.java \
 	InheritanceTree.java \
 	InstanceField.java \
 	ConstructorDec.java \
 	ArrayMaker.java \
-	SystemPrint.java \
-	ConditionalMaker.java 
-	
+	translate/PrintMaker.java \
+	ConditionalMaker.java \
+	EWalk.java
+
 
 
 
