@@ -1,11 +1,6 @@
 /*
  * Object-Oriented Programming
  * Copyright (C) 2010 Robert Grimm
- * Edited by Patrick Hammer
-<<<<<<< HEAD
- * Test Edited by Paige
-=======
->>>>>>> 5da2b25a04c1f9340af211ca5b1ab8296bcb9d2b
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -51,7 +46,6 @@ import xtc.util.Tool;
  * @version 1
  */
 public class Translator extends Tool {
-	public final boolean DEBUG=true;
 
 	File inputFile = null;
 
@@ -83,8 +77,6 @@ public class Translator extends Tool {
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
 				 "Translate .java file to c++.").
-			bool("file", "file", false,
-				 "Output to a file").
 			bool("testing","testing",false,"Run some Test cases.");
 	}
 

@@ -1,4 +1,4 @@
-package xtc.oop;
+package xtc.oop.translate;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
