@@ -31,7 +31,8 @@ import xtc.tree.Visitor;
 
 import xtc.util.Tool;
 
-public class CppPrinter extends Visitor{
+public class CppPrinter extends Visitor
+{
 	private StringBuilder printer;
 	public final boolean DEBUG = false;
 	public CppPrinter(GNode n)
@@ -149,10 +150,21 @@ public class CppPrinter extends Visitor{
 	{
 		setBinary(n);
 	}
+	public void visitThisExpression(GNode n)
+	{
+		printer.append("this.");
+		visit(n);
+	}
+	public void visitSuperExpression(GNode n)
+	{
+		printer.append("super.");
+		visit(n);
+	}
 	public void visitMultiplicativeExpression(GNode n)
 	{
 		setBinary(n);
-	}	/*******************Statements ******************************/
+	}	
+	/*******************Statements ******************************/
 	public void AssertStatement(GNode n)
 	{
 		printer.append("assert ");
@@ -254,7 +266,8 @@ public class CppPrinter extends Visitor{
 		dispatch(theExp);	
 		Node break1= n.getNode(2);
 		dispatch(break1);	
-	}	
+	}
+
 	public void visitConditionalStatement(GNode n)
 	{
 		printer.append("if(");
@@ -412,6 +425,26 @@ public class CppPrinter extends Visitor{
 		visit(n);
 		printer.append(";\n");
 	}
+	public void visitInitializer(GNode n)
+	{
+		printer.append("static ");
+		Node block= n.getNode(1);
+		dispatch(block);
+	}
+	public void visitLocalVariableDeclaration(GNode n)
+	{
+		printer.append("final ");
+		Node type= n.getNode(1);
+		for(int i=2;i<n.size();i++)
+		{
+			Node vd = n.getNode(i);
+			dispatch(vd);
+			if(i>2 && i<n.size()-1)
+			{
+				printer.append(" , ");
+			}
+		}	
+	}
 	public void visitModifier(GNode n)
 	{
 	}
@@ -484,6 +517,19 @@ public class CppPrinter extends Visitor{
 		Node r= n.getNode(2);
 		dispatch(r);	
 	}
+	/*public void visitPrimaryPrefix(GNode n)
+	{
+		/* f0 -> Literal()
+		 | "this"
+		 | "super" "." <IDENTIFIER>
+		 | "(" Expression() ")"
+		 | AllocationExpression()
+		 | ResultType() "." "class"
+		 | Name()		 
+		 */
+		
+		
+	//}
 	public void setUnary(GNode n)
 	{
 		for(int i=0;i<n.size();i++)
