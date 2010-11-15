@@ -41,21 +41,15 @@ public class CppPrinter extends Visitor
 		visit(n);
 		if(DEBUG){System.out.println(printer);}
 	}
-	public void CastExpression(GNode n)
+	public void visitCastExpression(GNode n)
 	{
-		/*
-		 f0 -> "(" Type() ")" UnaryExpression()
-		 | "(" Type() ")" UnaryExpressionNotPlusMinus()		
-		 */
-		printer.append("CAST");
-		/*Node type =n.getNode(0);
 		printer.append("(");
+		Node type = n.getNode(0);
 		dispatch(type);
 		printer.append(")");
-		//s2 = (String) v.elementAt(0);
-		Node call = n.getNode(1);
-		dispatch(call);
-	*/
+		Node next=n.getNode(1);
+		dispatch(next);
+		
 	}
 	/***********************Expressions***********************/
 	public void visitConditionalExpression(GNode n)
@@ -370,8 +364,29 @@ public class CppPrinter extends Visitor
 	}
 	public void visitCallExpression(GNode n)
 	{
-		//printer.append("CALLEXPRESSION");
-		visit(n);
+		Node primary1 = n.getNode(0);
+		dispatch(primary1);
+		Object mid = n.get(1);
+		if (mid instanceof Node) {
+			dispatch((Node) mid);
+		}
+		printer.append("->vptr->");
+		Object name =n.get(2);
+		if(name instanceof Node)
+		{
+			dispatch((Node)mid);
+		}
+		else if(name instanceof String)
+		{
+			printer.append((String)name);
+		}
+		Object arguments = n.get(3);
+		printer.append("(");
+		if(arguments instanceof Node)
+		{
+			dispatch((Node)arguments);
+		}
+		printer.append(")");
 	}
 	/**********************Other***************************/
 	public void visitArguments(GNode n)
