@@ -1,9 +1,25 @@
-#java specific
+## java specific
 *.class
+
+## cpp specific
+*.cpp
+*.h
+*.out
 
 ## generic files to ignore
 *~
 *.lock
 *.DS_Store
 *.swp
-*.out
+*.old
+
+## I like to keep notes in the directory
+*.txt
+
+## oop specific (testing, test files)
+*.cpp#
+Bar.java
+Foo.java
+Test.java
+testing/tester
+
