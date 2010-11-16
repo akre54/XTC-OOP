@@ -5,6 +5,8 @@
 *.cpp
 *.h
 *.out
+!java_lang.cpp
+!java_lang.h
 
 ## generic files to ignore
 *~
@@ -16,10 +18,8 @@
 ## I like to keep notes in the directory
 *.txt
 
-## oop specific (testing, test files)
-*.cpp#
+## oop specific (ignore test files except those in testing dir)
+!testing/
 Bar.java
 Foo.java
 Test.java
-testing/tester
-
