@@ -4,22 +4,29 @@ SHELL = /bin/sh
 .SUFFIXES: .c .o .h .cpp
 
 PRE = demo
-OBJS = main.cpp *_dataLayout.h *_methoddef.cpp
+TARGETS = main.cpp *_methoddef.cpp  java_lang.cpp
 CC = g++
 DEBUG = -g
 FLAGS = $(DEBUG)
 
-all : tester
+all : ex javac
 
-tester : $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) -o tester
+#Compile the translated code
+compile : translate
+	$(CC) $(FLAGS) $(TARGETS) -o $(PRE).out
 
+#Remove previous translations
 clean:
-	rm *.o *.h *.cpp *~
-	java xtc.oop.Translator -translate $(PRE).java
-	$(CC) $(LFLAGS) $(OBJS) -o tester
+	rm -f  *.o *.h *.cpp *~ *.out *.txt
 
+#Run the translator on demo.java
 translate:
-	\java xtc.oop.Translator -translate $(PRE).java
-	$(CC) $(LFLAGS) $(OBJS) -o tester
+	java xtc.oop.Translator -translate $(PRE).java
 
+#Execute the translated code
+ex:	compile
+	./$(PRE).out > cpp.out.txt
+
+javac: $(PRE).java
+	javac $(PRE).java
+	java -cp . $(PRE) > java.out.txt

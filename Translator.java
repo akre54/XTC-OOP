@@ -1,11 +1,6 @@
 /*
  * Object-Oriented Programming
  * Copyright (C) 2010 Robert Grimm
- * Edited by Patrick Hammer
-<<<<<<< HEAD
- * Test Edited by Paige
-=======
->>>>>>> 5da2b25a04c1f9340af211ca5b1ab8296bcb9d2b
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,6 +21,8 @@ package xtc.oop;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+
+import java.util.*;
 
 import xtc.lang.JavaFiveParser;
 
@@ -49,7 +46,6 @@ import xtc.util.Tool;
  * @version 1
  */
 public class Translator extends Tool {
-	public final boolean DEBUG=true;
 
 	File inputFile = null;
 
@@ -81,9 +77,8 @@ public class Translator extends Tool {
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
 				 "Translate .java file to c++.").
-			bool("file", "file", false,
-				 "Output to a file");
-	}
+			bool("testing","testing",false,"Run some Test cases.").
+			bool("test","test",false,"Run some Test cases.");	}
 
 	public void prepare() {
 		super.prepare();
@@ -110,6 +105,54 @@ public class Translator extends Tool {
 
 	//-----------------------------------------------------------------------
 	public void process(Node node) {
+		
+		
+		
+		//Some Testing Environments
+		if(runtime.test("testing"))
+		{
+			runtime.console().p("Testing...").pln().flush();
+			
+			/*Create a new visitor to visit the CompilationUnit */
+			new Visitor(){
+				public void visitBlock(GNode n)
+				{
+					CppPrinter print= new CppPrinter(n);
+					System.out.println(print.getString());
+				}
+				public void visit(Node n)
+				{
+					for(Object o:n) {
+						if(o instanceof Node) dispatch((Node) o);
+						
+					}
+				}
+			}.dispatch(node);
+			
+		}
+		//Some Testing Environments
+		if(runtime.test("test"))
+		{
+			runtime.console().p("Testing Method Overloading...").pln().flush();
+			
+			/*Create a new visitor to visit the CompilationUnit */
+			new Visitor(){
+				public void visitBlock(GNode n)
+				{
+					CppWalker walk= new CppWalker(n);
+					System.out.println(walk.getString());
+				}
+				public void visit(Node n)
+				{
+					for(Object o:n) {
+						if(o instanceof Node) dispatch((Node) o);
+						
+					}
+				}
+			}.dispatch(node);
+			//Print the New AST
+			//runtime.console().format(node).pln().flush();
+		}
 		
 		// Handle the translate option
 		if (runtime.test("translate")) {
@@ -141,7 +184,7 @@ public class Translator extends Tool {
 				
 				public void visitClassDeclaration(GNode n){
 					//if no extenstion it's superclass is Object
-					supr=Class;
+					supr=Object;
 					visit(n);
 					
 					//if the super class has been defined make the subclass
@@ -151,7 +194,7 @@ public class Translator extends Tool {
 					else ToTree.add(n);
 					
 				}
-				public void visitExtention(GNode n){
+				public void visitExtension(GNode n){
 					//find's super class
 					//searches for InheritanceTree with same name as extention
 					//returns null if no tree exists yet

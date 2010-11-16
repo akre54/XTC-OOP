@@ -1,4 +1,4 @@
-package xtc.oop;
+package xtc.oop.translate;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -33,9 +33,8 @@ public class ArrayMaker {
 	 * Takes a node of some array type and
 	 * translates it.
 	 * 
-	 * @param GNode arguments
-	 * @param boolean isExpression Set equal to true if node is at expression statement.
-	 * @return void
+	 * @param arguments gnode of containing an array
+	 * @param arg boolean isExpression Set equal to true if node is at expression statement.
 	 */ 
 	public ArrayMaker (GNode arguments, boolean arg) {
 		toPrint = new StringBuffer();

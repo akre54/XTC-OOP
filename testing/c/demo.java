@@ -1,4 +1,4 @@
-public class TestABApplet
+public class demo
 {
 	public static void main(String[] args) {
 		init();
