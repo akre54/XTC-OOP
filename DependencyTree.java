@@ -1,15 +1,16 @@
 /* Finds all dependencies for input jfile, returns ArrayList allPaths
  * Needs to handle both import statements and all members of package.
  *
- * to do:
- * how to avoid circular dependencies?
  *
- * v1 by Adam Krebs
+ * by The Group
  */
 package xtc.oop;
 
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.File;
+import java.io.IOException;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -24,28 +25,20 @@ public class DependencyTree {
     /**
       *  filePaths holds all the dependenies  for the current file
       *  allPaths holds all the dependencies for the current file and *its* depedencies
+      *
+      *  stored as HashMap so we can specify whether each file (key) has
+      *  been translated, and store them in a collection
       */
-    private ArrayList<String> allPaths = new ArrayList<String>();
-    private ArrayList<String> filePaths = new ArrayList<String>();
-    public boolean visited = false; // if dependency already translated
+    private HashMap<String,Boolean> allPaths;
+    private HashMap<String,Boolean> filePaths = new HashMap<String,Boolean>();
 
-/* maybe, possibly used for keeping track of recursing through dependencies, sometime in the future
-        public DependencyTree(GNode n, String currPath, ArrayList<String> parentPaths) {
-        allPaths.append(parentPaths);
 
-        DependencyTree(n);
+    public DependencyTree(Node n, HashMap<String,Boolean> oldPaths) {
 
-        }
-*/
-
-    public DependencyTree(Node n) {
+        allPaths = oldPaths;
 
         new Visitor() {
 
-         /**
-             * takes GNode of PackageDeclaration and adds all files
-             * to paths list
-             */
             public void visitPackageDeclaration(GNode g) {
 
                 // list all files in the directory, and add them to our paths list
@@ -58,28 +51,26 @@ public class DependencyTree {
                  */
 
 
-
                 StringBuilder pathbuilder = new StringBuilder();
 
                 if (n.getString(0).equals("java")) {
-                    return;
+                    return; // we don't want to convert anything in java.* ...
                 }
 
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < n.size(); i++) {
                     try {
                         String breadcrumb = n.getString(i);
 
                         // if still part of the path
-                        if (pathbuilder.length() > 0) {
+                        if (pathbuilder.length() > 0)
                             pathbuilder.append("/");
-                        }
 
                         pathbuilder.append(breadcrumb);
-                        System.out.println(i + " " + n.getString(i));
+                        //System.out.println(i + " " + n.getString(i));
                     } catch (IndexOutOfBoundsException e) {
-                        // do nothing
+                        e.printStackTrace();
                     } catch (Exception e) {
-                        // do nothing
+                        e.printStackTrace();
                     }
 
                 }
@@ -97,6 +88,7 @@ public class DependencyTree {
                 if (dir.exists()) {
                     for (String fileName : dir.list()) {
                         if (fileName.endsWith(".java")) {
+                            // will eventually use Reflection for e.g. finding non-filenamed classes
                             //addPath(Class.forName(pathname + '/' + fileName));
 
                             addPath(pathname + '/' + fileName);
@@ -122,14 +114,11 @@ public class DependencyTree {
                 /*
                 // if using the wildcard operator, visit the folder instead
                 try {
-                if (n.getString(n.getNode(1).size() -1 ).equals("*"))
-                visitPackageDeclaration( (GNode)n );
-                return;
+                	if (n.getString(n.getNode(1).size() -1 ).equals("*"))
+                		visitPackageDeclaration( (GNode)n );
+               	return;
                 } catch (Exception e) {
-                System.out.println();
-                e.printStackTrace();
-
-                // does nothing
+                    e.printStackTrace();
                 }
                  */
 
@@ -163,34 +152,48 @@ public class DependencyTree {
             } //end of visit method
         }.dispatch(n);
 
-        for (String filename : filePaths) {
+        for (String filename : filePaths.keySet()) {
 
             // only translate if not translated
-            if (!visited) {
+            if ( !allPaths.containsKey(filename) || !(allPaths.get(filename))) {
                 System.out.println("Now translating " + filename);
-                new Translator().run(new String[]{"-translate", filename});
-                visited = true;
+                allPaths.put(filename, true);
+                new Translator(allPaths).run(new String[]{"-translate", filename});
             }
+            /* NOTE: I overloaded the Translator constructor to take a HashMap rather
+               than overloading the run method because I thought it looked cleaner.
+               if this causes problems let me know.
+             */
         }
     }
 
     /*
-     *  add file path (as string) to both the lists of file-specific and the whole structure dependencies
-     * may need to be changed if it doesn't work for the recursive tree
+     *  add file path (as string) to both the maps of file-specific
+     *  and the whole structure dependencies, using canonical path
+	  *  rather than absolute to avoid collisions
      */
        private void addPath (String s) {
-           filePaths.add(s);
+
+           try {
+           		s = (new File(s)).getCanonicalPath();
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+
+           filePaths.put(s, false);
 
            // don't add duplicates
-           if (!allPaths.contains(s))
-            allPaths.add(s);
+           if (null == allPaths.get(s)) {
+           		allPaths.put(s, false);
+           }
        }
 
-      /**
-         * @return all paths to each dependent file of the whole dependency structure
+        /**
+         * @return all paths to each dependent file of the whole dependency
+         * structure as ArrayList
          */
         public ArrayList<String> getAllPaths() {
-            return allPaths;
+            return new ArrayList<String>(allPaths.keySet());
         }
 
 
@@ -198,21 +201,33 @@ public class DependencyTree {
          * @return all paths to each dependent file of the current file
          */
         public ArrayList<String> getFilePaths() {
-            return filePaths;
+            return new ArrayList<String>(filePaths.keySet());
         }
 
-        /**
-           *  uses string replacement to convert relative java
-           *  filenames (stored in filePaths) to CPP names
-           *
-           *  todo: use regex to only replace files that end in .java, not just anywhere in the file...
-           */
-        public ArrayList<String> getFileDependencies() {
-            ArrayList<String> translatedLocations = filePaths;
+       /**
+	     *  todo: use regex to only replace files that end in .java, not just
+        *  anywhere in the file
+        *
+        *  @return relative paths to CPP filenames
+        */
 
-            for (String filename : translatedLocations) {
-                filename.replace(".java", "_methoddef.cpp");
-                filename.replace( "/" , ".");
+        public ArrayList<String> getFileDependencies() {
+            ArrayList<String> translatedLocations = new ArrayList<String>(filePaths.keySet());
+
+            for (int i=0; i<translatedLocations.size(); i++) {
+
+                translatedLocations.set(
+                        i,
+                        translatedLocations.get(i).replace(".java", "_methoddef.cpp")
+                    );
+
+                translatedLocations.set(
+                        i,
+                        translatedLocations.get(i).replace("/", ".")
+                    );
+                
+                // using "/" as path separator char. If we ever use this on
+                // Windows, should probably replace with File.pathSeparator
             }
 
             return translatedLocations;

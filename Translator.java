@@ -22,13 +22,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
-import java.util.*;
 
 import xtc.lang.JavaFiveParser;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -48,11 +48,17 @@ import xtc.util.Tool;
 public class Translator extends Tool {
 
 	File inputFile = null;
+        HashMap<String,Boolean> dependencies;
 
 	/** Create a new translator. */
 	public Translator() {
 		// Nothing to do.
 	}
+
+        public Translator (HashMap<String,Boolean> dependencies) {
+            this();
+            this.dependencies = dependencies;
+        }
 
 	public String getCopy() {
 		return "(C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka";
@@ -156,11 +162,27 @@ public class Translator extends Tool {
 		
 		// Handle the translate option
 		if (runtime.test("translate")) {
+
+			runtime.console().p("translating...").pln().flush();
+
+
+                        // need the original file to be the first in dependencies
+                        // list to avoid circular imports
+                        if (dependencies.isEmpty()) {
+                            try {
+                                dependencies.put(inputFile.getCanonicalPath(), true);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+			
 			if (VERBOSE) {
 				runtime.console().p("Begining translation...").pln().flush();
 			}			
 			
-			DependencyTree dependency= new DependencyTree(node);
+                        // creates the import heirarchy
+                        DependencyTree dependency = new DependencyTree(node, dependencies);
+
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
 			
@@ -252,14 +274,18 @@ public class Translator extends Tool {
 		}
 
 	}//end of process method
-	
-	/**
+
+    /**
 	 * Run the translator with the specified command line arguments.
 	 *
 	 * Uses xtc.util.tool run();
 	 * @param args The command line arguments.
 	 */
 	public static void main(String[] args) {
-		new Translator().run(args);
+            
+            // start with an empty dependency list
+            HashMap<String,Boolean> dependencies = new HashMap<String,Boolean>();
+            
+            new Translator(dependencies).run(args);
 	}	
 }//end of Translator.java
