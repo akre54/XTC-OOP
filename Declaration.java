@@ -13,8 +13,9 @@ public class Declaration{
 	public ArrayList<local_variable> variables;
 	public boolean isVirtual;
 	public int overloadNum;
+	public int specificity;
 	
-	Declaration(String rtype, String mname, 
+	Declaration(int ol,String rtype, String mname, 
 				 String sclass,ArrayList<Fparam> fparams,GNode node,ArrayList<local_variable> lvar){
 		name = mname;
 		returntype = rtype;
@@ -22,9 +23,11 @@ public class Declaration{
 		ownerClass = sclass;
 		bnode=node;
 		modifiers = new ArrayList<String>(0);
+		overloadNum =ol;
+		specificity =0;
 
 	}
-	Declaration(ArrayList<String> mods, boolean virtual, String rtype, String mname, 
+	Declaration(int ol,ArrayList<String> mods, boolean virtual, String rtype, String mname, 
 				 String sclass,ArrayList<Fparam> fparams,GNode node,ArrayList<local_variable> lvar){
 		isVirtual = virtual;
 		name = mname;
@@ -34,6 +37,9 @@ public class Declaration{
 		bnode=node;
 		variables = new ArrayList<local_variable>(lvar);
 		modifiers = new ArrayList<String>(mods);
+		overloadNum =ol;
+		specificity =0;
+
 	}
 	Declaration(String rtype, String mname, 
 				 String sclass,ArrayList<Fparam> fparams,ArrayList<local_variable> lvar){
@@ -42,7 +48,8 @@ public class Declaration{
 		params = new ArrayList<Fparam>(fparams);
 		ownerClass = sclass;
 		modifiers = new ArrayList<String>(0);
-		
+		overloadNum =0;
+		specificity =0;
 	}
 	
 	/**
@@ -73,6 +80,13 @@ public class Declaration{
 	
 		}
 
+	}
+	public boolean is_static(){
+		for(int i=0;i<modifiers.size();i++){
+			if(modifiers.get(i).equals("static"))
+				return true;
+		}
+		return false;
 	}
 
 }

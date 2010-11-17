@@ -61,12 +61,14 @@ public class InheritanceBuilder{
 
 						 "using java::lang::__Class;\n"+
 						 "using java::lang::String;\n"+
+						 "using java::lang::ArrayOfInt;\n"+
+						 "using java::lang::ArrayOfObject;\n"+
+						 "using java::lang::ArrayOfClass;\n"+
+
 						 
 						 "namespace xtc {\n"+
 						 "\tnamespace oop{\n\n"+
 						 "\ttypedef std::string String;\n"
-						// "\ttypedef std::bool boolean;\n"+
-						 //"\ttypedef std::int32_t int;\n\n"
 						 );
 							 
 		
@@ -105,9 +107,6 @@ public class InheritanceBuilder{
 							
 							"namespace xtc {\n"+
 							"\tnamespace oop{\n\n"
-							//"\ttypedef std::bool boolean;\n"+
-							//"\ttypedef std::int32_t int;\n\n"
-
 							);
 		
 		
@@ -389,8 +388,8 @@ public class InheritanceBuilder{
 		//writes the __class() method
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
 							"::"+t.local.get(0).name+"(){\n\t"+
-							"\n\tstatic Class k = new __Class(\"xtc.oop."+t.className+"\", 0);"+
-							"\n\treturn k;"+
+							"\n\tstatic Class k = new __Class(__rt::stringify(\"xtc.oop."+t.className+"\"),__rt::null());"+
+							"\n\treturn k;\n\t"+
 							"}\n");
 
 		
