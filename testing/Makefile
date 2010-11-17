@@ -8,6 +8,7 @@ TARGETS = main.cpp *_methoddef.cpp  java_lang.cpp
 CC = g++
 DEBUG = -g
 FLAGS = $(DEBUG)
+TFLAGS = -verbose
 
 all : ex javac
 
@@ -21,7 +22,7 @@ clean:
 
 #Run the translator on demo.java
 translate:
-	java xtc.oop.Translator -translate $(PRE).java
+	java xtc.oop.Translator $(TFLAGS) -translate $(PRE).java
 
 #Execute the translated code
 ex:	compile

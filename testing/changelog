@@ -1,0 +1,40 @@
+ptr.h:
+	simplified (and disabled) TRACE() macro
+	made all methods inline
+	added default value to regular constructor
+	replaced implicit cast operator with explicit raw() accessor
+	added friend declaration: forall U, Ptr<T> is a friend
+	added copy constructor for Ptr<U>
+	added (in)equality operators for Ptr<U>
+
+java_lang.h:
+	changed all convenience typedefs from T* to __rt::Ptr<T>
+	added accessor for canonical null value
+	added simulatted virtual __delete() to all data/vtable layouts
+	made all vtables public to support translation of "super"
+		thanks to Mike Chrzanowski for identifying this issue
+	added support for java.lang.String (wrapping a C++ string)
+	removed memset() from array constructor
+	added specialization for __Array<int32_t> constructor with memset()
+	added __rt::stringify()
+	removed now unused __checkArrayIndex
+	moved __checkNotNull() and __checkArrayStore() into __rt
+	changed both functions to use Ptr<T> and null()
+	
+java_lang.cc:
+	added implementations for __delete()
+	added calls to raw() to
+		__Object::hashCode()
+		__Object::toString()
+	replaced 0 with calls to __rt::null() in
+		__Object::__class()
+		__Class::isArray()
+		__Class::isInstance()
+		__Integer::__primitiveClass()
+	eliminated now unnecessary upcast in __Class::isInstance()
+	added definition of __rt::null()
+	wrapped all usage of C/C++ strings with __rt::stringify()
+	
+main.cc:
+	added code to exercise strings
+	added calls to raw() for printing pointer address in b[1]
