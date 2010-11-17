@@ -19,9 +19,10 @@
 
 #pragma once
 
+#include "ptr.h"
+
 #include <stdint.h>
 #include <string>
-#include <cstring>
 
 namespace java {
   namespace lang {
@@ -30,15 +31,34 @@ namespace java {
     struct __Object;
     struct __Object_VT;
 
+    struct __String;
+    struct __String_VT;
+
     struct __Class;
     struct __Class_VT;
 
     // Definition of convenient type names.
-    typedef __Object* Object;
-    typedef __Class* Class;
-    typedef std::string String; // We re-use C++ strings.
+    typedef __rt::Ptr<__Object> Object;
+    typedef __rt::Ptr<__String> String;
+    typedef __rt::Ptr<__Class> Class;
+  }
+}
 
-    // ======================================================================
+// ==========================================================================
+
+namespace __rt {
+
+  // The function returning the canonical null value.  See comment
+  // below for java::lang::__Object::__class() as to why we use a
+  // function.
+  java::lang::Object null();
+
+}
+
+// ==========================================================================
+
+namespace java {
+  namespace lang {
 
     // The data layout for java.lang.Object.
     struct __Object {
@@ -64,13 +84,19 @@ namespace java {
       // object on subsequent invocations.
       static Class __class();
 
+      // The virtual destructor.  This method must be virtual
+      // because C++'s delete determines the size of the memory
+      // to be deallocated based on the pointer's static type.
+      // Consequently, every class needs its own __delete(),
+      // which simply invokes C++' delete on the pointer.
+      static void __delete(__Object*);
+
       // The methods implemented by java.lang.Object.
       static int32_t hashCode(Object);
       static bool equals(Object, Object);
       static Class getClass(Object);
       static String toString(Object);
 
-    private:
       // The vtable for java.lang.Object.
       static __Object_VT __vtable;
     };
@@ -78,6 +104,7 @@ namespace java {
     // The vtable layout for java.lang.Object.
     struct __Object_VT {
       Class __isa;
+      void (*__delete)(__Object*);
       int32_t (*hashCode)(Object);
       bool (*equals)(Object, Object);
       Class (*getClass)(Object);
@@ -85,12 +112,71 @@ namespace java {
 
       __Object_VT()
       : __isa(__Object::__class()),
+        __delete(&__Object::__delete),
         hashCode(&__Object::hashCode),
         equals(&__Object::equals),
         getClass(&__Object::getClass),
         toString(&__Object::toString) {
       }
     };
+
+    // ======================================================================
+
+    // The data layout for java.lang.String.
+    struct __String {
+      __String_VT* __vptr;
+      std::string data;
+
+      __String(std::string data) 
+      : __vptr(&__vtable),
+        data(data) {
+      }
+
+      // The function retturning the class object representing
+      // java.lang.String.
+      static Class __class();
+
+      // The virtual destructor.
+      static void __delete(__String*);
+
+      // The methods implemented by java.lang.String.
+      static int32_t hashCode(String);
+      static bool equals(String, Object);
+      static String toString(String);
+      static int32_t length(String);
+      static char charAt(String, int32_t);
+
+      // The vtable for java.lang.String.
+      static __String_VT __vtable;
+    };
+
+    // The vtable layout for java.lang.String.
+    struct __String_VT {
+      Class __isa;
+      void (*__delete)(__String*);
+      int32_t (*hashCode)(String);
+      bool (*equals)(String, Object);
+      Class (*getClass)(String);
+      String (*toString)(String);
+      int32_t (*length)(String);
+      char (*charAt)(String, int32_t);
+
+      __String_VT()
+      : __isa(__String::__class()),
+        __delete(&__String::__delete),
+        hashCode(&__String::hashCode),
+        equals(&__String::equals),
+        getClass((Class(*)(String))&__Object::getClass),
+        toString(&__String::toString),
+        length(&__String::length),
+        charAt(&__String::charAt) {
+      }
+    };
+
+    // The overloaded output operator for java.lang.String.
+    inline std::ostream& operator<<(std::ostream& out, String s) {
+      return out << s->data;
+    }
 
     // ======================================================================
 
@@ -102,7 +188,8 @@ namespace java {
       Class component;
       bool primitive;
 
-    __Class(String name, Class parent, Class comp = 0, bool prim = false)
+      __Class(String name, Class parent,
+              Class comp = __rt::null(), bool prim = false)
       : __vptr(&__vtable),
         name(name),
         parent(parent),
@@ -115,6 +202,9 @@ namespace java {
       // The function returning the class object representing
       // java.lang.Class.
       static Class __class();
+      
+      // The virtual destructor.
+      static void __delete(__Class*);
 
       // The instance methods of java.lang.Class.
       static String toString(Class);
@@ -125,7 +215,6 @@ namespace java {
       static bool isArray(Class);
       static bool isInstance(Class, Object);
 
-    private:
       // The vtable for java.lang.Class.
       static __Class_VT __vtable;
     };
@@ -133,6 +222,7 @@ namespace java {
     // The vtable layout for java.lang.Class.
     struct __Class_VT {
       Class __isa;
+      void (*__delete)(__Class*);
       int32_t (*hashCode)(Class);
       bool (*equals)(Class, Object);
       Class (*getClass)(Class);
@@ -146,6 +236,7 @@ namespace java {
 
       __Class_VT()
       : __isa(__Class::__class()),
+        __delete(__Class::__delete),
         hashCode((int32_t(*)(Class))&__Object::hashCode),
         equals((bool(*)(Class,Object))&__Object::equals),
         getClass((Class(*)(Class))&__Object::getClass),
@@ -210,9 +301,9 @@ namespace java {
     struct __Array_VT;
 
     // Definition of convenient type names.
-    typedef __Array<int32_t>* ArrayOfInt;
-    typedef __Array<Object>* ArrayOfObject;
-    typedef __Array<Class>* ArrayOfClass;
+    typedef __rt::Ptr<__Array<int32_t> > ArrayOfInt;
+    typedef __rt::Ptr<__Array<Object> > ArrayOfObject;
+    typedef __rt::Ptr<__Array<Class> > ArrayOfClass;
 
     // The data layout for arrays.
     template <typename T>
@@ -223,10 +314,15 @@ namespace java {
 
       __Array(const int32_t length)
       : __vptr(&__vtable), length(length), __data(new T[length]) {
-        std::memset(__data, 0, length * sizeof(T));
+        // Only zero out __data for arrays of primitive types.
       }
 
       static Class __class();
+
+      static void __delete(__Array* __this) {
+        delete[] __this->__data;
+        delete __this;
+      }
 
       T& operator[](int idx) {
         if (0 > idx || idx >= length) throw ArrayIndexOutOfBoundsException();
@@ -238,16 +334,16 @@ namespace java {
         return __data[idx];
       }
 
-    private:
       static __Array_VT<T> __vtable;
     };
 
     // The vtable layout for arrays.
     template <typename T>
     struct __Array_VT {
-      typedef __Array<T>* Array;
+      typedef __rt::Ptr<__Array<T> > Array;
 
       Class __isa;
+      void (*__delete)(__Array<T>*);
       int32_t (*hashCode)(Array);
       bool (*equals)(Array, Object);
       Class (*getClass)(Array);
@@ -255,6 +351,7 @@ namespace java {
 
       __Array_VT()
       : __isa(__Array<T>::__class()),
+        __delete(&__Array<T>::__delete),
         hashCode((int32_t(*)(Array))&__Object::hashCode),
         equals((bool(*)(Array,Object))&__Object::equals),
         getClass((Class(*)(Array))&__Object::getClass),
@@ -275,34 +372,38 @@ namespace java {
 
     // But where is the definition of __class()???
 
-    // ======================================================================
-
-    // Template function to check against null values.
-    template<typename T>
-    void __checkNotNull(T o) {
-      if (0 == o) throw NullPointerException();
-    }
-
-    // Template function to check array indices.
-    template<typename T>
-    void __checkArrayIndex(__Array<T>* array, int32_t index) {
-      if (0 > index || index >= array->length) {
-        throw ArrayIndexOutOfBoundsException();
-      }
-    }
-
-    // Template function to check array stores.
-    template<typename T, typename U>
-    void __checkArrayStore(__Array<T>* array, U object) {
-      if (0 != object) {
-        Class arraytype = array->__vptr->getClass(array);
-        Class eltype = arraytype->__vptr->getComponentType(arraytype);
-
-        if (! eltype->__vptr->isInstance(eltype, (Object)object)) {
-          throw ArrayStoreException();
-        }
-      }
-    }
-
   }
+}
+
+// ==========================================================================
+
+namespace __rt {
+
+  // Convenience function for converting C++ strings (std::string)
+  // into translated Java strings (java::lang::String).
+  // The C++ compiler automaticcally converts C string literals
+  // (const char *) into C++ stirngs, so we only need one such function.
+  inline java::lang::String stringify(std::string s) {
+    return new java::lang::__String(s);
+  }
+
+  // Template function to check against null values.
+  template<typename T>
+  void checkNotNull(T o) {
+    if (null() == o) throw java::lang::NullPointerException();
+  }
+  
+  // Template function to check array stores.
+  template<typename T, typename U>
+  void checkArrayStore(Ptr<java::lang::__Array<T> > array, U object) {
+    if (null() != object) {
+      java::lang::Class arraytype = array->__vptr->getClass(array);
+      java::lang::Class eltype = arraytype->__vptr->getComponentType(arraytype);
+      
+      if (! eltype->__vptr->isInstance(eltype, (java::lang::Object)object)) {
+        throw java::lang::ArrayStoreException();
+      }
+    }
+  }
+
 }
