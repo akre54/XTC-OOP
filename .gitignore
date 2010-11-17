@@ -5,8 +5,6 @@
 *.cpp
 *.h
 *.out
-!java_lang.cpp
-!java_lang.h
 
 ## generic files to ignore
 *~
@@ -19,7 +17,9 @@
 *.txt
 
 ## oop specific (ignore test files except those in testing dir)
-!testing/
 Bar.java
 Foo.java
 Test.java
+!testing/
+!java_lang.cpp
+!java_lang.h
