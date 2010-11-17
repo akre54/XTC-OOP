@@ -28,6 +28,7 @@ if [ $D ]; then
 	make -f ../Makefile clean
 	cp ../java_lang.cpp ./
 	cp ../java_lang.h ./
+	cp ../ptr.h ./
 	make -f ../Makefile PRE=$P
 		#sdiff will output both files to command line, more useful here than diff
 	sdiff java.out.txt cpp.out.txt

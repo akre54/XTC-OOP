@@ -61,12 +61,14 @@ public class InheritanceBuilder{
 
 						 "using java::lang::__Class;\n"+
 						 "using java::lang::String;\n"+
+						 "using java::lang::ArrayOfInt;\n"+
+						 "using java::lang::ArrayOfObject;\n"+
+						 "using java::lang::ArrayOfClass;\n"+
+
 						 
 						 "namespace xtc {\n"+
 						 "\tnamespace oop{\n\n"+
 						 "\ttypedef std::string String;\n"
-						// "\ttypedef std::bool boolean;\n"+
-						 //"\ttypedef std::int32_t int;\n\n"
 						 );
 							 
 		
@@ -101,13 +103,10 @@ public class InheritanceBuilder{
 							cpp_methoddef.write("#include \""+files.get(i)+"\"\n");
 						}
 							cpp_methoddef.write("#include <sstream>\n\n"+
-											"using xtc::oop::demo;\n"+
+											//"using xtc::oop::"+cpp_methoddef.cFile.getName()+";\n"+
 							
 							"namespace xtc {\n"+
 							"\tnamespace oop{\n\n"
-							//"\ttypedef std::bool boolean;\n"+
-							//"\ttypedef std::int32_t int;\n\n"
-
 							);
 		
 		
@@ -266,6 +265,10 @@ public class InheritanceBuilder{
 				h_classdef.write("\t   static int32_t "+method.name+"(int32_t, char**);\n");
 			}
 			else{
+				//h_classdef.write("\t   ");
+				for(int i=0;i<method.modifiers.size();i++){
+					h_classdef.write("\t"+method.modifiers.get(i)+": \n");
+				}
 				h_classdef.write("\t   static "+method.returntype+" "+method.name+"(");
 	
 				for(int j=0; j<method.params.size();j++){
@@ -273,7 +276,7 @@ public class InheritanceBuilder{
 					if(j==0)// print first param without ","
 						h_classdef.write(method.params.get(j).type);
 
-					h_classdef.write(","+method.params.get(j).type);
+					else h_classdef.write(","+method.params.get(j).type);
 				
 				}
 				h_classdef.write(");\n");
@@ -294,7 +297,6 @@ public class InheritanceBuilder{
 		CppCreator mainWriter = new CppCreator(source, "main.cpp");
 		//change parameters for c++
 		
-		System.out.println(n.params.size());
 		n.returntype = "int32_t";
 		String arrayName = n.params.get(0).var_name;
 		n.params.get(0).type="int32_t";
@@ -385,35 +387,11 @@ public class InheritanceBuilder{
 		
 		//writes the __class() method
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
-							"::"+t.local.get(0).name+"(){\n\t}\n");
-	// --- adds all constructors to METHODDEF
-		int size_c = t.constructors.size();
-		for(int index=1;index<size_c;index++){
-			Declaration constr = t.constructors.get(index);
-			
-			//method syntax
-			cpp_methoddef.write("\t"+constr.returntype+" __"+t.className+
-								"::"+constr.name+/*"_"+constr.overloadNum+*/"(");
-			
-			for(int i=0;i<constr.params.size();i++){
-				Fparam param= constr.params.get(i);
-				
-				//first param without ","
-				if(i==0)cpp_methoddef.write(param.type+" "+param.var_name);
-				else cpp_methoddef.write(","+param.type+" "+param.var_name);
-				
-			}
-			//calls to CppMethod to create the body of the method
-			cpp_methoddef.write("){\n");
-			
-			//**  cppBlock is called on method's block node  **//
-			//cppMethod mblock = new cppMethod(t.local.get(index).mnode);
-			CppPrinter cblock=new CppPrinter(constr.bnode);
-			cpp_methoddef.write(cblock.getString().toString());//write body of the method
-			cpp_methoddef.write("\n\t   }\n\n");
-			
-			cpp_methoddef.write("\n\n");
-		}
+							"::"+t.local.get(0).name+"(){\n\t"+
+							"\n\tstatic Class k = new __Class(__rt::stringify(\"xtc.oop."+t.className+"\"),__rt::null());"+
+							"\n\treturn k;\n\t"+
+							"}\n");
+
 		
 	//--- adds all methods to METHODDEF	
 		int size = t.local.size();

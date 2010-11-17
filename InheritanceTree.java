@@ -197,6 +197,35 @@ public class InheritanceTree{
 		}
 	}
 	/**
+	 *looks in Vt_ptrs and local for methods with same name but diff params
+	 * if multiple are found keeps method with max overloadNum stored
+	 * returns max overloadNum
+	 */
+	private int overloaded_check(String method,ArrayList<Fparam> params/*,boolean is_virtual*/){
+		int max=-1;
+		for(int i =0;i<Vt_ptrs.size();i++){
+			//same name test
+			if(method.equals(Vt_ptrs.get(i).name)){
+				//diff params test
+				if(!typetest(params,Vt_ptrs.get(i).params))
+					//store max overloadNum
+					max = Math.max(Vt_ptrs.get(i).overloadNum,max);
+				else; //if(is_virtual)
+			}	//delete vt_ptr bc its overwritten
+		}
+		for(int j=0;j<local.size();j++){
+			//same name test
+			if(method.equals(local.get(j).name)){
+				//diff params test
+				if(!typetest(params,local.get(j).params))
+					//store max overloadNum
+					max = Math.max(local.get(j).overloadNum,max);
+				else;
+			}
+		}
+			return max;
+	}
+	/**
 	 * helper method used in check_for_overrides() for testing for equal Declarations.
 	 *@param Declaration
 	 */
@@ -246,6 +275,7 @@ public class InheritanceTree{
 			ArrayList<String> mods = new ArrayList<String>(0);
 			String fptype ="";
 			String fpname ="";
+			int overloaded = 0;
 			GNode block;
 
 			boolean is_fparam=false;
@@ -266,12 +296,13 @@ public class InheritanceTree{
 				params.clear();
 				block=null;
 				is_virtual = true;
+				overloaded = 0;
 				
 				//get info from tree
 				visit(n);
-				
+				overloaded = constructors.size();
 				//add declaration to constructor
-				constructors.add(new Declaration(modifiers,is_virtual,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
+				constructors.add(new Declaration(overloaded ,modifiers,is_virtual,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
 				
 				is_constructor =false;
 			}
@@ -283,20 +314,24 @@ public class InheritanceTree{
 				params.clear();
 				block=null;
 				is_virtual = true;
+				overloaded=0;
 				
 				//go into tree to get info
 				visit(n);
 				
+				//search in Vt_ptrs and local for same name diff params
+				overloaded = overloaded_check(methodname,params)+1;
+				
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if(is_virtual) {
-					virtual.add(new Declaration(retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
+					virtual.add(new Declaration(overloaded ,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
 					//add it to local with true as isvirtual field
-					local.add(new Declaration(modifiers,true,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
+					local.add(new Declaration(overloaded ,modifiers,true,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
 
 				}
 				else{
 					//add it to local with false as isvirtual field	
-					local.add(new Declaration(modifiers ,false,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
+					local.add(new Declaration(overloaded ,modifiers ,false,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
 				}			
 			}
 			public void visitBlock(GNode n){
@@ -329,10 +364,17 @@ public class InheritanceTree{
 				else retrn = type;
 			}
 			public void visitDimensions(GNode n){
-				String dim ="[]";
-				if(is_fparam) fptype= fptype +dim;
-				else retrn = retrn + dim;
-			
+				if(is_fparam){ 
+					if(fptype.equals("Class"))fptype ="ArrayOfClass";
+					if(fptype.equals("int32_t"))fptype ="ArrayOfInt";
+					if(fptype.equals("Object"))fptype ="ArrayOfObject";
+				
+				}
+				else{ 
+					if(retrn.equals("Class"))retrn ="ArrayOfClass";
+					if(retrn.equals("int32_t"))retrn ="ArrayOfInt";
+					if(retrn.equals("Object"))retrn ="ArrayOfObject";
+				}
 			}
 			public void visitFormalParameters(GNode n){
 				//add __this parameter for virtual methods
@@ -514,24 +556,69 @@ public class InheritanceTree{
 		return found;
 	
 	}
-	public String search_for_method(boolean on_instance, Declaration method, ArrayList<String> paramtyps, String method_name){
-	
-		//ACCESSABLE CHECK
-			//looks in local(non virtual) and VT_ptrs
-			//eliminate methods with name!= to method_name
-			//if on_instance and static need to eliminate all non-static methods
-			//RETURN if one left
 
+	public String search_for_method(boolean on_instance, Declaration method, ArrayList<String> paramtyps, String method_name){
 		
-		//NUMBER OF PARAMETERS CHECK
-			//eliminate not same # of parameters
-			//RETURN if one left
+		//-----ACCESSABLE CHECK
+		//looks in local(non virtual) and VT_ptrs
+		ArrayList<Declaration> possible= new ArrayList<Declaration>(Vt_ptrs);
+		for(int i=0;i<local.size();i++){
+			if(!local.get(i).isVirtual) possible.add(local.get(i));
+		}
+		//eliminate methods with name!= to method_name
+		for(int n=0;n<possible.size();n++){
+			if(!possible.get(n).name.equals(method.name))
+				possible.remove(n);
+		}
+		if(possible.size()==1)return possible.get(0).name+"_"+possible.get(0).overloadNum;
+
+		//if !on_instance and static need to eliminate all non-static methods
+		if((!on_instance)&&(method.is_static())){
+			for(int s=0;s<possible.size();s++){
+				if(possible.get(s).is_static())
+					possible.remove(s);
+			}
+		}
+		if(possible.size()==1)return possible.get(0).name+"_"+possible.get(0).overloadNum;
+
+		//-----NUMBER OF PARAMETERS CHECK
+		//eliminate not same # of parameters
+		for(int p=0;p<possible.size();p++){
+			if(possible.get(p).params.size()!=method.params.size())
+				possible.remove(p);
+			else possible.get(p).specificity =0;//prepare for specificity check
+		}
+		if(possible.size()==1)return possible.get(0).name+"_"+possible.get(0).overloadNum;
 		
-		//SPECIFICITY CHECK
+		
+		//-----SPECIFICITY CHECK
 			//record sum of #classes up to match parameter for each parameter
-			//find method with smallest number MUST BE ONLY ONE MIN
-			//RETURN NAME+_number
-		return "";
+		Declaration min =possible.get(0);
+		for(int m=0;m<method.params.size();m++){
+			String type=method.params.get(m).type;
+			for(int c=0;c<possible.size();c++){
+				String ptype = possible.get(c).params.get(m).type;
+				if(!ptype.equals(type));
+				else possible.get(c).specificity =possible.get(c).specificity+ gouptree(ptype,type);
+				if(possible.get(c).specificity<min.specificity) min = possible.get(c);
+			}
+		}
+		//find method with smallest number MUST BE ONLY ONE MIN
+		//RETURN NAME+_number
+		return min.name+"_"+min.overloadNum;
 	
 	}
+	
+	private int gouptree(String value, String goal){
+		return 0;
+	
+	
+	}
+	
+	
+	
+	
+	
+	
+	
 }
