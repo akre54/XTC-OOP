@@ -105,8 +105,8 @@ public class Translator extends Tool {
 
 	//-----------------------------------------------------------------------
 	public void process(Node node) {
-		
-		
+		final boolean VERBOSE = runtime.test("optionVerbose");
+		final boolean SILENT  = runtime.test("optionSilent");
 		
 		//Some Testing Environments
 		if(runtime.test("testing"))
@@ -156,9 +156,9 @@ public class Translator extends Tool {
 		
 		// Handle the translate option
 		if (runtime.test("translate")) {
-			runtime.console().p("translating...").pln().flush();
-			
-			
+			if (VERBOSE) {
+				runtime.console().p("Begining translation...").pln().flush();
+			}			
 			
 			DependencyTree dependency= new DependencyTree(node);
 			//creates tree root a.k.a. the Object class
