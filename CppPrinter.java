@@ -388,6 +388,26 @@ public class CppPrinter extends Visitor
 		}
 		printer.append(")");
 	}
+	public void visitQualifiedIdentifier(GNode n)
+	{
+		
+		
+		for(int i=0; i<n.size();i++)
+		{
+			String name = n.getString(i);
+			if(i>0){
+				printer.append(".");
+			}
+			if(name.equals("String"))
+			{
+			}
+			else {
+				printer.append("__");
+			}
+			printer.append(name);
+			
+		}	
+	}
 	/**********************Other***************************/
 	public void visitPrimaryIdentifier(GNode n)
 	{

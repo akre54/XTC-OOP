@@ -59,7 +59,8 @@ SOURCE = \
 	ArrayMaker.java \
 	translate/PrintMaker.java \
 	ConditionalMaker.java \
-	EWalk.java
+	EWalk.java\
+	CppWalker.java
 
 
 
