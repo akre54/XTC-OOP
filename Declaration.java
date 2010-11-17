@@ -21,6 +21,7 @@ public class Declaration{
 		params = new ArrayList<Fparam>(fparams);
 		ownerClass = sclass;
 		bnode=node;
+		modifiers = new ArrayList<String>(0);
 
 	}
 	Declaration(ArrayList<String> mods, boolean virtual, String rtype, String mname, 
@@ -40,6 +41,7 @@ public class Declaration{
 		returntype = rtype;
 		params = new ArrayList<Fparam>(fparams);
 		ownerClass = sclass;
+		modifiers = new ArrayList<String>(0);
 		
 	}
 	
@@ -54,7 +56,6 @@ public class Declaration{
 				return variables.get(i).type;
 		}
 		return "variable does not exist";
-		
 	
 	}
 	
@@ -69,10 +70,9 @@ public class Declaration{
 			
 			if(name.equals(variables.get(i).name))
 				variables.get(i).type = newtype;
-				
-		}
-		
 	
+		}
+
 	}
 
 }

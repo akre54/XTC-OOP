@@ -139,8 +139,8 @@ public class Translator extends Tool {
 			new Visitor(){
 				public void visitBlock(GNode n)
 				{
-					CppWalker walk= new CppWalker(n);
-					System.out.println(walk.getString());
+					//CppWalker walk= new CppWalker(n);
+					//System.out.println(walk.getString());
 				}
 				public void visit(Node n)
 				{
