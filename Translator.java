@@ -111,8 +111,8 @@ public class Translator extends Tool {
 
 	//-----------------------------------------------------------------------
 	public void process(Node node) {
-		
-		
+		final boolean VERBOSE = runtime.test("optionVerbose");
+		final boolean SILENT  = runtime.test("optionSilent");
 		
 		//Some Testing Environments
 		if(runtime.test("testing"))
@@ -162,6 +162,7 @@ public class Translator extends Tool {
 		
 		// Handle the translate option
 		if (runtime.test("translate")) {
+
 			runtime.console().p("translating...").pln().flush();
 
 
@@ -175,7 +176,13 @@ public class Translator extends Tool {
                             }
                         }
 			
-			DependencyTree dependency = new DependencyTree(node, dependencies);
+			if (VERBOSE) {
+				runtime.console().p("Begining translation...").pln().flush();
+			}			
+			
+                        // creates the import heirarchy
+                        DependencyTree dependency = new DependencyTree(node, dependencies);
+
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
 			
