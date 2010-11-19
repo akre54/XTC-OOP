@@ -162,9 +162,15 @@ public class Translator extends Tool {
 		
 		// Handle the translate option
 		if (runtime.test("translate")) {
+<<<<<<< HEAD
+                    if (VERBOSE) {
+			runtime.console().p("Begining translation...").pln().flush();
+                    }
+=======
 
 			runtime.console().p("translating...").pln().flush();
 
+>>>>>>> 2a06bcf915abc07fdac4df447bf95e18544dcb8a
 
                         // need the original file to be the first in dependencies
                         // list to avoid circular imports
@@ -176,12 +182,16 @@ public class Translator extends Tool {
                             }
                         }
 			
+<<<<<<< HEAD
+			DependencyTree dependency = new DependencyTree(node, dependencies);
+=======
 			if (VERBOSE) {
 				runtime.console().p("Begining translation...").pln().flush();
 			}			
 			
                         // creates the import heirarchy
                         DependencyTree dependency = new DependencyTree(node, dependencies);
+>>>>>>> 2a06bcf915abc07fdac4df447bf95e18544dcb8a
 
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();

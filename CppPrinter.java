@@ -146,12 +146,12 @@ public class CppPrinter extends Visitor
 	}
 	public void visitThisExpression(GNode n)
 	{
-		printer.append("this.");
+		printer.append("__this.");
 		visit(n);
 	}
 	public void visitSuperExpression(GNode n)
 	{
-		printer.append("super.");
+		//printer.append("super.");
 		visit(n);
 	}
 	public void visitMultiplicativeExpression(GNode n)
@@ -159,7 +159,7 @@ public class CppPrinter extends Visitor
 		setBinary(n);
 	}	
 	/*******************Statements ******************************/
-	public void AssertStatement(GNode n)
+	public void visitAssertStatement(GNode n)
 	{
 		printer.append("assert ");
 		Node express=n.getNode(0);
@@ -229,8 +229,6 @@ public class CppPrinter extends Visitor
 		visit(n);
 		printer.append("; \n");
 	}
-	
-
 	public void visitExpressionStatement(GNode n)
 	{
 		visit(n);
