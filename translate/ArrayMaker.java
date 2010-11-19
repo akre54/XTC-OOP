@@ -4,7 +4,7 @@ import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 
-import xtc.util.Tool;
+//import xtc.util.Tool;
 /**
  * Translates a java array to a C array.
  * 
