@@ -4,6 +4,7 @@
 # tool to compare the output of both files
 #
 # for OOP fall 10 by The Group
+. ../../../../setup.sh
 clear
 echo "Java to C++ Translation"
 D="1";
