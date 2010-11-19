@@ -179,7 +179,7 @@ public class InheritanceBuilder{
 	private void write_all_feilds(InheritanceTree t){
 		
 		//loops through fields and prints out in proper syantax
-		for(int index =1;index<t.fields.size();index++){
+		for(int index =0;index<t.fields.size();index++){
 			InstanceField f = t.fields.get(index);
 			
 			for(int j=0; j<f.modifiers.size();j++){
@@ -239,9 +239,10 @@ public class InheritanceBuilder{
 				h_classdef.write("{\n\t\t");
 			
 			//**  cppBlock is called on constructor's block node  **//
-					cppConstructor cblock = new cppConstructor(constr.bnode);
-					h_classdef.write(cblock.getString().toString());//write body of the constructor
-					h_classdef.write("\n\t   };\n\n");
+				//EWalk changes = new EWalk(t,constr,constr.bnode);
+				CppPrinter print = new CppPrinter(constr.bnode);
+				h_classdef.write(print.getString().toString());//write body of the constructor
+				h_classdef.write("\n\t   };\n\n");
 			
 			}
 		
@@ -415,6 +416,7 @@ public class InheritanceBuilder{
 			
 				//**  cppBlock is called on method's block node  **//
 				//cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+			//EWalk changes = new EWalk(t,method,method.bnode);
 				CppPrinter mblock=new CppPrinter(method.bnode);
 				cpp_methoddef.write(mblock.getString().toString());//write body of the method
 				cpp_methoddef.write("\n\t   }\n\n");

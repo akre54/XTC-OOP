@@ -207,7 +207,8 @@ public class InheritanceTree{
 			//same name test
 			if(method.equals(Vt_ptrs.get(i).name)){
 				//diff params test
-				if(!typetest(params,Vt_ptrs.get(i).params))
+				
+				if((params.size()==Vt_ptrs.get(i).params.size())&&(!typetest(params,Vt_ptrs.get(i).params)))
 					//store max overloadNum
 					max = Math.max(Vt_ptrs.get(i).overloadNum,max);
 				else; //if(is_virtual)
@@ -425,7 +426,7 @@ public class InheritanceTree{
 		new Visitor(){
 			
 			ArrayList<String> mods= new ArrayList<String>(0);
-			String type;
+			String type="";
 			ArrayList<String> names= new ArrayList<String>(0);
 			String val;
 			boolean is_field = false;
@@ -452,7 +453,6 @@ public class InheritanceTree{
 				val="";
 				
 				visit(n);
-				
 				//add instancefield for each name in names
 				for(int i=0; i<names.size();i++){
 					f.add(new InstanceField(mods,type,names.get(i),val));
@@ -470,8 +470,8 @@ public class InheritanceTree{
 					String type = n.getString(0);
 					if(type.equals("int"))type="int32_t";
 					if(type.equals("boolean"))type="bool";
-					
 				}
+				visit(n);
 			}
 	
 			public void visitDeclarator(GNode n){//variable name

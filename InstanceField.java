@@ -13,7 +13,7 @@ public class InstanceField{
 	public String var_name;
 	public String value;
 	
-	InstanceField(ArrayList<String> mods,String name,String typ,String val){
+	InstanceField(ArrayList<String> mods,String typ,String name,String val){
 		modifiers = mods;
 		type = typ;
 		var_name = name;
@@ -21,15 +21,15 @@ public class InstanceField{
 		//initialize blank values
 		if(value.equals("")){
 		
-			if(type.equals("String")) value ="null";
-			if(type.equals("int")) value ="0";
+			if(type.equals("String")) value ="";
+			if(type.equals("int32_t")) value ="0";
 			if(type.equals("float")) value ="0.0";
 			if(type.equals("long")) value ="0";
 			if(type.equals("short")) value ="0";
 			if(type.equals("double")) value ="0.0";
 			if(type.equals("byte")) value ="0";
 			if(type.equals("char")) value ="''";
-			if(type.equals("boolean")) value ="false";
+			if(type.equals("bool")) value ="false";
 			if( (!type.equals("String"))&&
 				(!type.equals("int"))&&
 				(!type.equals("float"))&&

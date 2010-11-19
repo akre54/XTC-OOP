@@ -19,7 +19,7 @@ public class EWalk extends Visitor
 	FullName fullName;
 	boolean inCall = false;
 
-	public void EWalk (InheritanceTree inClass, Declaration method, GNode n) {
+	public EWalk(InheritanceTree inClass, Declaration method, GNode n) {
 		
 		printer = new StringBuilder();
 		visit(n);
