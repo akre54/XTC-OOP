@@ -52,7 +52,7 @@ public class Translator extends Tool {
 
 	/** Create a new translator. */
 	public Translator() {
-		// Nothing to do.
+		
 	}
 
         public Translator (HashMap<String,Boolean> dependencies) {

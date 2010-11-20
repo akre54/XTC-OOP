@@ -12,7 +12,7 @@ import xtc.tree.Visitor;
  */ 
 public class EWalk extends Visitor
 {
-	void EWalk (InheritanceTree treeClass, Declaration treeMethod, GNode n) {
+	EWalk (InheritanceTree treeClass, Declaration treeMethod, GNode n) {
 		eWalker(n);
 	}
 

@@ -556,63 +556,99 @@ public class InheritanceTree{
 		return found;
 	
 	}
-
-	public String search_for_method(boolean on_instance, Declaration method, ArrayList<String> paramtyps, String method_name){
+	public String search_for_method(boolean on_instance, Declaration method, 
+									ArrayList<String> paramtyps, String method_name){
 		
-		//-----ACCESSABLE CHECK
-		//looks in local(non virtual) and VT_ptrs
-		ArrayList<Declaration> possible= new ArrayList<Declaration>(Vt_ptrs);
-		for(int i=0;i<local.size();i++){
-			if(!local.get(i).isVirtual) possible.add(local.get(i));
+		String accessor;
+		
+		int parmsize=paramtyps.size();
+		//-----ACCESSABLE/SAME NAME/SAME #PARAMS CHECK
+		//looks in local(non virtual) and VT_ptrs for same named methods and same number of parameters
+		LinkedList possible= new LinkedList();
+		int vsize = VT_ptrs.size();
+		for(int j=0;j<vsize;j++){
+			if((VT_ptrs.get(j).name.equals(method_name))&&(VT_ptrs.get(j).params.size()==paramsize))
+				possible.add(VT_ptrs.get(i));
 		}
-		//eliminate methods with name!= to method_name
-		for(int n=0;n<possible.size();n++){
-			if(!possible.get(n).name.equals(method.name))
-				possible.remove(n);
+		int lsize = local.size();
+		for(int i=0;i<lsize;i++){
+			
+			if((local.get(i).equals(method_name))&&(!local.get(i).isVirtual)&&(local.get(i).parms.size()==paramsize)) 
+				possible.add(local.get(i));
 		}
-		if(possible.size()==1)return possible.get(0).name+"_"+possible.get(0).overloadNum;
-
+		
+		//if only one left return it with accessor!!
+		if(possible.size()==1){
+			Declaration choosen = possible.get(0);
+			if((on_instance)&&(choosen.isVirtual)) accessor="->vtpr->";
+			else if((on_instance)&&(!choosen.isVirtual)) accessor=".";
+			else accessor ="";
+			return accessor+choosen.name+"_"+choosen.overloadNum;
+		}
+		
+		// CALLING NON_STATIC FROM STATIC CONTEXT CHECK 
 		//if !on_instance and static need to eliminate all non-static methods
 		if((!on_instance)&&(method.is_static())){
-			for(int s=0;s<possible.size();s++){
-				if(possible.get(s).is_static())
-					possible.remove(s);
+			ListIterator<Declaration> list = possible.listIterator(0);
+			for(int s=0;s<possible.size();s++){//compute size each time so that we dont go too far
+				if(!possible.get(s).is_static())
+					possible.remove(s);//remove non-static methods
 			}
 		}
-		if(possible.size()==1)return possible.get(0).name+"_"+possible.get(0).overloadNum;
-
-		//-----NUMBER OF PARAMETERS CHECK
-		//eliminate not same # of parameters
-		for(int p=0;p<possible.size();p++){
-			if(possible.get(p).params.size()!=method.params.size())
-				possible.remove(p);
-			else possible.get(p).specificity =0;//prepare for specificity check
+		
+		//if only one left return it with accessor!!
+		if(possible.size()==1){
+			Declaration choosen = possible.get(0);
+			if((on_instance)&&(choosen.isVirtual)) accessor="->vtpr->";
+			else if((on_instance)&&(!choosen.isVirtual)) accessor=".";
+			else accessor ="";
+			return accessor+choosen.name+"_"+choosen.overloadNum;
 		}
-		if(possible.size()==1)return possible.get(0).name+"_"+possible.get(0).overloadNum;
 		
-		
-		//-----SPECIFICITY CHECK
-			//record sum of #classes up to match parameter for each parameter
+		//----SPECIFICITY CHECK
 		Declaration min =possible.get(0);
-		for(int m=0;m<method.params.size();m++){
-			String type=method.params.get(m).type;
-			for(int c=0;c<possible.size();c++){
-				String ptype = possible.get(c).params.get(m).type;
-				if(!ptype.equals(type));
+		for(int m=0;m<paramsize;m++){
+			String type=paramtyps.get(m).type;
+			int pos_size = possible.size();
+			for(int c=0;c<pos_size;c++){
+				String pos_type = possible.get(c).params.get(m).type;
+				if(!pos_type.equals(type));
 				else possible.get(c).specificity =possible.get(c).specificity+ gouptree(ptype,type);
 				if(possible.get(c).specificity<min.specificity) min = possible.get(c);
 			}
 		}
-		//find method with smallest number MUST BE ONLY ONE MIN
-		//RETURN NAME+_number
-		return min.name+"_"+min.overloadNum;
-	
+		//find method with smallest number MUST BE ONLY ONE (MIN)
+		//RETURN accessor+NAME+_number
+		if((on_instance)&&(min.isVirtual)) accessor="->vtpr->";
+		else if((on_instance)&&(!min.isVirtual)) accessor=".";
+		else accessor ="";
+		return accessor+min.name+"_"+min.overloadNum;
+		
+		
+		
 	}
-	
-	private int gouptree(String value, String goal){
-		return 0;
-	
-	
+	private String make_accessor(boolean on_instance,boolean isVirtual){
+		if((on_instance)&&(isVirtual)) return "->vtpr->";
+		else if((on_instance)&&(!isVirtual)) return".";
+		else return"";
+	}
+
+	private int gouptree(String casted_to, String castee){
+		int distance =0;
+		//find root of tree
+		InheritanceTree Object=this;
+		while(Object.supr !=null){
+			Object = Object.supr;
+		}
+		//search on root of tree for castee class
+		InheritanceTree type = Object.search(castee);
+		
+		while(type.name!=casted_to){
+			distance++;
+			type = type.supr;
+		}
+		
+		return distance;
 	}
 	
 	
