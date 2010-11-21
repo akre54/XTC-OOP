@@ -1,5 +1,6 @@
 package xtc.oop;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
@@ -41,30 +42,30 @@ public class InheritanceTree{
 		
 		//add __isa to Vtable
 		Vt_ptrs.add(new Declaration("Class", "__isa",
-									 className,new ArrayList<Fparam>(0),new ArrayList<local_variable>(0)));
+									 className,new ArrayList<Fparam>(0)));
 		
 		//add hashcode to Vtable
 		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
 		Vt_ptrs.add(new Declaration("int32_t","hashCode",
-									 "Object",p,new ArrayList<local_variable>(0)));
+									 "Object",p));
 		//add equals to Vtable
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
 		p.add(new Fparam(new ArrayList<String>(),"Object","other"));
 
 		Vt_ptrs.add(new Declaration("bool","equals",
-									 "Object",p,new ArrayList<local_variable>(0)));
+									 "Object",p));
 		//add getClass to Vtable
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
 		Vt_ptrs.add(new Declaration("Class","getClass",
-									 "Object",p,new ArrayList<local_variable>(0)));
+									 "Object",p));
 		//add toString to Vtable
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
 		Vt_ptrs.add(new Declaration("String","toString",
-									 "Object",p,new ArrayList<local_variable>(0)));
+									 "Object",p));
 
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
@@ -96,33 +97,33 @@ public class InheritanceTree{
 		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
 		Vt_ptrs.add(new Declaration("String","getName",
-									 "Class",p,new ArrayList<local_variable>(0)));
+									 "Class",p));
 		
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
 		Vt_ptrs.add(new Declaration("String","getSuperclass",
-									 "Class",p,new ArrayList<local_variable>(0)));
+									 "Class",p));
 		
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
 		Vt_ptrs.add(new Declaration("String","getComponentType",
-									 "Class",p,new ArrayList<local_variable>(0)));
+									 "Class",p));
 		
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
 		Vt_ptrs.add(new Declaration("String","isPrimitive",
-									 "Class",p,new ArrayList<local_variable>(0)));
+									 "Class",p));
 		
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
 		Vt_ptrs.add(new Declaration("String","isArray",
-									 "Class",p,new ArrayList<local_variable>(0)));
+									 "Class",p));
 		
 		 p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
 		p.add(new Fparam(new ArrayList<String>(),"Object","o"));
 		Vt_ptrs.add(new Declaration("String","isInstance",
-									 "Class",p,new ArrayList<local_variable>(0)));
+									 "Class",p));
 		
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
@@ -160,7 +161,7 @@ public class InheritanceTree{
 		Vt_ptrs.get(0).ownerClass = className;
 		//add __isa to local methods
 		local.add(new Declaration("Class","__class",className,
-								  new ArrayList<Fparam>(0),new ArrayList<local_variable>(0)));
+								  new ArrayList<Fparam>(0)));
 		
 		//constructors defined
 		//local methods defined
@@ -303,7 +304,8 @@ public class InheritanceTree{
 				visit(n);
 				overloaded = constructors.size();
 				//add declaration to constructor
-				constructors.add(new Declaration(overloaded ,modifiers,is_virtual,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
+				constructors.add(new Declaration(overloaded ,modifiers,is_virtual,retrn,methodname,className,params,
+												 block,new ArrayList<local_variable>(0)));
 				
 				is_constructor =false;
 			}
@@ -324,16 +326,16 @@ public class InheritanceTree{
 				overloaded = overloaded_check(methodname,params)+1;
 				
 				//test to see if the modifier was public or protected(if it should be virtual)
-				if(is_virtual) {
-					virtual.add(new Declaration(overloaded ,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
+				if(is_virtual) 
+					virtual.add(new Declaration(overloaded ,modifiers,is_virtual,retrn,methodname,className,params,
+												block,new ArrayList<local_variable>(0)));
 					//add it to local with true as isvirtual field
-					local.add(new Declaration(overloaded ,modifiers,true,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
+					local.add(new Declaration(overloaded ,modifiers,is_virtual,retrn,methodname,className,params,
+											  block,new ArrayList<local_variable>(0)));
 
-				}
-				else{
-					//add it to local with false as isvirtual field	
-					local.add(new Declaration(overloaded ,modifiers ,false,retrn,methodname,className,params,block,new ArrayList<local_variable>(0)));
-				}			
+				
+					
+							
 			}
 			public void visitBlock(GNode n){
 				block = n;
@@ -561,19 +563,19 @@ public class InheritanceTree{
 		
 		String accessor;
 		
-		int parmsize=paramtyps.size();
+		int paramsize=paramtyps.size();
 		//-----ACCESSABLE/SAME NAME/SAME #PARAMS CHECK
 		//looks in local(non virtual) and VT_ptrs for same named methods and same number of parameters
-		LinkedList possible= new LinkedList();
-		int vsize = VT_ptrs.size();
+		LinkedList<Declaration> possible= new LinkedList<Declaration>();
+		int vsize = Vt_ptrs.size();
 		for(int j=0;j<vsize;j++){
-			if((VT_ptrs.get(j).name.equals(method_name))&&(VT_ptrs.get(j).params.size()==paramsize))
-				possible.add(VT_ptrs.get(i));
+			if((Vt_ptrs.get(j).name.equals(method_name))&&(Vt_ptrs.get(j).params.size()==paramsize))
+				possible.add(Vt_ptrs.get(j));
 		}
 		int lsize = local.size();
 		for(int i=0;i<lsize;i++){
 			
-			if((local.get(i).equals(method_name))&&(!local.get(i).isVirtual)&&(local.get(i).parms.size()==paramsize)) 
+			if((local.get(i).equals(method_name))&&(!local.get(i).isVirtual)&&(local.get(i).params.size()==paramsize)) 
 				possible.add(local.get(i));
 		}
 		
@@ -589,7 +591,6 @@ public class InheritanceTree{
 		// CALLING NON_STATIC FROM STATIC CONTEXT CHECK 
 		//if !on_instance and static need to eliminate all non-static methods
 		if((!on_instance)&&(method.is_static())){
-			ListIterator<Declaration> list = possible.listIterator(0);
 			for(int s=0;s<possible.size();s++){//compute size each time so that we dont go too far
 				if(!possible.get(s).is_static())
 					possible.remove(s);//remove non-static methods
@@ -608,12 +609,12 @@ public class InheritanceTree{
 		//----SPECIFICITY CHECK
 		Declaration min =possible.get(0);
 		for(int m=0;m<paramsize;m++){
-			String type=paramtyps.get(m).type;
+			String type=paramtyps.get(m);
 			int pos_size = possible.size();
 			for(int c=0;c<pos_size;c++){
 				String pos_type = possible.get(c).params.get(m).type;
 				if(!pos_type.equals(type));
-				else possible.get(c).specificity =possible.get(c).specificity+ gouptree(ptype,type);
+				else possible.get(c).specificity =possible.get(c).specificity+ gouptree(pos_type,type);
 				if(possible.get(c).specificity<min.specificity) min = possible.get(c);
 			}
 		}
@@ -637,15 +638,15 @@ public class InheritanceTree{
 		int distance =0;
 		//find root of tree
 		InheritanceTree Object=this;
-		while(Object.supr !=null){
-			Object = Object.supr;
+		while(Object.superclass !=null){
+			Object = Object.superclass;
 		}
 		//search on root of tree for castee class
 		InheritanceTree type = Object.search(castee);
 		
-		while(type.name!=casted_to){
+		while(type.className!=casted_to){
 			distance++;
-			type = type.supr;
+			type = type.superclass;
 		}
 		
 		return distance;
