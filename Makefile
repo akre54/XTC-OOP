@@ -49,7 +49,6 @@ SOURCE = \
 	CppPrinter.java\
 	Translator.java \
 	CppCreator.java \
-	cppClass.java \
 	translate/ArrayMaker.java\
 	InheritanceBuilder.java \
 	Declaration.java \
