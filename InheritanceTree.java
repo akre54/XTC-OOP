@@ -12,7 +12,7 @@ import xtc.tree.Visitor;
  *
  */
 public class InheritanceTree{
-	
+	public InheritanceTree root;
 	public final String className;
 	public ArrayList<InstanceField> fields;
 	public ArrayList<Declaration> constructors;
@@ -69,6 +69,8 @@ public class InheritanceTree{
 
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
+		
+		this.root = this;
 
 	}
 	
@@ -77,6 +79,8 @@ public class InheritanceTree{
 	 * @param InheritanceTree (the Object inheritance tree)
 	 */
 	InheritanceTree(InheritanceTree supr){
+		this.root = supr.root;
+		
 		//defines superclass
 		superclass = supr;
 		//defines class name
@@ -139,7 +143,7 @@ public class InheritanceTree{
 	 * @param GNode (classdeclaration), InheritanceTree (superclass's).
 	 */
 	InheritanceTree(GNode n, InheritanceTree supr){
-		
+		this.root = supr.root;
 		superclass = supr;//superclass defined
 		className = n.getString(1);//className defined from node
 		
