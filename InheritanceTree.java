@@ -582,32 +582,22 @@ public class InheritanceTree{
 		//if only one left return it with accessor!!
 		if(possible.size()==1){
 			Declaration choosen = possible.get(0);
-			if((on_instance)&&(choosen.isVirtual)) accessor="->vtpr->";
-			else if((on_instance)&&(!choosen.isVirtual)) accessor=".";
-			else accessor ="";
+			accessor= make_accessor(on_instance,choosen.isVirtual);
 			return accessor+choosen.name+"_"+choosen.overloadNum;
 		}
 		
 		// CALLING NON_STATIC FROM STATIC CONTEXT CHECK 
 		//if !on_instance and static need to eliminate all non-static methods
-		if((!on_instance)&&(method.is_static())){
+		/*if((!on_instance)&&(method.is_static())){
 			for(int s=0;s<possible.size();s++){//compute size each time so that we dont go too far
 				if(!possible.get(s).is_static())
 					possible.remove(s);//remove non-static methods
 			}
 		}
-		
-		//if only one left return it with accessor!!
-		if(possible.size()==1){
-			Declaration choosen = possible.get(0);
-			if((on_instance)&&(choosen.isVirtual)) accessor="->vtpr->";
-			else if((on_instance)&&(!choosen.isVirtual)) accessor=".";
-			else accessor ="";
-			return accessor+choosen.name+"_"+choosen.overloadNum;
-		}
+	*/
 		
 		//----SPECIFICITY CHECK
-		Declaration min =possible.get(0);
+		
 		for(int m=0;m<paramsize;m++){
 			String type=paramtyps.get(m);
 			int pos_size = possible.size();
@@ -615,14 +605,16 @@ public class InheritanceTree{
 				String pos_type = possible.get(c).params.get(m).type;
 				if(!pos_type.equals(type));
 				else possible.get(c).specificity =possible.get(c).specificity+ gouptree(pos_type,type);
-				if(possible.get(c).specificity<min.specificity) min = possible.get(c);
 			}
+		}
+		Declaration min =possible.get(0);
+		for(int n=0;n<possible.size();n++){
+			if(min.specificity>possible.get(n).specificity)
+				min=possible.get(n);
 		}
 		//find method with smallest number MUST BE ONLY ONE (MIN)
 		//RETURN accessor+NAME+_number
-		if((on_instance)&&(min.isVirtual)) accessor="->vtpr->";
-		else if((on_instance)&&(!min.isVirtual)) accessor=".";
-		else accessor ="";
+		accessor = make_accessor(on_instance,min.isVirtual);
 		return accessor+min.name+"_"+min.overloadNum;
 		
 		
@@ -651,11 +643,6 @@ public class InheritanceTree{
 		
 		return distance;
 	}
-	
-	
-	
-	
-	
-	
+
 	
 }
