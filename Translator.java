@@ -198,7 +198,8 @@ public class Translator extends Tool {
 			
 			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
 				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
-			final LinkedList<GNode> ToTree = new LinkedList<GNode>();
+
+			final LinkedList<GNode> toTree = new LinkedList<GNode>();
 			
 			new Visitor() {
 				
@@ -219,7 +220,7 @@ public class Translator extends Tool {
 					if(supr!=null){
 						inherit.addClassdef((new InheritanceTree(n,supr)));
 					}
-					else ToTree.add(n);
+					else toTree.add(n);
 					
 				}
 				public void visitExtension(GNode n){
@@ -237,17 +238,18 @@ public class Translator extends Tool {
 			//creates the rest of the tree all nodes whose super exists until all 
 			//trees created
 			InheritanceTree supr;
+
 			int i=0;
-			while(!ToTree.isEmpty()){
+			while(!toTree.isEmpty()){
 				
-					supr = Object.search(ToTree.get(i).getNode(3)
+					supr = Object.search(toTree.get(i).getNode(3)
 									 .getNode(0).getNode(0).getString(0));
 					if(supr!=null){
-						inherit.addClassdef((new InheritanceTree(ToTree.get(i),supr)));
-						ToTree.remove(i);
+						inherit.addClassdef((new InheritanceTree(toTree.get(i),supr)));
+						toTree.remove(i);
 					}
 					else i++;
-				if (i==ToTree.size()) i=0;
+				if (i==toTree.size()) i=0;
 				
 			}
 				
