@@ -635,6 +635,20 @@ public class InheritanceTree{
 	}
 
 	private int gouptree(String casted_to, String castee){
+
+            /*
+                      *  WRONG: will fix
+                      */
+            if (castee.equals("char")) {
+                if (casted_to.equals("int"))
+                    return 1;
+                else
+                    return -1;
+            }
+
+            final String[] primatives = {"double", "float", "long",
+                "int", "short", "byte" };
+
 		int distance =0;
 		//find root of tree
 		InheritanceTree Object=this;
