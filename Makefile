@@ -53,6 +53,7 @@ SOURCE = \
 	translate/ArrayMaker.java\
 	InheritanceBuilder.java \
 	Declaration.java \
+	DependencyTree.java \
 	InheritanceTree.java \
 	InstanceField.java \
 	ConstructorDec.java \
