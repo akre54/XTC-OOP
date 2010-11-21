@@ -28,6 +28,7 @@ import xtc.lang.JavaFiveParser;
 import xtc.parser.ParseException;
 import xtc.parser.Result;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.HashMap;
 
 import xtc.tree.GNode;
@@ -48,17 +49,17 @@ import xtc.util.Tool;
 public class Translator extends Tool {
 
 	File inputFile = null;
-	HashMap<String,Boolean> dependencies;
+        HashMap<String,Boolean> dependencies;
 
 	/** Create a new translator. */
 	public Translator() {
-		// Nothing to do.
+		
 	}
 
-	public Translator (HashMap<String,Boolean> dependencies) {
-		this();
-		this.dependencies = dependencies;
-	}
+        public Translator (HashMap<String,Boolean> dependencies) {
+            this();
+            this.dependencies = dependencies;
+        }
 
 	public String getCopy() {
 		return "(C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka";
@@ -83,6 +84,8 @@ public class Translator extends Tool {
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
 				 "Translate .java file to c++.").
+			bool("finddependencies", "finddependencies", false,
+				 "find all classes we need to translate").	
 			bool("testing","testing",false,"Run some Test cases.").
 			bool("test","test",false,"Run some Test cases.");	}
 
@@ -191,8 +194,9 @@ public class Translator extends Tool {
 			
 			
 			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
-			/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
-			final ArrayList<GNode> ToTree = new ArrayList<GNode>(0);
+				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
+
+			final LinkedList<GNode> toTree = new LinkedList<GNode>();
 			
 			new Visitor() {
 				
@@ -213,7 +217,7 @@ public class Translator extends Tool {
 					if(supr!=null){
 						inherit.addClassdef((new InheritanceTree(n,supr)));
 					}
-					else ToTree.add(n);
+					else toTree.add(n);
 					
 				}
 				public void visitExtension(GNode n){
@@ -231,15 +235,19 @@ public class Translator extends Tool {
 			//creates the rest of the tree all nodes whose super exists until all 
 			//trees created
 			InheritanceTree supr;
-			while(!ToTree.isEmpty()){
-				for(int i=0;i<ToTree.size();i++){
-					supr = Object.search(ToTree.get(i).getNode(3)
-										 .getNode(0).getNode(0).getString(0));
+
+			int i=0;
+			while(!toTree.isEmpty()){
+				
+					supr = Object.search(toTree.get(i).getNode(3)
+									 .getNode(0).getNode(0).getString(0));
 					if(supr!=null){
-						inherit.addClassdef((new InheritanceTree(ToTree.get(i),supr)));
-						ToTree.remove(i);
+						inherit.addClassdef((new InheritanceTree(toTree.get(i),supr)));
+						toTree.remove(i);
 					}
-				}
+					else i++;
+				if (i==toTree.size()) i=0;
+				
 			}
 				
 			
@@ -247,6 +255,15 @@ public class Translator extends Tool {
 
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
+
+		if(runtime.test("finddependencies")){
+		
+		
+		
+		
+		
+		
+		}
 
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();

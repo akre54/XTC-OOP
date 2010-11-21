@@ -406,4 +406,16 @@ namespace __rt {
     }
   }
 
+  // Template function to perform Java casts.
+  template<typename Target, typename Source>
+  Target java_cast(Source other) {
+    java::lang::Class k = Target::value_t::__class();
+
+    if (! k->__vptr->isInstance(k, other)) {
+      throw java::lang::ClassCastException();
+    }
+
+    return Target(other);
+  }
+
 }

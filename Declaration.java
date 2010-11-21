@@ -41,8 +41,9 @@ public class Declaration{
 		specificity =0;
 
 	}
+	//constructor for Class and Object methods
 	Declaration(String rtype, String mname, 
-				 String sclass,ArrayList<Fparam> fparams,ArrayList<local_variable> lvar){
+				 String sclass,ArrayList<Fparam> fparams){
 		name = mname;
 		returntype = rtype;
 		params = new ArrayList<Fparam>(fparams);

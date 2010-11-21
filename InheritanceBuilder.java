@@ -239,7 +239,7 @@ public class InheritanceBuilder{
 				h_classdef.write("{\n\t\t");
 			
 			//**  cppBlock is called on constructor's block node  **//
-				EWalk changes = new EWalk(t,constr,constr.bnode);
+			EWalk changes = new EWalk(t,constr,constr.bnode);
 				CppPrinter print = new CppPrinter(constr.bnode);
 				h_classdef.write(print.getString().toString());//write body of the constructor
 				h_classdef.write("\n\t   };\n\n");
@@ -263,14 +263,14 @@ public class InheritanceBuilder{
 			
 			if (method.name.equals("main")) {
 				buildMain(method);
-				h_classdef.write("\t   static int32_t "+method.name+"(int32_t, char**);\n");
+				h_classdef.write("\t   static int32_t "+method.name+"_"+method.overloadNum+"(int32_t, char**);\n");
 			}
 			else{
 				//h_classdef.write("\t   ");
 				for(int i=0;i<method.modifiers.size();i++){
 					h_classdef.write("\t"+method.modifiers.get(i)+": \n");
 				}
-				h_classdef.write("\t   static "+method.returntype+" "+method.name+"(");
+				h_classdef.write("\t   static "+method.returntype+" "+method.name+"_"+method.overloadNum+"(");
 	
 				for(int j=0; j<method.params.size();j++){
 					
@@ -310,7 +310,7 @@ public class InheritanceBuilder{
 						 "using namespace xtc::oop;\n\n\n"
 						 +"int32_t main(int32_t argc, char *argv[]){\n\n\t"
 						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n\t"
-						 +"NAMEmain->main(argc,argv);\n\treturn 0;\n}");
+						 +"NAMEmain->main"+"_"+n.overloadNum+"(argc,argv);\n\treturn 0;\n}");
 		mainWriter.close();
 	}
 	
@@ -330,7 +330,7 @@ public class InheritanceBuilder{
 		for(int index =1;index<t.Vt_ptrs.size();index++){
 			Declaration method = t.Vt_ptrs.get(index);
 			
-			h_classdef.write("\t\t"+method.returntype+" (*"+method.name+")("+t.className);
+			h_classdef.write("\t\t"+method.returntype+" (*"+method.name+"_"+method.overloadNum+")("+t.className);
 			
 			for(int j=1; j<method.params.size();j++){
 				h_classdef.write(", "+method.params.get(j).type);
@@ -360,16 +360,16 @@ public class InheritanceBuilder{
 			//syntax for an overridden method
 			if((method.ownerClass).equals(t.className)){
 				
-				h_classdef.write(",\n\t\t   "+method.name+"(&__"+t.className+"::"+method.name+")");
+				h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(&__"+t.className+"::"+method.name+"_"+method.overloadNum+")");
 			}
 			//syntax for a method that needs a this class casting
 			else{
-				h_classdef.write(",\n\t\t   "+method.name+"(("+method.returntype+"(*)("+t.className);
+				h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(("+method.returntype+"(*)("+t.className);
 				
 				for(int j=1; j<method.params.size();j++){
 					h_classdef.write(", "+method.params.get(j).type);
 				}
-				h_classdef.write("))&__"+method.ownerClass+"::"+method.name+")");
+				h_classdef.write("))&__"+method.ownerClass+"::"+method.name+"_"+method.overloadNum+")");
 			
 			}
 			
@@ -401,7 +401,7 @@ public class InheritanceBuilder{
 
 				//method syntax
 				cpp_methoddef.write("\t"+method.returntype+" __"+t.className+
-									"::"+method.name+/*"_"+method.overloadNum+*/"(");
+									"::"+method.name+"_"+method.overloadNum+"(");
 		
 				for(int i=0;i<method.params.size();i++){
 					Fparam param= method.params.get(i);
@@ -416,7 +416,7 @@ public class InheritanceBuilder{
 			
 				//**  cppBlock is called on method's block node  **//
 				//cppMethod mblock = new cppMethod(t.local.get(index).mnode);
-				EWalk changes = new EWalk(t,method,method.bnode);
+			EWalk changes = new EWalk(t,method,method.bnode);
 				CppPrinter mblock=new CppPrinter(method.bnode);
 				cpp_methoddef.write(mblock.getString().toString());//write body of the method
 				cpp_methoddef.write("\n\t   }\n\n");
