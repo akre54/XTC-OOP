@@ -48,17 +48,17 @@ import xtc.util.Tool;
 public class Translator extends Tool {
 
 	File inputFile = null;
-        HashMap<String,Boolean> dependencies;
+	HashMap<String,Boolean> dependencies;
 
 	/** Create a new translator. */
 	public Translator() {
 		// Nothing to do.
 	}
 
-        public Translator (HashMap<String,Boolean> dependencies) {
-            this();
-            this.dependencies = dependencies;
-        }
+	public Translator (HashMap<String,Boolean> dependencies) {
+		this();
+		this.dependencies = dependencies;
+	}
 
 	public String getCopy() {
 		return "(C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka";
@@ -116,74 +116,71 @@ public class Translator extends Tool {
 		
 		//Some Testing Environments
 		if(runtime.test("testing"))
-		{
-			runtime.console().p("Testing...").pln().flush();
+			{
+				runtime.console().p("Testing...").pln().flush();
 			
-			/*Create a new visitor to visit the CompilationUnit */
-			new Visitor(){
-				public void visitBlock(GNode n)
-				{
-					CppPrinter print= new CppPrinter(n);
-					System.out.println(print.getString());
-				}
-				public void visit(Node n)
-				{
-					for(Object o:n) {
-						if(o instanceof Node) dispatch((Node) o);
-						
+				/*Create a new visitor to visit the CompilationUnit */
+				new Visitor(){
+					public void visitBlock(GNode n)
+					{
+						CppPrinter print= new CppPrinter(n);
+						System.out.println(print.getString());
 					}
-				}
-			}.dispatch(node);
+					public void visit(Node n)
+					{
+						for(Object o:n) {
+							if(o instanceof Node) dispatch((Node) o);
+						
+						}
+					}
+				}.dispatch(node);
 			
-		}
+			}
 		//Some Testing Environments
 		if(runtime.test("test"))
-		{
-			runtime.console().p("Testing Method Overloading...").pln().flush();
+			{
+				runtime.console().p("Testing Method Overloading...").pln().flush();
 			
-			/*Create a new visitor to visit the CompilationUnit */
-			new Visitor(){
-				public void visitBlock(GNode n)
-				{
-					//CppWalker walk= new CppWalker(n);
-					//System.out.println(walk.getString());
-				}
-				public void visit(Node n)
-				{
-					for(Object o:n) {
-						if(o instanceof Node) dispatch((Node) o);
-						
+				/*Create a new visitor to visit the CompilationUnit */
+				new Visitor(){
+					public void visitBlock(GNode n)
+					{
+						//CppWalker walk= new CppWalker(n);
+						//System.out.println(walk.getString());
 					}
-				}
-			}.dispatch(node);
-			//Print the New AST
-			//runtime.console().format(node).pln().flush();
-		}
+					public void visit(Node n)
+					{
+						for(Object o:n) {
+							if(o instanceof Node) dispatch((Node) o);
+						
+						}
+					}
+				}.dispatch(node);
+				//Print the New AST
+				//runtime.console().format(node).pln().flush();
+			}
 		
 		// Handle the translate option
 		if (runtime.test("translate")) {
 
-                    if (VERBOSE) {
-			runtime.console().p("Begining translation...").pln().flush();
-                    }
+			if (VERBOSE) {
+				runtime.console().p("Begining translation...").pln().flush();
+			}
 
-			runtime.console().p("translating...").pln().flush();
-
-
-                        // need the original file to be the first in dependencies
-                        // list to avoid circular imports
-                        if (dependencies.isEmpty()) {
-                            try {
-                                dependencies.put(inputFile.getCanonicalPath(), true);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
+			// need the original file to be the first in dependencies
+			// list to avoid circular imports
+			if (dependencies.isEmpty()) {
+				try {
+					dependencies.put(inputFile.getCanonicalPath(), true);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			
 		
 			
-                        // creates the import heirarchy
-                        DependencyTree dependency = new DependencyTree(node, dependencies);
+			// creates the import heirarchy
+			DependencyTree dependency = new DependencyTree(node, dependencies);
 
 
 			//creates tree root a.k.a. the Object class
@@ -194,7 +191,7 @@ public class Translator extends Tool {
 			
 			
 			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
-				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
+			/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
 			final ArrayList<GNode> ToTree = new ArrayList<GNode>(0);
 			
 			new Visitor() {
@@ -237,7 +234,7 @@ public class Translator extends Tool {
 			while(!ToTree.isEmpty()){
 				for(int i=0;i<ToTree.size();i++){
 					supr = Object.search(ToTree.get(i).getNode(3)
-									 .getNode(0).getNode(0).getString(0));
+										 .getNode(0).getNode(0).getString(0));
 					if(supr!=null){
 						inherit.addClassdef((new InheritanceTree(ToTree.get(i),supr)));
 						ToTree.remove(i);
@@ -286,9 +283,9 @@ public class Translator extends Tool {
 	 */
 	public static void main(String[] args) {
             
-            // start with an empty dependency list
-            HashMap<String,Boolean> dependencies = new HashMap<String,Boolean>();
+		// start with an empty dependency list
+		HashMap<String,Boolean> dependencies = new HashMap<String,Boolean>();
             
-            new Translator(dependencies).run(args);
+		new Translator(dependencies).run(args);
 	}	
 }//end of Translator.java
