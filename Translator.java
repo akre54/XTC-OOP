@@ -84,6 +84,8 @@ public class Translator extends Tool {
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
 				 "Translate .java file to c++.").
+			bool("finddependencies", "finddependencies", false,
+				 "find all classes we need to translate").	
 			bool("testing","testing",false,"Run some Test cases.").
 			bool("test","test",false,"Run some Test cases.");	}
 
@@ -256,6 +258,15 @@ public class Translator extends Tool {
 
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
+
+		if(runtime.test("finddependencies")){
+		
+		
+		
+		
+		
+		
+		}
 
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();
