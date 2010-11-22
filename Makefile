@@ -53,12 +53,11 @@ SOURCE = \
 	InheritanceBuilder.java \
 	Declaration.java \
 	DependencyTree.java \
+	ClassStruct.java \
 	InheritanceTree.java \
 	InstanceField.java \
 	ConstructorDec.java \
-	ArrayMaker.java \
 	translate/PrintMaker.java \
-	ConditionalMaker.java \
 	EWalk.java\
 	CppWalker.java
 
