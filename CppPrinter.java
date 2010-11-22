@@ -455,18 +455,6 @@ public class CppPrinter extends Visitor
 		}	
 	}
 	/**********************Other***************************/
-	public void visitPrimaryIdentifier(GNode n)
-	{
-		Object o = n.get(0);
-		if(o instanceof String)
-			{
-				printer.append((String)o+";\n");
-			}
-			else if(o instanceof Node)
-			{
-				dispatch((Node) o);
-			}
-	}
 	public void visitArguments(GNode n)
 	{
 		for (int i=0; i<n.size(); i++) {

@@ -84,6 +84,8 @@ public class Translator extends Tool {
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
 				 "Translate .java file to c++.").
+			bool("finddependencies", "finddependencies", false,
+				 "find all classes we need to translate").	
 			bool("testing","testing",false,"Run some Test cases.").
 			bool("test","test",false,"Run some Test cases.");	}
 
@@ -117,74 +119,71 @@ public class Translator extends Tool {
 		
 		//Some Testing Environments
 		if(runtime.test("testing"))
-		{
-			runtime.console().p("Testing...").pln().flush();
+			{
+				runtime.console().p("Testing...").pln().flush();
 			
-			/*Create a new visitor to visit the CompilationUnit */
-			new Visitor(){
-				public void visitBlock(GNode n)
-				{
-					CppPrinter print= new CppPrinter(n);
-					System.out.println(print.getString());
-				}
-				public void visit(Node n)
-				{
-					for(Object o:n) {
-						if(o instanceof Node) dispatch((Node) o);
-						
+				/*Create a new visitor to visit the CompilationUnit */
+				new Visitor(){
+					public void visitBlock(GNode n)
+					{
+						CppPrinter print= new CppPrinter(n);
+						System.out.println(print.getString());
 					}
-				}
-			}.dispatch(node);
+					public void visit(Node n)
+					{
+						for(Object o:n) {
+							if(o instanceof Node) dispatch((Node) o);
+						
+						}
+					}
+				}.dispatch(node);
 			
-		}
+			}
 		//Some Testing Environments
 		if(runtime.test("test"))
-		{
-			runtime.console().p("Testing Method Overloading...").pln().flush();
+			{
+				runtime.console().p("Testing Method Overloading...").pln().flush();
 			
-			/*Create a new visitor to visit the CompilationUnit */
-			new Visitor(){
-				public void visitBlock(GNode n)
-				{
-					//CppWalker walk= new CppWalker(n);
-					//System.out.println(walk.getString());
-				}
-				public void visit(Node n)
-				{
-					for(Object o:n) {
-						if(o instanceof Node) dispatch((Node) o);
-						
+				/*Create a new visitor to visit the CompilationUnit */
+				new Visitor(){
+					public void visitBlock(GNode n)
+					{
+						//CppWalker walk= new CppWalker(n);
+						//System.out.println(walk.getString());
 					}
-				}
-			}.dispatch(node);
-			//Print the New AST
-			//runtime.console().format(node).pln().flush();
-		}
+					public void visit(Node n)
+					{
+						for(Object o:n) {
+							if(o instanceof Node) dispatch((Node) o);
+						
+						}
+					}
+				}.dispatch(node);
+				//Print the New AST
+				//runtime.console().format(node).pln().flush();
+			}
 		
 		// Handle the translate option
 		if (runtime.test("translate")) {
 
-                    if (VERBOSE) {
-			runtime.console().p("Begining translation...").pln().flush();
-                    }
+			if (VERBOSE) {
+				runtime.console().p("Begining translation...").pln().flush();
+			}
 
-			runtime.console().p("translating...").pln().flush();
-
-
-                        // need the original file to be the first in dependencies
-                        // list to avoid circular imports
-                        if (dependencies.isEmpty()) {
-                            try {
-                                dependencies.put(inputFile.getCanonicalPath(), true);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
+			// need the original file to be the first in dependencies
+			// list to avoid circular imports
+			if (dependencies.isEmpty()) {
+				try {
+					dependencies.put(inputFile.getCanonicalPath(), true);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			
 		
 			
-                        // creates the import heirarchy
-                        DependencyTree dependency = new DependencyTree(node, dependencies);
+			// creates the import heirarchy
+			DependencyTree dependency = new DependencyTree(node, dependencies);
 
 
 			//creates tree root a.k.a. the Object class
@@ -196,7 +195,8 @@ public class Translator extends Tool {
 			
 			final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
 				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
-			final LinkedList<GNode> ToTree = new LinkedList<GNode>();
+
+			final LinkedList<GNode> toTree = new LinkedList<GNode>();
 			
 			new Visitor() {
 				
@@ -217,7 +217,7 @@ public class Translator extends Tool {
 					if(supr!=null){
 						inherit.addClassdef((new InheritanceTree(n,supr)));
 					}
-					else ToTree.add(n);
+					else toTree.add(n);
 					
 				}
 				public void visitExtension(GNode n){
@@ -235,17 +235,18 @@ public class Translator extends Tool {
 			//creates the rest of the tree all nodes whose super exists until all 
 			//trees created
 			InheritanceTree supr;
+
 			int i=0;
-			while(!ToTree.isEmpty()){
+			while(!toTree.isEmpty()){
 				
-					supr = Object.search(ToTree.get(i).getNode(3)
+					supr = Object.search(toTree.get(i).getNode(3)
 									 .getNode(0).getNode(0).getString(0));
 					if(supr!=null){
-						inherit.addClassdef((new InheritanceTree(ToTree.get(i),supr)));
-						ToTree.remove(i);
+						inherit.addClassdef((new InheritanceTree(toTree.get(i),supr)));
+						toTree.remove(i);
 					}
 					else i++;
-				if (i==ToTree.size()) i=0;
+				if (i==toTree.size()) i=0;
 				
 			}
 				
@@ -254,6 +255,15 @@ public class Translator extends Tool {
 
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
+
+		if(runtime.test("finddependencies")){
+		
+		
+		
+		
+		
+		
+		}
 
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();
@@ -290,9 +300,9 @@ public class Translator extends Tool {
 	 */
 	public static void main(String[] args) {
             
-            // start with an empty dependency list
-            HashMap<String,Boolean> dependencies = new HashMap<String,Boolean>();
+		// start with an empty dependency list
+		HashMap<String,Boolean> dependencies = new HashMap<String,Boolean>();
             
-            new Translator(dependencies).run(args);
+		new Translator(dependencies).run(args);
 	}	
 }//end of Translator.java

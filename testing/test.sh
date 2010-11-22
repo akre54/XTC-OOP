@@ -7,6 +7,9 @@
 . ../../../../setup.sh
 clear
 echo "Java to C++ Translation"
+cd ..
+make
+cd testing/
 D="1";
 while [ $D ]; do
 echo "Enter the filename (____.java , default is demo)"
@@ -23,7 +26,7 @@ if [ $D ]; then
 	cd $D
 	echo
 	echo $P.java:
-	more $P.java
+	cat $P.java | nl
 	echo
 		#clean out previous translations
 	make -f ../Makefile clean
