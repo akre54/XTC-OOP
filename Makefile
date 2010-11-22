@@ -49,7 +49,6 @@ SOURCE = \
 	CppPrinter.java\
 	Translator.java \
 	CppCreator.java \
-	translate/ArrayMaker.java\
 	InheritanceBuilder.java \
 	Declaration.java \
 	DependencyTree.java \
@@ -57,9 +56,9 @@ SOURCE = \
 	InheritanceTree.java \
 	InstanceField.java \
 	ConstructorDec.java \
-	translate/PrintMaker.java \
 	EWalk.java\
-	CppWalker.java
+	CppWalker.java\
+	FCname.java
 
 
 
