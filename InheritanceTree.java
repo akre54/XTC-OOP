@@ -1,6 +1,7 @@
 package xtc.oop;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Arrays;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
@@ -640,14 +641,20 @@ public class InheritanceTree{
                       *  WRONG: will fix
                       */
             if (castee.equals("char")) {
-                if (casted_to.equals("int"))
-                    return 1;
-                else
+                if (casted_to.equals("short"))
                     return -1;
-            }
+                else
+                    castee = "short"; // has same precidence as a short,
+            } else if (casted_to.equals("char"))
+                return -1;
+            
 
-            final String[] primatives = {"double", "float", "long",
-                "int", "short", "byte" };
+            final ArrayList<String> primatives = (ArrayList) Arrays.asList(
+                    new String[] {"double", "float", "long",
+                    "int", "short", "byte" });
+            
+            if (primatives.contains(casted_to) && primatives.contains(castee))
+                return primatives.indexOf(casted_to) - primatives.indexOf(castee);
 
 		int distance =0;
 		
