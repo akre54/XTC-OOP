@@ -292,7 +292,7 @@ public class CppPrinter extends Visitor
 		for(int i=1; i<(n.size());i++)
 		{
 			Node cases= n.getNode(i);
-			dispatch(cases);e
+			dispatch(cases);
 		}
 		printer.append("}\n");
 	}
@@ -560,7 +560,7 @@ public class CppPrinter extends Visitor
 		if(one!=null)
 		{//check the instance of the object and decide what to do with it
 			if (one instanceof String ) {
-				printer.append(n.getString(1);
+				printer.append(n.getString(1));
 			}
 			else if (one instanceof Node)
 			{
@@ -574,7 +574,7 @@ public class CppPrinter extends Visitor
 		{
 			printer.append(" = ");
 			if (two instanceof String ) {
-				printer.append(n.getString(2);
+				printer.append(n.getString(2));
 							   }
 			else if (two instanceof Node)
 			{
