@@ -50,15 +50,17 @@ public class Translator extends Tool {
 
 	File inputFile = null;
         HashMap<String,Boolean> dependencies;
+        HashMap<ClassStruct,Boolean> classes;
 
 	/** Create a new translator. */
 	public Translator() {
-		
+            // do nothing
 	}
 
         public Translator (HashMap<String,Boolean> dependencies) {
             this();
             this.dependencies = dependencies;
+            //this.classes = classes;
         }
 
 	public String getCopy() {
@@ -134,7 +136,6 @@ public class Translator extends Tool {
 					{
 						for(Object o:n) {
 							if(o instanceof Node) dispatch((Node) o);
-						
 						}
 					}
 				}.dispatch(node);
@@ -181,11 +182,9 @@ public class Translator extends Tool {
 				}
 			}
 			
-		
-			
-			// creates the import heirarchy
-			DependencyTree dependency = new DependencyTree(node, dependencies);
 
+                        // creates the import heirarchy
+                        DependencyTree dependency = new DependencyTree(node, dependencies, classes);
 
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
@@ -205,7 +204,7 @@ public class Translator extends Tool {
 				
 				public void visitCompilationUnit(GNode n){
 					//Paiges testing class
-					cppClass classtester=new cppClass(n);
+					//cppClass classtester=new cppClass(n);
 					visit(n);
 				}
 				
@@ -259,7 +258,9 @@ public class Translator extends Tool {
 
 		if(runtime.test("finddependencies")){
 		
-		
+                    HashMap<ClassStruct,Boolean> classesToTranslate =
+                            new HashMap<ClassStruct,Boolean>();
+                    
 		
 		
 		

@@ -31,11 +31,14 @@ public class DependencyTree {
       */
     private HashMap<String,Boolean> allPaths;
     private HashMap<String,Boolean> filePaths = new HashMap<String,Boolean>();
+    private HashMap<ClassStruct,Boolean> allClasses;
+    private HashMap<ClassStruct,Boolean> fileClasses;
 
 
-    public DependencyTree(Node n, HashMap<String,Boolean> oldPaths) {
+    public DependencyTree(Node n, HashMap<String,Boolean> oldPaths, HashMap<ClassStruct,Boolean> oldClasses) {
 
         allPaths = oldPaths;
+        allClasses = oldClasses;
 
         new Visitor() {
 
@@ -142,6 +145,15 @@ public class DependencyTree {
 
                 addPath(filename);
             }
+            public void visitClassDeclaration(GNode n){
+                String className = n.getString(1);
+		visit(n);
+            }
+
+            public void visitExtension(GNode n){
+		String superClass = n.getNode(0).getNode(0).getString(0);
+            }
+
 
             public void visit(Node n) {
                 for (Object o : n) {
@@ -202,6 +214,22 @@ public class DependencyTree {
          */
         public ArrayList<String> getFilePaths() {
             return new ArrayList<String>(filePaths.keySet());
+        }
+
+        /**
+         * @return all classes to each dependent file of the whole dependency
+         * structure as ArrayList of ClassStruct
+         */
+        public ArrayList<ClassStruct> getAllCLasses() {
+            return new ArrayList<ClassStruct>(allClasses.keySet());
+        }
+
+
+      /**
+         * @return all classes in the current file
+         */
+        public ArrayList<ClassStruct> getFileClasses() {
+            return new ArrayList<ClassStruct>(fileClasses.keySet());
         }
 
        /**
