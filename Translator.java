@@ -127,7 +127,8 @@ public class Translator extends Tool {
 					public void visitBlock(GNode n)
 					{
 						CppPrinter print= new CppPrinter(n);
-						System.out.println(print.getString());
+						print.DEBUG=true;
+						
 					}
 					public void visit(Node n)
 					{
