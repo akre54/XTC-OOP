@@ -43,6 +43,13 @@ public class CppPrinter extends Visitor
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
 	}
+	public CppPrinter(GNode n, boolean debug)
+	{
+		DEBUG= debug;
+		printer = new StringBuilder(); //intialize Stringbuilder
+		isPrivate =false; //sets false by default since structs are public by default
+		visit(n); //visit the given node (starts all the visiting)
+	}
 	/*visit cast expression and print the c++ version of the java AST values*/
 	public void visitCastExpression(GNode n)
 	{
@@ -184,7 +191,7 @@ public class CppPrinter extends Visitor
 	/**Assumes that all "smart' code has been handled in EWalk does nothing but print code *place holder**/
 	public void visitSuperExpression(GNode n)
 	{
-		//print("super.");
+		print("superclass.");
 		visit(n);
 	}
 	/**set the default binary behavior*/
@@ -503,6 +510,8 @@ public class CppPrinter extends Visitor
 			}*/
 		}	
 	}
+	/**Visits the modifier node, checks for isPrivate condition to see the current modifier of the scope
+	 Also currently ignores protected*/
 	public void visitModifier(GNode n)
 	{
 		//run check to see if isPrivate is one
@@ -547,7 +556,11 @@ public class CppPrinter extends Visitor
 			checkInstance(two);
 		}
 	}
-							   
+	public void visitType(GNode n)
+	{
+		visitChildren(n, 0, n.size(), "");
+		//print(" ");
+	}
 	/**edited visitor method checks the instance of every node to decide whether to visit or print*/						   
 	public void visit(Node n)
 	{
@@ -572,11 +585,10 @@ public class CppPrinter extends Visitor
 			
 			Object current = n.get(i);
 			//call the instance check on it
-			checkInstance(current);
-			
-						
+			checkInstance(current);	
 		}
 	}
+	
 	
 	/**Checks instances of a given node and calls appropiate action*/
 	public void checkInstance (Object o)
@@ -585,9 +597,8 @@ public class CppPrinter extends Visitor
 		if (o != null) {
 			//if the given o is a String print it
 			if (isString(o)) {
-				print(" ");
+				//print(" ");
 				print((String) o);
-				
 			}			
 			//if the given o is a Node dispatch on it (visit its subtree)
 			else if(isNode(o)){
@@ -622,13 +633,10 @@ public class CppPrinter extends Visitor
 			}
 			
 			if(o instanceof String)//if object o is a string print it
-			{
 				print(" "+(String)o);
-			}
 			else if(o instanceof Node) //if its a node call dispatch on it
-			{
 				dispatch((Node) o);
-			}
+	
 			if (o!=null) {
 				if(i!=(n.size()-1)){
 				}
