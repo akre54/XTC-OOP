@@ -58,29 +58,37 @@ public class Declaration{
 	 * returns the type of that name
 	 *
 	 */
-	public String search_for_type(String name){
+	public ArrayList<String> search_for_type(String name){
 		for(int i=0;i<variables.size();i++){
-			if(name.equals(variables.get(i).name))
-				return variables.get(i).type;
+			if(name.equals(variables.get(i).name)){
+				ArrayList<String> type = new ArrayList<String>(variables.get(i).packages);
+				type.add(variables.get(i).type);
+				return type;
+			}
 		}
-		return "variable does not exist";
+		return null;//error type does not exist
 	
 	}
 	
 	/**
 	 * will cycle throu all variables for name
 	 * and then update the type to the new type
-	 *
+	 * will create a new local_variable if none exists
 	 */
-	public void update_type(String name, String newtype){
+	public void update_type(String name,ArrayList<String> newpack, String newtype){
+				boolean found = false;
 		
-		for(int i=0;i<variables.size();i++){
-			
-			if(name.equals(variables.get(i).name))
-				variables.get(i).type = newtype;
-	
-		}
-
+				for(int i=0;i<variables.size();i++){
+					if(name.equals(variables.get(i).name)){
+						found = true;
+						variables.get(i).type = newtype;
+						variables.get(i).packages = newpack;
+					}
+				}
+				if(!found){
+					variables.add(new local_variable(newpack,newtype,name));	
+				
+				}
 	}
 	public boolean is_static(){
 		for(int i=0;i<modifiers.size();i++){
@@ -92,17 +100,14 @@ public class Declaration{
 
 }
 class local_variable{
-
+	ArrayList<String> packages;
 	String name;
 	String type;
-	
-	
 
-	local_variable(String typ, String nm){
-	
+	local_variable(ArrayList<String> pack,String typ, String nm){
+		packages = pack;
 		name = nm;
 		type = typ;
-		
 	}
 
 }
