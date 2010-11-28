@@ -94,15 +94,12 @@ public class DependencyTree {
 
                 if (dir.exists()) {
                     for (String fileName : dir.list()) {
-                        if (fileName.endsWith(".java")) {
-                            // will eventually use Reflection for e.g. finding non-filenamed classes
-                            //addPath(Class.forName(pathname + '/' + fileName));
-
+                        if (fileName.endsWith(".java")) 
                             addPath(pathname + '/' + fileName);
                             //visitImportDeclaration(pathname + '/' + fileName);
                         }
                     }
-                }
+                
 
 
             }

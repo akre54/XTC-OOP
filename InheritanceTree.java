@@ -592,9 +592,9 @@ public class InheritanceTree{
 		return found;
 	
 	}
-	public String search_for_method(boolean on_instance, Declaration method, 
+	public String[] search_for_method(boolean on_instance, Declaration method, 
 									ArrayList<String> paramtyps, String method_name){
-		
+		String result[]= new String[2];
 		String accessor;
 		
 		int paramsize=paramtyps.size();
@@ -616,8 +616,10 @@ public class InheritanceTree{
 		//if only one left return it with accessor!!
 		if(possible.size()==1){
 			Declaration choosen = possible.get(0);
+			result[0] = choosen.returntype;
 			accessor= make_accessor(on_instance,choosen.isVirtual);
-			return accessor+choosen.name+"_"+choosen.overloadNum;
+			result[1]= accessor+choosen.name+"_"+choosen.overloadNum;
+			return result;
 		}
 		
 		// CALLING NON_STATIC FROM STATIC CONTEXT CHECK 
@@ -652,7 +654,9 @@ public class InheritanceTree{
 		//find method with smallest number MUST BE ONLY ONE (MIN)
 		//RETURN accessor+NAME+_number
 		accessor = make_accessor(on_instance,min.isVirtual);
-		return accessor+min.name+"_"+min.overloadNum;
+		result[0]= min.returntype;
+		result[1]= accessor+min.name+"_"+min.overloadNum;
+		return result;
 		
 		
 		
