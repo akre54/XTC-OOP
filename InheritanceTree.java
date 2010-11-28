@@ -592,9 +592,51 @@ public class InheritanceTree{
 		return found;
 	
 	}
+	public String search_for_constructor(ArrayList<String> paramtyps){
+		//list of possible constructors
+		LinkedList<Declaration> possible= new LinkedList<Declaration>();
+		
+		//add all constructors to list that have same #params
+		int size= constructors.size();
+		for(int i=0;i<size;i++){
+			if(constructors.get(i).params.size()==paramtyps.size())
+			possible.add(constructors.get(i));
+		}
+		//return if only one
+		if(possible.size()==1)
+			return possible.get(0).name+"_"+possible.get(0).overloadNum;
+		
+		//need to zero out specificity for next check
+		for(Declaration d : possible){
+			d.specificity =0;
+		}
+		
+		//check for specificity
+		int ptsize = paramtyps.size();
+		for(int m = 0;m<ptsize;m++){
+			String type=paramtyps.get(m);
+			for(int c=0;c<possible.size();c++){
+				String pos_type = possible.get(c).params.get(m).type;
+				if(!pos_type.equals(type));
+				else{
+					int casting = gouptree(pos_type,type);
+					if(casting == -1){ possible.remove(c);}
+					else possible.get(c).specificity =possible.get(c).specificity+ casting;
+				}
+			}
+		}
+		Declaration min =possible.get(0);
+		for(int n=0;n<possible.size();n++){
+			if(min.specificity>possible.get(n).specificity)
+				min=possible.get(n);
+		
+		}
+		return min.name+"_"+min.overloadNum;
+	
+	}
 	public String[] search_for_method(boolean on_instance, Declaration method, 
 									ArrayList<String> paramtyps, String method_name){
-		String result[]= new String[2];
+		String[] result= new String[2];
 		String accessor;
 		
 		int paramsize=paramtyps.size();
@@ -622,15 +664,10 @@ public class InheritanceTree{
 			return result;
 		}
 		
-		// CALLING NON_STATIC FROM STATIC CONTEXT CHECK 
-		//if !on_instance and static need to eliminate all non-static methods
-		/*if((!on_instance)&&(method.is_static())){
-			for(int s=0;s<possible.size();s++){//compute size each time so that we dont go too far
-				if(!possible.get(s).is_static())
-					possible.remove(s);//remove non-static methods
-			}
+		//need to zero out specificity for next check
+		for(Declaration d : possible){
+			d.specificity =0;
 		}
-	*/
 		
 		//----SPECIFICITY CHECK
 		
@@ -657,8 +694,7 @@ public class InheritanceTree{
 		result[0]= min.returntype;
 		result[1]= accessor+min.name+"_"+min.overloadNum;
 		return result;
-		
-		
+
 		
 	}
 	private String make_accessor(boolean on_instance,boolean isVirtual){
