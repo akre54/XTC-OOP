@@ -77,10 +77,13 @@ public class EWalk
 				
 				int size = fcNameList.size();
 				String methodName = fcNameList.get(size-1);
-				String className = fcNameList.get(size-2);
+				//String className = fcNameList.get(size-2);//SOURCE OF ARRAY OUT OF BOUNDS
 				fcNameList.remove(size-1);
-				fcNameList.remove(size-2);
-				//String newMethod=tree.search_for_method(isInstance,method,argumentList,methodName);
+				//fcNameList.remove(size-2);//SOURCE OF ARRAY OUT OF BOUNDS
+				
+				//search for the right method name to change it to
+				//InheritenceTree b =search(methodName); //search takes the current method name?
+				//String newMethod=b.search_for_method(isInstance,method,argumentList,methodName);
 
 
 
@@ -131,7 +134,9 @@ public class EWalk
 				//String temp = n.getString(0)
 
 			}
-						public String getType(Node n)
+			/**Helper method that checks for the types in the subtree and returns them 
+			 is currently used when get the types for values in an argument*/
+			public String getType(Node n)
 			{
 				//check for primitative types
 				if (n.getName().equals("IntegerLiteral")) {
@@ -160,6 +165,12 @@ public class EWalk
 					//call the method in the inheritence tree to get the type of the primaryIden
 					return method.search_for_type(n.getString(0));
 				}
+				/**can put support for handling methods inside an argument here (use search for methods
+				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
+			}
+			
+			public void visitSuperExpression(GNode n)
+			{
 			}
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);

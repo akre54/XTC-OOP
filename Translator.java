@@ -88,8 +88,7 @@ public class Translator extends Tool {
 				 "Translate .java file to c++.").
 			bool("finddependencies", "finddependencies", false,
 				 "find all classes we need to translate").	
-			bool("testing","testing",false,"Run some Test cases.").
-			bool("test","test",false,"Run some Test cases.");	}
+		bool("testing","testing",false,"Run some Test cases.");}
 
 	public void prepare() {
 		super.prepare();
@@ -128,40 +127,17 @@ public class Translator extends Tool {
 				new Visitor(){
 					public void visitBlock(GNode n)
 					{
-						CppPrinter print= new CppPrinter(n);
-						System.out.println(print.getString());
-					}
-					public void visit(Node n)
-					{
-						for(Object o:n) {
-							if(o instanceof Node) dispatch((Node) o);
-						}
-					}
-				}.dispatch(node);
-			
-			}
-		//Some Testing Environments
-		if(runtime.test("test"))
-			{
-				runtime.console().p("Testing Method Overloading...").pln().flush();
-			
-				/*Create a new visitor to visit the CompilationUnit */
-				new Visitor(){
-					public void visitBlock(GNode n)
-					{
-						//CppWalker walk= new CppWalker(n);
-						//System.out.println(walk.getString());
-					}
-					public void visit(Node n)
-					{
-						for(Object o:n) {
-							if(o instanceof Node) dispatch((Node) o);
+						CppPrinter print= new CppPrinter(n,true);
 						
+					}
+					public void visit(Node n)
+					{
+						for(Object o:n) {
+							if(o instanceof Node) dispatch((Node) o);
 						}
 					}
 				}.dispatch(node);
-				//Print the New AST
-				//runtime.console().format(node).pln().flush();
+			
 			}
 		
 		// Handle the translate option
@@ -223,7 +199,10 @@ public class Translator extends Tool {
 					//find's super class
 					//searches for InheritanceTree with same name as extention
 					//returns null if no tree exists yet
+					
+					/**CURRENTLY CRASHES MAKE REMOVED BY PAIGE 11.25
 					supr = Object.search(n.getNode(0).getNode(0).getString(0));
+					 */
 				}
 				public void visit(Node n) {
 					for (Object o : n) if (o instanceof Node) dispatch((Node)o);
@@ -238,15 +217,17 @@ public class Translator extends Tool {
 			int i=0;
 			while(!toTree.isEmpty()){
 				
+				/**CURRENTLY CRAHES MAKE REMOVED BY PAIGE 11.25
 					supr = Object.search(toTree.get(i).getNode(3)
 									 .getNode(0).getNode(0).getString(0));
+				 
 					if(supr!=null){
 						inherit.addClassdef((new InheritanceTree(toTree.get(i),supr)));
 						toTree.remove(i);
 					}
 					else i++;
 				if (i==toTree.size()) i=0;
-				
+				*/
 			}
 				
 			

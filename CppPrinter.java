@@ -30,53 +30,56 @@ import xtc.tree.Node;
 import xtc.tree.Visitor;
 
 import xtc.util.Tool;
-/**A "Stupid" printer, it just prints everything it sees and assumes that every String inside the AST is proper C++ code, there are special catches and cases
+/**A "Stupid" print, it just prints everything it sees and assumes that every String inside the AST is proper C++ code, there are special catches and cases
  for brackets, etc but there is no intelligent code in here */
 public class CppPrinter extends Visitor
 {
-	private StringBuilder printer; //a StringBuilder that stores the code translated by the printer
-	public final boolean DEBUG = false;
+	private StringBuilder printer; //a StringBuilder that stores the code translated by the print
+	public boolean DEBUG = false;
 	public boolean isPrivate; //a global boolean that keeps track of the current modifier status
 	public CppPrinter(GNode n)
 	{
 		printer = new StringBuilder(); //intialize Stringbuilder
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
-		if(DEBUG){System.out.println(printer);}
+	}
+	public CppPrinter(GNode n, boolean debug)
+	{
+		DEBUG= debug;
+		printer = new StringBuilder(); //intialize Stringbuilder
+		isPrivate =false; //sets false by default since structs are public by default
+		visit(n); //visit the given node (starts all the visiting)
 	}
 	/*visit cast expression and print the c++ version of the java AST values*/
 	public void visitCastExpression(GNode n)
 	{
-		printer.append("(");
+		print("(");
 		//visit the cast type
-		Node type = n.getNode(0);
-		dispatch(type);
-		
-		printer.append(")");
+		visitChildren(n, 0,1,"");
+		print(")");
 		//visit the next batch of code
-		Node next=n.getNode(1);
-		dispatch(next);
-		
+		visitChildren(n, 1,n.size(),"");
+	}
+	public void visitBasicCastExpression(GNode n)
+	{
+		print("(");
+		//visit the cast type
+		visitChildren(n, 0,1,"");
+		print(")");
+		//visit the next batch of code
+		visitChildren(n, 1,n.size(),"");
 	}
 	/***********************Expressions***********************/
-	
 	/*Visit a conditional expression and print the c++ equivalent**/
 	public void visitConditionalExpression(GNode n)
 	{
-		printer.append("(");
+		print("(");
 		//visit the expression Node
-		Node express = n.getNode(0);
-		dispatch(express);
+		visitChildren(n, 0,1,"");
 		//append the default strings not in the AST
-		printer.append(") ? ");
-		//get the node at location 1
-		Node one = n.getNode(1);
-		dispatch(one);
-		
-		printer.append(" : ");
-		//get the node at location 2
-		Node two = n.getNode(2);
-		dispatch(two);
+		print(") ? ");
+		//get the rest node
+		visitChildren(n, 1,n.size(),":");
 	}	
 	/** Visit the selection expression i.e. java.lang*/
 	public void visitSelectionExpression(GNode n)
@@ -85,11 +88,11 @@ public class CppPrinter extends Visitor
 		Node prim = n.getNode(0);
 		dispatch(prim);
 		//print a . at the end of each expression
-		printer.append(".");
+		print(".");
 		Object o =n.get(1);
 		if(o instanceof String) //make sure the object o is an string
 		{
-			printer.append((String)o);
+			print((String)o);
 		}
 		else { //other wise its a Node and call dispatch on it to visit it
 			dispatch((Node) o);
@@ -103,9 +106,9 @@ public class CppPrinter extends Visitor
 	/**prints default c++ code and calls default binary behavor on Equality Expressions */
 	public void visitEqualityExpression(GNode n)
 	{
-		printer.append("(");		
+		print("(");		
 		setBinary(n);		
-		printer.append("){ \n");
+		print("){ \n");
 	}//end of visitCallExpression method
 	
 	/** calls default binary behavior on Expression */
@@ -182,13 +185,13 @@ public class CppPrinter extends Visitor
 	/*replaces "this" with __this for propery c++ conversion*/
 	public void visitThisExpression(GNode n)
 	{
-		printer.append("__this.");
+		print("__this.");
 		visit(n);
 	}
-	/**does nothing but print code *place holder**/
+	/**Assumes that all "smart' code has been handled in EWalk does nothing but print code *place holder**/
 	public void visitSuperExpression(GNode n)
 	{
-		//printer.append("super.");
+		print("superclass.");
 		visit(n);
 	}
 	/**set the default binary behavior*/
@@ -200,136 +203,117 @@ public class CppPrinter extends Visitor
 	/**print java asser code currently not a priority*/
 	public void visitAssertStatement(GNode n)
 	{
-		printer.append("assert ");
-		Node express=n.getNode(0);
-		dispatch(express);
-		printer.append(":");
-		Node express2=n.getNode(1);
-		dispatch(express2);
-		printer.append("; \n");
+		print("assert ");
+		visitChildren(n,0,1,"");
+		print(":");
+		visitChildren(n,1,n.size(),"");
+		print("; \n");
 	}
 	/**print java sychronizedstatement currently not a priority */
 	public void visitSychronizedStatement(GNode n)
 	{
-		printer.append("sychronized (");
-		Node expression=n.getNode(0);
-		dispatch(expression);
-		printer.append("){\n");
-		Node block = n.getNode(1);
-		dispatch(block);
-		printer.append("}\n");
-		
+		print("sychronized (");
+		visitChildren(n,0,1,"");
+		print("){\n");
+		visitChildren(n,1,n.size(),"");
+		print("}\n");
 	}
 	/**print java labeled statement */
 	public void visitLabeledStatement(GNode n)
 	{
-		printer.append(n.getString(0)+":\n");
-		for(int i=1;i<n.size();i++)
-		{
-			Object o=n.get(i);
-			if(o instanceof String) //check if o is an instance of a string
-			{
-			}
-			else if(o instanceof Node)
-			{
-				dispatch((Node) o);
-			}
-		}	
+		print(n.getString(0)+":\n");
+		visitChildren(n,1,n.size(),"");
 	}
 	/*print c++ break statement  call setBreCon to get code if inside of break statement*/
 	public void visitBreakStatement(GNode n)
 	{
-		printer.append("break");
+		print("break");
 		setBreCon(n);
 	}
 	/**visit contrinue stats ment and call setBreCon to get code if any inside of continue statement*/
 	public void visitContinueStatement(GNode n)
 	{
-		printer.append("continue");
+		print("continue");
 		setBreCon(n);
 	}
 	/**get code inside of trycatchfinallystatement*/
 	public void visitTryCatchFinallyStatement(GNode n)
 	{
 		
-		printer.append("try {\n");
+		print("try {\n");
 		Node block = n.getNode(0);
 		dispatch(block);
-		printer.append("} ");
-		for (int i=1; i<n.size(); i++) {
+		print("} ");
+		visitChildren(n, 1, n.size(), "");
+		/*for (int i=1; i<n.size(); i++) {
+			
 			Node catch1 = n.getNode(i);
 			dispatch(catch1);
-		}
+		}*/
 	}
 	//print throw statement (handling excpetions? */
 	public void visitThrowStatement(GNode n)
 	{
-		printer.append("throw ");
-		visit(n);
-		printer.append(";\n}\n");
+		print("throw ");
+		visitChildren(n, 0, n.size(), "");
+		print(";\n}\n");
 	}
 	/**print the c++ return statement */
 	public void visitReturnStatement(GNode n)
 	{
-		printer.append("return ");
-		visit(n);
-		printer.append("; \n");
+		print("return ");
+		visitChildren(n, 0, n.size(), "");
+		print("; \n");
 	}
 	/**Visit Expression append a ;*/
 	public void visitExpressionStatement(GNode n)
 	{
-		visit(n);
-		printer.append(";\n");
+		visitChildren(n, 0, n.size(), "");
+		print(";\n");
 	}
 	/**visit switch statement and below case clause*/
 	public void visitSwitchStatement(GNode n)
 	{
-		printer.append("switch(");
-		Node h= n.getNode(0);
-		dispatch(h);
-		printer.append(")\n");
-		printer.append("{\n");
-		for(int i=1; i<(n.size());i++)
-		{
-			Node cases= n.getNode(i);
-			dispatch(cases);
-		}
-		printer.append("}\n");
+		print("switch(");
+		visitChildren(n, 0, 1, "");
+		print(")");
+		print("{\n");
+		visitChildren(n, 1, n.size(), "");
+		print("}\n");
 	}
 	public void visitCaseClause(GNode n)
 	{
-		printer.append("case");
-		Node theCase= n.getNode(0);
-		dispatch(theCase);
-		printer.append(": ");
-		Node theExp= n.getNode(1);
-		dispatch(theExp);	
-		Node break1= n.getNode(2);
-		dispatch(break1);	
+		print("case");
+		visitChildren(n, 0, 1, "");
+		print(":");
+		visitChildren(n, 1, n.size(), "");
 	}
-	/*visit conditionalstatement aka if*/
+	/*visit if/Else statements nodes aka Conditional statments*/
 	public void visitConditionalStatement(GNode n)
 	{
-		printer.append("if(");
-		Node express=n.getNode(0);
-		dispatch(express);
-		printer.append("){\n");
-		Node block = n.getNode(1);
-		dispatch(block);
-		printer.append("}\n");
+		print("if(");
+		visitChildren(n, 0, 1, "");
+		print("){\n");
+		visitChildren(n, 1, 2, "");
+		print("}\n");
 		for(int i=2;i<n.size();i++)
 		{
-			printer.append("else ");
-			Node cond =n.getNode(i);
-			if(cond.getName().equals("Block")){
-				printer.append("{ \n");
-				dispatch(cond);
-				printer.append("} \n");
+			Object o = n.get(i);
+			//make sure the node isn't null (there isn't an else statement)
+			if (o!=null) {
+				print("else ");
+				Node cond =n.getNode(i);
+				if(cond.getName().equals("Block")){
+					print("{ \n");
+					dispatch(cond);
+					print("} \n");
+				}
+				else
+				{
+					dispatch(cond);
+				}
 			}
-			else
-			{
-				dispatch(cond);
-			}
+			
 			
 		}
 		
@@ -337,19 +321,20 @@ public class CppPrinter extends Visitor
 	////////////////Loops////////////////////////
 	public void visitDoWhileStatement(GNode n)
 	{
-		printer.append("do{\n");
-		Node block= n.getNode(0);
-		dispatch(block);
-		printer.append("}while(");
-		Node expression= n.getNode(1);
-		dispatch(expression);
-		printer.append(");\n");
+		print("do{\n");
+		visitChildren(n, 0, 1, "");
+		print("}while(");
+		visitChildren(n, 1, n.size(), "");
+		print(");\n");
 	}
 	public void visitWhileStatement(GNode n)
 	{
-		printer.append("\n while");
-		visit(n);
-		printer.append("} \n");
+		print("\n while(");
+		Object param=n.get(0);
+		checkInstance(param);
+		print("){\n");
+		visitChildren(n, 1, n.size(), "");
+		print("} \n");
 	}
 	public void visitForUpdate(Node n)
 	{
@@ -369,163 +354,164 @@ public class CppPrinter extends Visitor
 	{
 		//basic control node
 		Node a=n.getNode(0);
-		printer.append("(");
+		print("(");
 		visitForInit(a);
-		printer.append(";");
+		print(";");
 		visitExpression(a);
-		printer.append(";");
+		print(";");
 		visitForUpdate(a);
-		printer.append(")");
+		print(")");
 	}
 	public void visitForStatement(GNode n)
 	{
-		printer.append("for");
+		print("for");
 		visitBasicForControl(n);
-		printer.append("{\n");
-		Node f= n.getNode(1);
-		visit(f);
-		printer.append("}\n");	
-	}	/***********************Classes ******************************/
+		print("{\n");
+		visitChildren(n, 1, n.size(), "");
+		print("}\n");	
+	}	
+	/***********************Classes ******************************/
 	public void visitNewClassExpression(GNode n)
 	{
-		printer.append("new ");
+		print("new ");
 		for(int i=0;i<n.size();i++)
 		{
 			if (i==3) {
-				printer.append("(");
+				print("(");
 			}
+			
 			Object o=n.get(i);
-			if(o instanceof String)
+			if(isString(o))
 			{
-				printer.append(" __"+(String)o);
+				print(" __"+(String)o);
 			}
-			else if(o instanceof Node)
+			else if(isNode(o))
 			{
 				dispatch((Node) o);
 			}
+			
 			if (i==3) {
-				printer.append(")");
+				print(")");
 			}			
 		}
 	}
+	/**visit call expression where a method is called */
 	public void visitCallExpression(GNode n)
 	{
-		Node primary1 = n.getNode(0);
-		dispatch(primary1);
-		Object mid = n.get(1);
-		if (mid instanceof Node) {
-			dispatch((Node) mid);
-		}
-		//printer.append("->vptr->");
-		Object name =n.get(2);
-		if(name instanceof Node)
-		{
-			dispatch((Node)mid);
-		}
-		else if(name instanceof String)
-		{
-			printer.append((String)name);
-		}
-		Object arguments = n.get(3);
-		printer.append("(");
-		if(arguments instanceof Node)
-		{
-			dispatch((Node)arguments);
-		}
-		printer.append(")");
+		//visit all the children minus the arguments
+		visitChildren(n, 0, 3, "");
+		
+		//visit the arguments
+		print("(");
+		visitChildren(n, 3, n.size(), "");
+		print(")");
 	}
+	/**visit qualifiedIdentifier i.e. custom Objects
+	 It is assumed that all the "SMART" work has already been handled in EWalk
+	 i.e. prints no "." or "->" etc just prints the __ and the name
+	 */
 	public void visitQualifiedIdentifier(GNode n)
 	{
-		
-		
+		//visit every child
+		//visitChildren(n, 0, n.size(), "");
 		for(int i=0; i<n.size();i++)
 		{
 			String name = n.getString(i);
-			if(i>0){
-				printer.append(".");
-			}
-			if(name.equals("String"))
-			{
-			}
-			else {
-				printer.append("__");
-			}
-			printer.append(name);
+			print("__");
+			print(name);
 			
-		}	
+		}
 	}
 	/**********************Other***************************/
 	public void visitArguments(GNode n)
 	{
-		for (int i=0; i<n.size(); i++) {
+		visitChildren(n, 0, n.size(), ",");
+		/*for (int i=0; i<n.size(); i++) {
 			
 			dispatch(n.getNode(i));
 			if(i!=(n.size()-1))
 			{
-				printer.append(", ");
+				print(", ");
 			}
-		}
+		}*/
 	}
 	public void visitFormalParameter(GNode n)
 	{
-		for(int i=0;i<n.size();i++)
+		visitChildren(n, 0, n.size(), " ");
+		/*for(int i=0;i<n.size();i++)
 		{
 			Object o=n.get(i);
 			if(o instanceof String)
 			{
-				printer.append(" "+(String)o);
+				print(" "+(String)o);
 			}
 			else if(o instanceof Node)
 			{
 				dispatch((Node) o);
 			}
-		}
+		}*/
 	}
 			
 	public void visitCatchClause(GNode n)
 	{
-		printer.append("catch(");
-		Node io = n.getNode(0);
-		dispatch(io);
-		printer.append("){\n");
-		Node block = n.getNode(1);
-		dispatch(block);
+		print("catch(");
+		visitChildren(n, 0, 1, "");
+		print("){\n");
+		visitChildren(n, 1, n.size(), "");
+		/*Node block = n.getNode(1);
+		dispatch(block);*/
 	}
 	public void visitDefaultClause(GNode n)
 	{
-		printer.append("default");
-		printer.append(": ");
-		Node theExp= n.getNode(0);
+		//print the proper java code
+		print("default");
+		print(":");
+		
+		//visit all of the switch children
+		visitChildren(n,0,n.size(),"");
+		/*Node theExp= n.getNode(0);
 		dispatch(theExp);	
 		Node break1= n.getNode(1);
-		dispatch(break1);	
+		dispatch(break1);*/
 		
 	}
 	public void visitFieldDeclaration(GNode n)
 	{
-		visit(n);
-		printer.append(";\n");
+		//add a new tab to the front of the declaration
+		//print("\t");
+		
+		//visit all of the field declarations children
+		visitChildren(n,0,n.size(),"");
+		
+		//append the semicolon and new line symbol
+		print(";\n");
 	}
 	public void visitInitializer(GNode n)
 	{
-		printer.append("static ");
-		Node block= n.getNode(1);
-		dispatch(block);
+		print("static");
+		
+		visitChildren(n,1,n.size(),"");
+		/*Node block= n.getNode(1);
+		dispatch(block);*/
 	}
 	public void visitLocalVariableDeclaration(GNode n)
 	{
-		printer.append("final ");
+		print("final");
 		Node type= n.getNode(1);
 		for(int i=2;i<n.size();i++)
 		{
-			Node vd = n.getNode(i);
+			visitChildren(n,2,n.size()," , ");
+
+			/*Node vd = n.getNode(i);
 			dispatch(vd);
 			if(i>2 && i<n.size()-1)
 			{
-				printer.append(" , ");
-			}
+				print(" , ");
+			}*/
 		}	
 	}
+	/**Visits the modifier node, checks for isPrivate condition to see the current modifier of the scope
+	 Also currently ignores protected*/
 	public void visitModifier(GNode n)
 	{
 		//run check to see if isPrivate is one
@@ -536,76 +522,107 @@ public class CppPrinter extends Visitor
 			//if the modifier is a public and isPrivate is one print it
 			if(modifier.equals("public")&& isPrivate)
 			{//if the modifier is public and the current modifier status is set to private
-				printer.append("public: \n");
+				print("public: \n");
 				isPrivate = false;
 			}
 			else if(modifier.equals("private") && (!isPrivate))
 			{//if the modifier is private and the current modifier status is set to private
-				printer.append("private: \n");
+				print("private: \n");
 				isPrivate = true;
 			}
 			else if (!(modifier.equals("public"))&&(!(modifier.equals("private")))&&(!(modifier.equals("protected")))){
 				//if the modifiers are anything but public, private, protected just print them normally
-				printer.append(modifier+ " ");
+				print(modifier+ " ");
 			}
 		}
 	}
+	
 	/**Visit the declarators */
 	public void visitDeclarator(GNode n)
 	{
-		//append the declarator name
-		printer.append(" " +n.getString(0));
+		print(" " +n.getString(0));
 		//get the object at position 1 and check to make sure its not null
 		Object one = n.get(1);
+		checkInstance(one);
 		if(one!=null)
 		{//check the instance of the object and decide what to do with it
-			if (one instanceof String ) {
-				printer.append(n.getString(1));
-			}
-			else if (one instanceof Node)
-			{
-				dispatch((Node) one);
-			}
+			checkInstance(one);
 		}
 		//do the same with object at position 2
 		Object two = n.get(2);
-							   
 		if(two!=null)
 		{
-			printer.append(" = ");
-			if (two instanceof String ) {
-				printer.append(n.getString(2));
-							   }
-			else if (two instanceof Node)
-			{
-				dispatch((Node) two);
-			}
+			print("=");
+			checkInstance(two);
 		}
-		printer.append("");
 	}
-							   
-	//edit the visit method to print out instances of strings if not it visits the node						   
+	public void visitType(GNode n)
+	{
+		visitChildren(n, 0, n.size(), "");
+		//print(" ");
+	}
+	/**edited visitor method checks the instance of every node to decide whether to visit or print*/						   
 	public void visit(Node n)
 	{
-		for (int i=0; i<n.size(); i++) { //visit every child of Node n if its an instance of a string print it
-			Object k=n.get(i);
-			if(k instanceof Node) 
-			{
-			}
-			else {
-				if(!((n.getName().equals("MethodDeclaration"))||(n.getName().equals("ConstructorDeclaration"))))
-				{
-					if(n.getString(i)!=null)
-					{		////add the string to the printer
-						printer.append(n.getString(i));
-					}
-				}
-			}
-		}
 		for(Object o:n) {
-			if(o instanceof Node) dispatch((Node) o);
+			checkInstance(o);
 		}
-	}	
+	}
+	/**method that visits all the children of a node from start to finish and calls check instance
+	 @param Node n is the parent node
+	 @param int start is the starting child (0 for all)
+	 @param int end is the ending child (n.size for all)
+	 @param string seperator is the seperating string value (i.e. " ", "," etc)
+	 */
+	 public void visitChildren(Node n, int start, int end, String seperator)
+	{
+		for (int i=start;i<end;i++) {
+			//as long as its not the last child or first child append the seperator
+			if(i<end && i>start){
+				print(seperator);
+			}
+			//get the node at the given position
+			
+			Object current = n.get(i);
+			//call the instance check on it
+			checkInstance(current);	
+		}
+	}
+	
+	
+	/**Checks instances of a given node and calls appropiate action*/
+	public void checkInstance (Object o)
+	{
+		//make sure the object isn't null
+		if (o != null) {
+			//if the given o is a String print it
+			if (isString(o)) {
+				//print(" ");
+				print((String) o);
+			}			
+			//if the given o is a Node dispatch on it (visit its subtree)
+			else if(isNode(o)){
+				dispatch((Node)o);
+			}
+		}
+		
+	}
+	/**returns true if the given Object is a String*/
+	public boolean isString(Object o)
+	{
+		if(o instanceof String)
+			return true;
+		else			
+			return false;
+	}
+	/**returns true if the given Object is a Node*/
+	public boolean isNode(Object o)
+	{
+		if(o instanceof Node)
+			return true;
+		else
+			return false;			
+	}
 	public void setBreCon(GNode n)
 	{
 		//checks for calls inside break and continue statements and prints those values
@@ -616,20 +633,17 @@ public class CppPrinter extends Visitor
 			}
 			
 			if(o instanceof String)//if object o is a string print it
-			{
-				printer.append(" "+(String)o);
-			}
+				print(" "+(String)o);
 			else if(o instanceof Node) //if its a node call dispatch on it
-			{
 				dispatch((Node) o);
-			}
+	
 			if (o!=null) {
 				if(i!=(n.size()-1)){
 				}
 							   
 			}
 		}
-		printer.append(";\n"); //append a new link 
+		print(";\n"); //append a new link 
 	}
 	/**for expressions "recursively" calls dispatch on the operands and print the middle operator*/						   
 	public void setBinary(GNode n)
@@ -637,24 +651,12 @@ public class CppPrinter extends Visitor
 		//get the first operand
 		Node operand1= n.getNode(0);
 		dispatch(operand1);
-		printer.append(n.getString(1)); //print the operator		
+		print(n.getString(1)); //print the operator		
 		//get the second operand
 		Node operand2= n.getNode(2);
 		dispatch(operand2);	
 	}
-	/*public void visitPrimaryPrefix(GNode n)
-	{
-		/* f0 -> Literal()
-		 | "this"
-		 | "super" "." <IDENTIFIER>
-		 | "(" Expression() ")"
-		 | AllocationExpression()
-		 | ResultType() "." "class"
-		 | Name()		 
-		 */
-		
-		
-	//}
+	
 	/**for unary expressions such as -A checks to see intances of children */						   
 	public void setUnary(GNode n)
 	{
@@ -667,13 +669,21 @@ public class CppPrinter extends Visitor
 			}
 			else { //else print the strings
 					if(n.getString(i)!=null)
-					{		////add the string to the printer
-						printer.append(n.getString(i));
+					{		////add the string to the print
+						print(n.getString(i));
 					}
 			}
 		}
 	}
-	/**@return the public stringBuilder */						   
+	/**A Method that takes a string to be appended to the stringbuilder and also if 
+	 debug is set to true it prints to the screen*/
+	public void print(String value)
+	{
+		printer.append(value);
+		//print the value to the terminal
+		if (DEBUG) {System.out.print(value);}
+	}
+	/**@return the public stringBuilder */
 	public StringBuilder getString()
 	{
 		return printer;

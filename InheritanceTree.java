@@ -21,6 +21,7 @@ public class InheritanceTree{
 	public ArrayList<Declaration> Vt_ptrs;//all methods able to be inherited by children
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
+	public ArrayList<String> packages;
 
 
 	/**
@@ -551,13 +552,13 @@ public class InheritanceTree{
 	 * this is meant to be used only on the root Object Tree so that the entire tree is searched
 	 *
 	 */
-	public InheritanceTree search(String name){
+	public InheritanceTree search(ArrayList<String> packages, String name){
 		InheritanceTree found = null;
-		if(this.className.equals(name))
+		if((this.className.equals(name))&&(this.packages.containsAll(packages)))
 			return this;
 		
 		for(int i=0; i< this.subclasses.size();i++){
-			found = subclasses.get(i).search(name);
+			found = subclasses.get(i).search(packages,name);
 			if(found!=null) return found;
 		}
 		return found;
@@ -605,11 +606,14 @@ public class InheritanceTree{
 		
 		for(int m=0;m<paramsize;m++){
 			String type=paramtyps.get(m);
-			int pos_size = possible.size();
-			for(int c=0;c<pos_size;c++){
+			for(int c=0;c<possible.size();c++){
 				String pos_type = possible.get(c).params.get(m).type;
 				if(!pos_type.equals(type));
-				else possible.get(c).specificity =possible.get(c).specificity+ gouptree(pos_type,type);
+				else{
+					int casting = gouptree(pos_type,type);
+					if(casting == -1){ possible.remove(c);}
+					else possible.get(c).specificity =possible.get(c).specificity+ casting;
+				}
 			}
 		}
 		Declaration min =possible.get(0);
@@ -652,14 +656,10 @@ public class InheritanceTree{
             if (primatives.contains(casted_to) && primatives.contains(castee))
                 return primatives.indexOf(casted_to) - primatives.indexOf(castee);
 
-		int distance = 0;
-		//find root of tree
-		InheritanceTree Object=this;
-		while(Object.superclass !=null){
-			Object = Object.superclass;
-		}
+		int distance =0;
+		
 		//search on root of tree for castee class
-		InheritanceTree type = Object.search(castee);
+		InheritanceTree type = this.root.search(this.packages,castee);
 		
 		while(type.className!=casted_to){
 			distance++;
