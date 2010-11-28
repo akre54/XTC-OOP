@@ -16,6 +16,8 @@ public class EWalk
 	public InheritanceTree tree;
 	public Declaration method;
 	public boolean isInstance; //check for callExpression (needed for chaining)
+	public boolean isMethodChaining;//check if methodChaining is enacted
+	public String savedReturnType;
 	EWalk (final InheritanceTree treeClass, final Declaration treeMethod, GNode n) {
 		if (VERBOSE) System.out.println("EWalk Called");
 		tree=treeClass;
@@ -59,10 +61,30 @@ public class EWalk
 				//call the intheritiecne tree method
 				method.update_type(name,type);
 			}
+			/*Checks to see if the given node has the name "Call Expression */
+			public boolean isCallExpression(Node n)
+			{
+				if(n.getName().equals("Call Expression"))
+				   {
+					return true;
+				}
+				   return false;
+			}
 			/**Visit a Call expression and call the necessary inheritence checks*/
 			public void visitCallExpression (GNode n) {
 				inCall = true; //start looking for fully qualified name
 				
+				Node firstChild = n.getNode(0);
+				String primaryIdentifier;
+				if(isCallExpression(firstChild))
+				{
+					isMethodChaining=true;
+					primaryIdentifier=savedReturnType;
+				}
+				else
+				{
+					primaryIdentifier=n.getString(0);
+				}
 				
 				//visit the arguments node
 				Node arguments=n.getNode(3);
@@ -77,11 +99,11 @@ public class EWalk
 				//get the method name
 				String methodName = n.getString(2);
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-				String[] methodArray = getMethodInfo(fcNameList, methodName,argumentTypes);
+				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
 				
 				//new method name to override in the tree
 				String newMethod= methodArray[1];
-				String returnType = methodArray[0];
+				savedReturnType = methodArray[0];
 
 				//code to replace the old method name with the new method name in the tree	
 				
@@ -169,10 +191,13 @@ public class EWalk
 
 			}
 			/**helpers method that uses the inheritence tree search for method and returns the string array */
-			public String[] getMethodInfo(ArrayList<String> nameList, String name, ArrayList<String> argumentList)
+			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
-				//search for the right method name to change it to
-				InheritanceTree b =tree.root.search(nameList,name); //search takes the current method name?
+				//method .search for type with packages if you dont send a package its the package you're in
+				//what do you send if its your current package
+				String className=method.search_for_type(nameList,Identifier);//send the primary Identifier
+				//get the inheritance name of 
+				InheritanceTree b =tree.root.search(nameList,className); //search takes the current method name?
 				//when there are no arguments sends a NullPointerException
 				
 				//returns an array of string 0= return type and 1=new method string
