@@ -46,8 +46,15 @@ public class InheritanceTree{
 		Vt_ptrs.add(new Declaration("Class", "__isa",
 									 className,new ArrayList<Fparam>(0)));
 		
-		//add hashcode to Vtable
+		//add __delete to Vtable
 		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+		p.add(new Fparam(new ArrayList<String>(),"__Object*","__this"));
+		Vt_ptrs.add(new Declaration("void","__delete",
+									"Object",p));
+		
+		
+		//add hashcode to Vtable
+		p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
 		Vt_ptrs.add(new Declaration("int32_t","hashCode",
 									 "Object",p));
@@ -94,9 +101,13 @@ public class InheritanceTree{
 		//change __isa field to point to this class's feild
 		Vt_ptrs.get(0).ownerClass = className;
 		
+		//change __delete field to point to this class's feild
+		Vt_ptrs.get(1).ownerClass = className;
+		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
+		
 		//change toString to point to class name
-		Vt_ptrs.get(4).ownerClass = className;
-		Vt_ptrs.get(4).params.get(0).type = className;
+		Vt_ptrs.get(5).ownerClass = className;
+		Vt_ptrs.get(5).params.get(0).type = className;
 
 		
 		//adds virtual Class methods ptrs to virtual Vtable
@@ -165,9 +176,19 @@ public class InheritanceTree{
 		
 		//change __isa methods to point to this class
 		Vt_ptrs.get(0).ownerClass = className;
-		//add __isa to local methods
+		
+		//change __delete field to point to this class's feild
+		Vt_ptrs.get(1).ownerClass = className;
+		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
+		
+		//add __class to local methods
 		local.add(new Declaration("Class","__class",className,
 								  new ArrayList<Fparam>(0)));
+		
+		//add __delete to local methods
+		ArrayList<Fparam> d= new ArrayList<Fparam>(0);
+		d.add(new Fparam(new ArrayList<String>(0),className,"__this"));
+		local.add(Vt_ptrs.get(1));
 		
 		//constructors defined
 		//local methods defined
@@ -208,17 +229,23 @@ public class InheritanceTree{
 	 * if multiple are found keeps method with max overloadNum stored
 	 * returns max overloadNum
 	 */
-	private int overloaded_check(String method,ArrayList<Fparam> params/*,boolean is_virtual*/){
+	private int overloaded_check(String method,ArrayList<Fparam> params,boolean is_virtual){
 		int max=-1;
 		for(int i =0;i<Vt_ptrs.size();i++){
 			//same name test
 			if(method.equals(Vt_ptrs.get(i).name)){
 				//diff params test
 				
-				if((params.size()==Vt_ptrs.get(i).params.size())&&(!typetest(params,Vt_ptrs.get(i).params)))
+				if(params.size()==Vt_ptrs.get(i).params.size())
+				   if(!typetest(params,Vt_ptrs.get(i).params))
 					//store max overloadNum
 					max = Math.max(Vt_ptrs.get(i).overloadNum,max);
-				else; //if(is_virtual)
+				   else if(is_virtual){
+					   Vt_ptrs.get(i).ownerClass = this.className;
+					   //signify to NOT ADD TO VIRTUAL
+					   return Vt_ptrs.get(i).overloadNum-1;
+		
+				   }
 			}	//delete vt_ptr bc its overwritten
 		}
 		for(int j=0;j<local.size();j++){
@@ -233,6 +260,7 @@ public class InheritanceTree{
 		}
 			return max;
 	}
+
 	/**
 	 * helper method used in check_for_overrides() for testing for equal Declarations.
 	 *@param Declaration
@@ -304,7 +332,7 @@ public class InheritanceTree{
 				params.clear();
 				block=null;
 				is_virtual = true;
-				overloaded = 0;
+				overloaded=0;
 				
 				//get info from tree
 				visit(n);
@@ -329,7 +357,7 @@ public class InheritanceTree{
 				visit(n);
 				
 				//search in Vt_ptrs and local for same name diff params
-				overloaded = overloaded_check(methodname,params)+1;
+				overloaded = overloaded_check(methodname,params,is_virtual)+1;
 				
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if(is_virtual) 
