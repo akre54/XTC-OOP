@@ -124,7 +124,7 @@ public class InheritanceBuilder{
 			"\tstruct __"+ClassName+"; \n"+/**/
 			"\tstruct __"+ClassName+"_VT;\n\n"+/**/
 						 
-			"\ttypedef __"+ClassName+"* "+ClassName+";\n\n"+/**/
+			"\ttypedef __rt::Ptr<__"+ClassName+"> "+ClassName+";\n\n"+/**/
 		
 			"\tstruct __"+ClassName+"{ \n"+/**/
 			"\t   __"+ClassName+"_VT* __vptr;\n");
@@ -143,7 +143,7 @@ public class InheritanceBuilder{
 				write_all_methods(t);  h_classdef.write("\n\n"+
 						 
 				/*create instance of VTABLE*/
-				"\t   private: \n\t   static __"+ClassName+"_VT __vtable;\n"+/**/
+				"\n\t   static __"+ClassName+"_VT __vtable;\n"+/**/
 			"\t};\n\n\n"+                      
 		/*-------------------------end of struct __ClassName in .h file-------------------------*/	
 						 
@@ -211,7 +211,7 @@ public class InheritanceBuilder{
 					h_classdef.write(constr.modifiers.get(i)+": ");
 				}		
 				//write className
-				h_classdef.write("__"+t.className+"(");
+				h_classdef.write("__"+t.className+"_"+constr.overloadNum+"(");
 				
 				//loop through formal parameter 
 				for(int i =0;i<constr.params.size();i++){
@@ -388,11 +388,15 @@ public class InheritanceBuilder{
 		
 		//writes the __class() method
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
-							"::"+t.local.get(0).name+"(){\n\t"+
+							"::"+t.local.get(0).name+"_0(){\n\t"+
 							"\n\tstatic Class k = new __Class(__rt::stringify(\"xtc.oop."+t.className+"\"),__rt::null());"+
 							"\n\treturn k;\n\t"+
 							"}\n");
-
+		//writes the __delete() method
+		cpp_methoddef.write("\t"+t.local.get(1).returntype+" __"+t.className+
+							"::"+t.local.get(1).name+"_0(__"+t.className+"* __this){\n\t"+
+							"delete __this\n\t"+
+							"}\n");
 		
 	//--- adds all methods to METHODDEF	
 		int size = t.local.size();
