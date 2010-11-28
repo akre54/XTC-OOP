@@ -379,7 +379,9 @@ public class CppPrinter extends Visitor
 			if (i==3) {
 				print("(");
 			}
-			
+			if (i==2){
+				print("__");
+			}
 			Object o=n.get(i);
 			if(isString(o))
 			{
@@ -417,7 +419,7 @@ public class CppPrinter extends Visitor
 		for(int i=0; i<n.size();i++)
 		{
 			String name = n.getString(i);
-			print("__");
+			//print("__");
 			print(name);
 			
 		}
@@ -426,30 +428,10 @@ public class CppPrinter extends Visitor
 	public void visitArguments(GNode n)
 	{
 		visitChildren(n, 0, n.size(), ",");
-		/*for (int i=0; i<n.size(); i++) {
-			
-			dispatch(n.getNode(i));
-			if(i!=(n.size()-1))
-			{
-				print(", ");
-			}
-		}*/
 	}
 	public void visitFormalParameter(GNode n)
 	{
 		visitChildren(n, 0, n.size(), " ");
-		/*for(int i=0;i<n.size();i++)
-		{
-			Object o=n.get(i);
-			if(o instanceof String)
-			{
-				print(" "+(String)o);
-			}
-			else if(o instanceof Node)
-			{
-				dispatch((Node) o);
-			}
-		}*/
 	}
 			
 	public void visitCatchClause(GNode n)
@@ -458,8 +440,6 @@ public class CppPrinter extends Visitor
 		visitChildren(n, 0, 1, "");
 		print("){\n");
 		visitChildren(n, 1, n.size(), "");
-		/*Node block = n.getNode(1);
-		dispatch(block);*/
 	}
 	public void visitDefaultClause(GNode n)
 	{
@@ -469,10 +449,6 @@ public class CppPrinter extends Visitor
 		
 		//visit all of the switch children
 		visitChildren(n,0,n.size(),"");
-		/*Node theExp= n.getNode(0);
-		dispatch(theExp);	
-		Node break1= n.getNode(1);
-		dispatch(break1);*/
 		
 	}
 	public void visitFieldDeclaration(GNode n)
@@ -491,8 +467,6 @@ public class CppPrinter extends Visitor
 		print("static");
 		
 		visitChildren(n,1,n.size(),"");
-		/*Node block= n.getNode(1);
-		dispatch(block);*/
 	}
 	public void visitLocalVariableDeclaration(GNode n)
 	{
@@ -501,13 +475,6 @@ public class CppPrinter extends Visitor
 		for(int i=2;i<n.size();i++)
 		{
 			visitChildren(n,2,n.size()," , ");
-
-			/*Node vd = n.getNode(i);
-			dispatch(vd);
-			if(i>2 && i<n.size()-1)
-			{
-				print(" , ");
-			}*/
 		}	
 	}
 	/**Visits the modifier node, checks for isPrivate condition to see the current modifier of the scope
