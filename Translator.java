@@ -54,13 +54,13 @@ public class Translator extends Tool {
 
 	/** Create a new translator. */
 	public Translator() {
-            // do nothing
+            // do nothing 
 	}
 
-        public Translator (HashMap<String,Boolean> dependencies) {
+        public Translator (HashMap<String,Boolean> dependencies, HashMap<ClassStruct,Boolean> classes) {
             this();
             this.dependencies = dependencies;
-            //this.classes = classes;
+            this.classes = classes;
         }
 
 	public String getCopy() {
@@ -72,7 +72,7 @@ public class Translator extends Tool {
 	}
 
 	public String getExplanation() {
-		return "This tool translates a subset of Javat to a subset of C++.";
+		return "This tool translates a subset of Java to a subset of C++.";
 	}
 
 	public void init() {
@@ -143,6 +143,8 @@ public class Translator extends Tool {
 		// Handle the translate option
 		if (runtime.test("translate")) {
 
+                    String fullPathName = null;
+
 			if (VERBOSE) {
 				runtime.console().p("Begining translation...").pln().flush();
 			}
@@ -151,7 +153,8 @@ public class Translator extends Tool {
 			// list to avoid circular imports
 			if (dependencies.isEmpty()) {
 				try {
-					dependencies.put(inputFile.getCanonicalPath(), true);
+                                    fullPathName = inputFile.getCanonicalPath();
+                                    dependencies.put(fullPathName, true);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -159,7 +162,8 @@ public class Translator extends Tool {
 			
 
                         // creates the import heirarchy
-                        DependencyTree dependency = new DependencyTree(node, dependencies, classes);
+                        DependencyTree dependency = new DependencyTree(node, fullPathName,
+                                dependencies, classes);
 
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
@@ -236,17 +240,28 @@ public class Translator extends Tool {
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
 
+/*
 		if(runtime.test("finddependencies")){
-		
-                    HashMap<ClassStruct,Boolean> classesToTranslate =
-                            new HashMap<ClassStruct,Boolean>();
-                    
-		
-		
-		
-		
-		}
+                    DependencyTree dTree = null;
 
+                    try {
+                        dTree = new DependencyTree( (GNode)node, inputFile.getCanonicalPath(),
+                            dependencies, classes);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    
+                    HashMap<ClassStruct,Boolean> classesToTranslate =
+                            dTree.getFileClasses();
+                            //dTree.getFileClasses();
+
+                    while (!classesToTranslate.isEmpty()) {
+                        // get next class;
+                        new Translator().run(new String[] {"translate", inputFileName});
+		
+
+		}
+*/
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();
 		}
@@ -284,7 +299,8 @@ public class Translator extends Tool {
             
 		// start with an empty dependency list
 		HashMap<String,Boolean> dependencies = new HashMap<String,Boolean>();
+                HashMap<ClassStruct,Boolean> classes = new HashMap<ClassStruct,Boolean>();
             
-		new Translator(dependencies).run(args);
+		new Translator(dependencies, classes).run(args);
 	}	
 }//end of Translator.java
