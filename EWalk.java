@@ -195,7 +195,7 @@ public class EWalk
 			{
 				//method .search for type with packages if you dont send a package its the package you're in
 				//what do you send if its your current package
-				String className=method.search_for_type(nameList,Identifier);//send the primary Identifier
+				String className=method.search_for_type(Identifier);//send the primary Identifier
 				//get the inheritance name of 
 				InheritanceTree b =tree.root.search(nameList,className); //search takes the current method name?
 				//when there are no arguments sends a NullPointerException
@@ -232,6 +232,18 @@ public class EWalk
 				}
 				else if (n.getName().equals("Call Expression"))
 				{
+					Node firstChild = n.getNode(0);
+					String primaryIdentifier;
+					if(isCallExpression(firstChild))
+					{
+						isMethodChaining=true;
+						primaryIdentifier=savedReturnType;
+					}
+					else
+					{
+						primaryIdentifier=n.getString(0);
+					}
+										
 					//visit the arguments node
 					Node arguments=n.getNode(3);
 					//create a new argumentTypes arraylist call the getarguments method on the arguments node
@@ -247,7 +259,7 @@ public class EWalk
 					//get the method name
 					String methodName = n.getString(2);
 					//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-					String[] methodArray = getMethodInfo(fcNameList, methodName, argumentTypes);
+					String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName, argumentTypes);
 					//return the return type gotten from getMethodInfo (located as the first item in the given array)
 					return methodArray[0];
 				}
