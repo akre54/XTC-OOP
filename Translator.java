@@ -253,12 +253,10 @@ public class Translator extends Tool {
                     
                     HashMap<ClassStruct,Boolean> classesToTranslate =
                             dTree.getFileClasses();
-                            //dTree.getFileClasses();
 
-                    while (!classesToTranslate.isEmpty()) {
-                        // get next class;
-                        new Translator().run(new String[] {"translate", inputFileName});
-		
+                    while (!classes.containsValue(true)) {
+                        classes = dTree.getAllClasses();
+                        new Translator(classes, files).run(new String[] {"translate", inputFileName});
 
 		}
 */

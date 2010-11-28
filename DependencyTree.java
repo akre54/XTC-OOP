@@ -94,7 +94,8 @@ public class DependencyTree {
 
                 if (dir.exists()) {
                     for (String fileName : dir.list()) {
-                        if (fileName.endsWith(".java")) 
+                        if (fileName.endsWith(".java")) {
+
                             addPath(pathname + '/' + fileName);
                             //visitImportDeclaration(pathname + '/' + fileName);
                         }
