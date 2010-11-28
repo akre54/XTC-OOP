@@ -256,7 +256,11 @@ public class Translator extends Tool {
 
                     while (!classes.containsValue(true)) {
                         classes = dTree.getAllClasses();
-                        new Translator(classes, files).run(new String[] {"translate", inputFileName});
+
+                        String fileToBeTranslated = "the file that we pull from allFiles";
+
+                        files.put( fileToBeTranslated , true);
+                        new Translator(classes, files).run(new String[] {"translate", fileToBeTranslated});
 
 		}
 */

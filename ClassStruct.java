@@ -12,14 +12,14 @@ public class ClassStruct {
     String fullPath;
     String packageName;
     String name;
-    ArrayList<String> extensions;
+    String superClass;
     GNode n; // of Class
 
-    public ClassStruct(String path, String packName, String className, GNode gn) {
+    public ClassStruct(String path, String packName, String className, String superClassName, GNode gn) {
         fullPath = path;
         packageName = packName;
         name = className;
-        extensions = new ArrayList<String>();
+        superClass = superClassName;
         n = gn;
     }
 
@@ -27,9 +27,4 @@ public class ClassStruct {
     public boolean equals (ClassStruct c) {
         return (this.name == c.name) && (this.packageName == c.packageName) ;
     }
-
-    public void addExtension(String ex) {
-        this.extensions.add(ex);
-    }
-
 }
