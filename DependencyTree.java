@@ -32,7 +32,9 @@ public class DependencyTree {
     private HashMap<ClassStruct,Boolean> allClasses;
     private HashMap<ClassStruct,Boolean> fileClasses = new HashMap<ClassStruct,Boolean>();
     private String currentPackage = "";
+    private String currentSuperClass = "";
     private String currentFilePath;
+
 
 
     public DependencyTree(Node n, String filePath,
@@ -72,7 +74,6 @@ public class DependencyTree {
                             pathbuilder.append("/");
 
                         pathbuilder.append(breadcrumb);
-                        //System.out.println(i + " " + n.getString(i));
                     } catch (IndexOutOfBoundsException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
@@ -149,13 +150,12 @@ public class DependencyTree {
             }
             public void visitClassDeclaration(GNode n){
                 String className = n.getString(1);
-                addClass(className, n);
 		visit(n);
+                addClass(className, n);
             }
 
             public void visitExtension(GNode n){
-		String superClass = n.getNode(0).getNode(0).getString(0);
-                addExtension(superClass);
+		currentSuperClass = n.getNode(0).getNode(0).getString(0);
             }
 
 
@@ -208,20 +208,14 @@ public class DependencyTree {
         */
        void addClass (String className, GNode n) {
 
-           ClassStruct c = new ClassStruct(currentFilePath, currentPackage, className, n);
+           ClassStruct c = new ClassStruct(currentFilePath, currentPackage,
+                            currentSuperClass, className, n);
            
            fileClasses.put(c, false);
 
            if (!allClasses.containsKey(c))
                allClasses.put(c, false);
 
-       }
-
-       /*
-             * Add each extension to the current ClassStruct
-             */
-       void addExtension(String ex) {
-           // get last-added ClassStruct (ie allClasses.lastAddedFoo.addExtension(ex))
        }
 
         /**
