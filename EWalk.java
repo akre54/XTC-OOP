@@ -74,7 +74,25 @@ public class EWalk
 			public void visitCallExpression (GNode n) {
 				inCall = true; //start looking for fully qualified name
 				
+				String[] methodArray=setMethodInfo(n);
+				//new method name to override in the tree
+				String newMethod= methodArray[1];
+				savedReturnType = methodArray[0];
+
+				//code to replace the old method name with the new method name in the tree	
+				//where the current method name is current located as position 2
+				n.set(2,newMethod);
+				
+				//if(VERBOSE) System.out.println("fully qualified name: "+fcName);
+   				//Object garbage = n.remove(0); //having trouble removing nodes!!!
+				
+				
+			}
+			//does all of Call Expressions Heavy Lifting and returns the newmethod arraylist
+			public String[] setMethodInfo(Node n)
+			{
 				Node firstChild = n.getNode(0);
+
 				String primaryIdentifier;
 				if(isCallExpression(firstChild))
 				{
@@ -90,7 +108,7 @@ public class EWalk
 				Node arguments=n.getNode(3);
 				//create a new argumentTypes arraylist call the getarguments method on the arguments node
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
-								if(VERBOSE) System.out.println("New Array List Created...\n");
+				if(VERBOSE) System.out.println("New Array List Created...\n");
 				
 				Node fcName=n.getNode(2);
 				//gets the FCNameList Node and visits it using the getFCName method
@@ -100,18 +118,7 @@ public class EWalk
 				String methodName = n.getString(2);
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
-				
-				//new method name to override in the tree
-				String newMethod= methodArray[1];
-				savedReturnType = methodArray[0];
-
-				//code to replace the old method name with the new method name in the tree	
-				
-				
-				if(VERBOSE) System.out.println("fully qualified name: "+fcName);
-   				//Object garbage = n.remove(0); //having trouble removing nodes!!!
-				
-				
+				return methodArray;
 			}
 						/**Helper method returns the arguments in an array list*/
 			public ArrayList<String> getArgumentTypes(Node n)
@@ -232,35 +239,10 @@ public class EWalk
 				}
 				else if (n.getName().equals("Call Expression"))
 				{
-					Node firstChild = n.getNode(0);
-					String primaryIdentifier;
-					if(isCallExpression(firstChild))
-					{
-						isMethodChaining=true;
-						primaryIdentifier=savedReturnType;
-					}
-					else
-					{
-						primaryIdentifier=n.getString(0);
-					}
-										
-					//visit the arguments node
-					Node arguments=n.getNode(3);
-					//create a new argumentTypes arraylist call the getarguments method on the arguments node
-					ArrayList<String> argumentTypes =getArgumentTypes(arguments);
-					if(VERBOSE) System.out.println("New Array List Created...\n");
-					
-					Node fcName=n.getNode(2);
-
-					//gets the FCNameList Node and visits it using the getFCName method
-					ArrayList<String> fcNamelist =getFcName(fcName);
-					
-					
-					//get the method name
-					String methodName = n.getString(2);
+							
 					//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-					String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName, argumentTypes);
-					//return the return type gotten from getMethodInfo (located as the first item in the given array)
+					String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
+					methodArray=setMethodInfo(n);
 					return methodArray[0];
 				}
 				else{ //return the name of the primaryIdentifier
