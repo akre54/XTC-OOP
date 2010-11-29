@@ -88,7 +88,8 @@ public class Translator extends Tool {
 				 "Translate .java file to c++.").
 			bool("finddependencies", "finddependencies", false,
 				 "find all classes we need to translate").	
-		bool("testing","testing",false,"Run some Test cases.");}
+		bool("testing","testing",false,"Run some Test cases.").
+		bool("testing2","testing2",false, "tester2 for EWalk");}
 
 	public void prepare() {
 		super.prepare();
@@ -139,7 +140,107 @@ public class Translator extends Tool {
 				}.dispatch(node);
 			
 			}
-		
+			if(runtime.test("testing2"))
+			{
+				
+				String fullPathName = null;
+				
+				if (VERBOSE) {
+					runtime.console().p("Begining translation...").pln().flush();
+				}
+				
+				// need the original file to be the first in dependencies
+				// list to avoid circular imports
+				if (dependencies.isEmpty()) {
+					try {
+						fullPathName = inputFile.getCanonicalPath();
+						dependencies.put(fullPathName, true);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				
+				// creates the import heirarchy
+				DependencyTree dependency = new DependencyTree(node, fullPathName,
+															   dependencies, classes);
+				
+				//creates tree root a.k.a. the Object class
+				final InheritanceTree Object = new InheritanceTree();
+				
+				//creates the Class class as subclass of Object class
+				final InheritanceTree Class = new InheritanceTree(Object);
+				
+				
+				final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
+				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
+				
+				final LinkedList<GNode> toTree = new LinkedList<GNode>();
+				
+				new Visitor() {
+					
+					InheritanceTree supr;
+					
+					public void visitCompilationUnit(GNode n){
+						//Paiges testing class
+						//cppClass classtester=new cppClass(n);
+						visit(n);
+					}
+					
+					public void visitClassDeclaration(GNode n){
+						//if no extenstion it's superclass is Object
+						supr=Object;
+						visit(n);
+						
+						//if the super class has been defined make the subclass
+						if(supr!=null){
+							inherit.addClassdef((new InheritanceTree(n,supr)));
+						}
+						else toTree.add(n);
+						
+					}
+					public void visitExtension(GNode n){
+						//find's super class
+						//searches for InheritanceTree with same name as extention
+						//returns null if no tree exists yet
+						
+						/**CURRENTLY CRASHES MAKE REMOVED BY PAIGE 11.25
+						 supr = Object.search(n.getNode(0).getNode(0).getString(0));
+						 */
+					}
+					public void visit(Node n) {
+						for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+					}
+					
+				}.dispatch(node); //end of main dispatch
+				
+				//creates the rest of the tree all nodes whose super exists until all 
+				//trees created
+				InheritanceTree supr;
+				
+				int i=0;
+				while(!toTree.isEmpty()){
+					
+					/**CURRENTLY CRAHES MAKE REMOVED BY PAIGE 11.25
+					 supr = Object.search(toTree.get(i).getNode(3)
+					 .getNode(0).getNode(0).getString(0));
+					 
+					 if(supr!=null){
+					 inherit.addClassdef((new InheritanceTree(toTree.get(i),supr)));
+					 toTree.remove(i);
+					 }
+					 else i++;
+					 if (i==toTree.size()) i=0;
+					 */
+				}
+				
+				
+				inherit.close(); // when all nodes are visited and inheritance files are made close files
+				//print the new Java AST
+						runtime.console().format(node).pln().flush();
+			}//end of runtime.test("Ttesting2") test
+			
+			
 		// Handle the translate option
 		if (runtime.test("translate")) {
 
@@ -241,7 +342,9 @@ public class Translator extends Tool {
 				
 			
 			inherit.close(); // when all nodes are visited and inheritance files are made close files
-
+			if (VERBOSE)
+				//prints the ast after every translation
+				runtime.console().format(node).pln().flush();
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
 

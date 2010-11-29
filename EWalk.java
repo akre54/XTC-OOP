@@ -4,7 +4,7 @@ import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 import java.util.ArrayList;
-//import xtc.oop.translate.*;
+import xtc.oop.ArrayMaker;
 
 /**
  * Translates stuff.
@@ -28,7 +28,12 @@ public class EWalk
 	private void eWalker (final GNode n) {
 		Node node = n;
 		new Visitor() {
-			boolean inCall = false, isPrint = false, isPrintln = false;
+			boolean inCall = false,
+				isPrint = false,
+				isPrintln = false,
+				isString = false,
+				isArray = false,
+				isPrintString = false;
 			StringBuffer fcName;
 			ArrayList<String> fcNameList;
 			public void visitPrimitiveType (GNode n) {
@@ -58,31 +63,58 @@ public class EWalk
 				Node qual = n.getNode(0);
 				String type =qual.getString(0);
 				
-				//call the intheritiecne tree method
-				method.update_type(name,type);
+				ArrayList<String> packages=getFcName(n);
+				//call the intheritiecne tree method string, arraylist of a new packages and type name
+				method.update_type(name,packages,type);
 			}
 			/*Checks to see if the given node has the name "Call Expression */
 			public boolean isCallExpression(Node n)
 			{
-				if(n.getName().equals("Call Expression"))
+				if(n!=null)
+				{
+					System.out.println("IS CALL?"+n.getName());
+					if(n.getName().equals("CallExpression"))
 				   {
 					return true;
+				   }
+				  
 				}
-				   return false;
+				 return false;
 			}
 			/**Visit a Call expression and call the necessary inheritence checks*/
 			public void visitCallExpression (GNode n) {
+				if(VERBOSE) System.out.println("\nVisiting a Call Expression node:");
 				inCall = true; //start looking for fully qualified name
 				
+				String[] methodArray=setMethodInfo(n);
+				//new method name to override in the tree
+				String newMethod= methodArray[1];
+				savedReturnType = methodArray[0];
+
+				//code to replace the old method name with the new method name in the tree	
+				//where the current method name is current located as position 2
+				n.set(2,newMethod);
+				
+				//if(VERBOSE) System.out.println("fully qualified name: "+fcName);
+   				//Object garbage = n.remove(0); //having trouble removing nodes!!!
+				
+				
+			}
+			//does all of Call Expressions Heavy Lifting and returns the newmethod arraylist
+			public String[] setMethodInfo(Node n)
+			{
 				Node firstChild = n.getNode(0);
+
 				String primaryIdentifier;
-				if(isCallExpression(firstChild))
+				if(!isCallExpression(firstChild))
 				{
 					isMethodChaining=true;
 					primaryIdentifier=savedReturnType;
 				}
 				else
 				{
+					System.out.println("DEBUG" +n.getName());
+					
 					primaryIdentifier=n.getString(0);
 				}
 				
@@ -90,9 +122,9 @@ public class EWalk
 				Node arguments=n.getNode(3);
 				//create a new argumentTypes arraylist call the getarguments method on the arguments node
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
-								if(VERBOSE) System.out.println("New Array List Created...\n");
+				if(VERBOSE) System.out.println("New Array List Created...\n");
 				
-				Node fcName=n.getNode(2);
+				Node fcName=n.getNode(2);//where will the fcnameList be?
 				//gets the FCNameList Node and visits it using the getFCName method
 				ArrayList<String> fcNamelist =getFcName(fcName);
 				
@@ -100,18 +132,7 @@ public class EWalk
 				String methodName = n.getString(2);
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
-				
-				//new method name to override in the tree
-				String newMethod= methodArray[1];
-				savedReturnType = methodArray[0];
-
-				//code to replace the old method name with the new method name in the tree	
-				
-				
-				if(VERBOSE) System.out.println("fully qualified name: "+fcName);
-   				//Object garbage = n.remove(0); //having trouble removing nodes!!!
-				
-				
+				return methodArray;
 			}
 						/**Helper method returns the arguments in an array list*/
 			public ArrayList<String> getArgumentTypes(Node n)
@@ -146,58 +167,119 @@ public class EWalk
 				//fcNameList.remove(size-2);//SOURCE OF ARRAY OUT OF BOUNDS
 				if (fcName.toString().contains("System.out.print")) {
 					isPrint = true;
-					if (fcName.toString().contains("System.out.println")) {
+					if (fcName.toString().contains("System->out->__vptr->println")) {
 						isPrintln = true;
-						n.add("<< std:endl;");
 					}
 					fcName = new StringBuffer(); //clear the fcName
 					fcName.append("std::cout<<");
 					if(VERBOSE) {
-						System.out.print("Translating System.out.print");
+						System.out.print("Translating special case:\t\tSystem.out.print");
 						if (isPrintln) System.out.print("ln");
 						System.out.println("");
 					}
 				}
 				else {
-					//deal with more complex stuff
+					//other
 				}
-				n.set(2,fcName); //error in cpp printer, prints println see demo.out
+				if(VERBOSE) System.out.println("Size of n is\t\t\t\t"+n.size());
+				if(VERBOSE) System.out.println("Setting n[0] to:\t\t\t"+fcName);
+				if(isPrintln) {
+					n.set(0,null);
+					n.set(2,fcName.toString());
+					n.set(1,"<<std::endl");
+				}
+				else {
+					n.set(0,null);
+					n.set(2,fcName.toString());
+				}
+				visit(n.getNode(3));
+				visit(n.getNode(3));
 				isPrint=isPrintln=false;
 				return fcNameList;
 				
 			}
 			public void visitSelectionExpression (GNode n) {
-				visit(n);			
-				//if (inCall) 
-				fcName.append(n.getString(1)+".");
+				visit(n);	
+				if (inCall);
+				fcName.append(n.getString(1)+"->");
 				fcNameList.add(n.getString(1));
 			}
 			public void visitPrimaryIdentifier (GNode n) {
 				if (inCall) {
 					inCall = false;
-					fcName.append(n.getString(0)+".");
-					fcName.append(n.getString(0));
+					fcName.append(n.getString(0)+"->");
+					fcNameList.add(n.getString(0));
 				} else {
 					//Do something?
 				}
 				visit(n);
 			}
 			public void visitAdditiveExpression (GNode n) {
-				if(isPrint) n.set(1,"<<");
+				if(isPrint) {
+					if(isPrintString) n.set(1,"<<");
+				}
 				visit(n);
 			}
-			public void visitModifiers (GNode n) {
-				//String temp = n.getString(0)
-
+			public void visitModifier (GNode n) {
+				String temp = n.getString(0);
+				if (temp.equals("final")) n.set(0,"const");
+			}
+			public void visitFieldDeclaration (GNode n) {
+				visit(n);
+				if (isString) {
+					visit(n);
+					isString = false;
+				}
+				if (isArray) {
+					if(VERBOSE) System.out.println("Entering array");
+					ArrayMaker goArray = new ArrayMaker (n);
+					isArray = false;
+				}
+			}
+			public void visitDimensions (GNode n) {
+				if(!isArray) {
+					if(VERBOSE) System.out.println("Setting array flag to true...");
+					isArray = true;
+				}
+				visit(n);
+			}
+			public void visitNewArrayExpression (GNode n) {
+				if(!isArray) {
+					if(VERBOSE) System.out.println("Setting array flag to true...");
+					isArray = true;
+					visit(n);
+				}
+			}
+			public void visitQualifiedIdentifier (GNode n) {
+				if (!isString) {
+					String temp = n.getString(0);
+					if (temp.equals("String")) isString = true;
+				}
+				visit(n);
+			}
+			public void visitStringLiteral (GNode n) {
+				if (isString) {
+					String temp = n.getString(0);
+					n.set(0,"__rt::stringify("+temp+")");
+					isString = false; //make sure it only happens once
+				}
+				if (isPrint) isPrintString = true;
+				visit(n);
 			}
 			/**helpers method that uses the inheritence tree search for method and returns the string array */
 			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
 				//method .search for type with packages if you dont send a package its the package you're in
 				//what do you send if its your current package
-				String className=method.search_for_type(Identifier);//send the primary Identifier
+				ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
+				//get the last value which is the Classname
+				String className = qualities.remove(qualities.size());
+				//questions WHAT DO I DO WITH the rest? Is that needed?
+				
+				
+				
 				//get the inheritance name of 
-				InheritanceTree b =tree.root.search(nameList,className); //search takes the current method name?
+				InheritanceTree b =tree.root.search(qualities,className); //search takes the current method name?
 				//when there are no arguments sends a NullPointerException
 				
 				//returns an array of string 0= return type and 1=new method string
@@ -230,47 +312,23 @@ public class EWalk
 				{
 					return "char";
 				}
-				else if (n.getName().equals("Call Expression"))
+				else if (n.getName().equals("CallExpression"))
 				{
-					Node firstChild = n.getNode(0);
-					String primaryIdentifier;
-					if(isCallExpression(firstChild))
-					{
-						isMethodChaining=true;
-						primaryIdentifier=savedReturnType;
-					}
-					else
-					{
-						primaryIdentifier=n.getString(0);
-					}
-										
-					//visit the arguments node
-					Node arguments=n.getNode(3);
-					//create a new argumentTypes arraylist call the getarguments method on the arguments node
-					ArrayList<String> argumentTypes =getArgumentTypes(arguments);
-					if(VERBOSE) System.out.println("New Array List Created...\n");
-					
-					Node fcName=n.getNode(2);
-
-					//gets the FCNameList Node and visits it using the getFCName method
-					ArrayList<String> fcNamelist =getFcName(fcName);
-					
-					
-					//get the method name
-					String methodName = n.getString(2);
 					//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-					String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName, argumentTypes);
-					//return the return type gotten from getMethodInfo (located as the first item in the given array)
+					String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
+					methodArray=setMethodInfo(n);
 					return methodArray[0];
 				}
 				else{ //return the name of the primaryIdentifier
 					//call the method in the inheritence tree to get the type of the primaryIden
-					return method.search_for_type(n.getString(0));
+					
+					ArrayList<String> packageNType= method.search_for_type(n.getString(0));
+					String type = packageNType.remove(packageNType.size());
+					return type;
 				}
 				/**can put support for handling methods inside an argument here (use search for methods
 				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
 			}
-			
 			public void visitSuperExpression(GNode n)
 			{
 			}

@@ -58,7 +58,7 @@ SOURCE = \
 	ConstructorDec.java \
 	EWalk.java\
 	CppWalker.java\
-	FCname.java
+	ArrayMaker.java
 
 
 
