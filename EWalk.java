@@ -118,9 +118,9 @@ public class EWalk
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				if(VERBOSE) System.out.println("New Array List Created...\n");
 				
-				Node fcName=n.getNode(2);//where will the fcnameList be?
+				//Node fcName=n.getNode(2);//where will the fcnameList be?
 				//gets the FCNameList Node and visits it using the getFCName method
-				ArrayList<String> fcNamelist =getFcName(fcName);
+				ArrayList<String> fcNamelist =getFcName(n);
 				
 				//get the method name
 				String methodName = n.getString(2);
