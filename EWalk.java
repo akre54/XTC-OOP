@@ -67,7 +67,8 @@ public class EWalk
 			{
 				if(n!=null)
 				{
-					if(n.getName().equals("Call Expression"))
+					System.out.println("IS CALL?"+n.getName());
+					if(n.getName().equals("CallExpression"))
 				   {
 					return true;
 				   }
@@ -99,13 +100,15 @@ public class EWalk
 				Node firstChild = n.getNode(0);
 
 				String primaryIdentifier;
-				if(isCallExpression(firstChild))
+				if(!isCallExpression(firstChild))
 				{
 					isMethodChaining=true;
 					primaryIdentifier=savedReturnType;
 				}
 				else
 				{
+					System.out.println("DEBUG" +n.getName());
+					
 					primaryIdentifier=n.getString(0);
 				}
 				
@@ -115,7 +118,7 @@ public class EWalk
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				if(VERBOSE) System.out.println("New Array List Created...\n");
 				
-				Node fcName=n.getNode(2);
+				Node fcName=n.getNode(2);//where will the fcnameList be?
 				//gets the FCNameList Node and visits it using the getFCName method
 				ArrayList<String> fcNamelist =getFcName(fcName);
 				
