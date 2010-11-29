@@ -58,17 +58,22 @@ public class EWalk
 				Node qual = n.getNode(0);
 				String type =qual.getString(0);
 				
-				//call the intheritiecne tree method
-				method.update_type(name,type);
+				ArrayList<String> packages=getFcName(n);
+				//call the intheritiecne tree method string, arraylist of a new packages and type name
+				method.update_type(name,packages,type);
 			}
 			/*Checks to see if the given node has the name "Call Expression */
 			public boolean isCallExpression(Node n)
 			{
-				if(n.getName().equals("Call Expression"))
+				if(n!=null)
+				{
+					if(n.getName().equals("Call Expression"))
 				   {
 					return true;
+				   }
+				  
 				}
-				   return false;
+				 return false;
 			}
 			/**Visit a Call expression and call the necessary inheritence checks*/
 			public void visitCallExpression (GNode n) {
@@ -202,9 +207,15 @@ public class EWalk
 			{
 				//method .search for type with packages if you dont send a package its the package you're in
 				//what do you send if its your current package
-				String className=method.search_for_type(Identifier);//send the primary Identifier
+				ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
+				//get the last value which is the Classname
+				String className = qualities.remove(qualities.size());
+				//questions WHAT DO I DO WITH the rest? Is that needed?
+				
+				
+				
 				//get the inheritance name of 
-				InheritanceTree b =tree.root.search(nameList,className); //search takes the current method name?
+				InheritanceTree b =tree.root.search(qualities,className); //search takes the current method name?
 				//when there are no arguments sends a NullPointerException
 				
 				//returns an array of string 0= return type and 1=new method string
@@ -237,9 +248,8 @@ public class EWalk
 				{
 					return "char";
 				}
-				else if (n.getName().equals("Call Expression"))
+				else if (n.getName().equals("CallExpression"))
 				{
-							
 					//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 					String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
 					methodArray=setMethodInfo(n);
@@ -247,7 +257,10 @@ public class EWalk
 				}
 				else{ //return the name of the primaryIdentifier
 					//call the method in the inheritence tree to get the type of the primaryIden
-					return method.search_for_type(n.getString(0));
+					
+					ArrayList<String> packageNType= method.search_for_type(n.getString(0));
+					String type = packageNType.remove(packageNType.size());
+					return type;
 				}
 				/**can put support for handling methods inside an argument here (use search for methods
 				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/

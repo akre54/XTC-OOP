@@ -309,7 +309,7 @@ public class CppPrinter extends Visitor
 					print("} \n");
 				}
 				else
-				{
+				{	//System.out.println("NOT A BLOCK");
 					dispatch(cond);
 				}
 			}
@@ -531,8 +531,12 @@ public class CppPrinter extends Visitor
 	/**edited visitor method checks the instance of every node to decide whether to visit or print*/						   
 	public void visit(Node n)
 	{
+		System.out.println(n);
+		if(n!=null){
 		for(Object o:n) {
-			checkInstance(o);
+				checkInstance(o);
+			
+		}
 		}
 	}
 	/**method that visits all the children of a node from start to finish and calls check instance
