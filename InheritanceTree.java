@@ -1,6 +1,7 @@
 package xtc.oop;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Arrays;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
@@ -20,6 +21,7 @@ public class InheritanceTree{
 	public ArrayList<Declaration> Vt_ptrs;//all methods able to be inherited by children
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
+	public ArrayList<String> packages;
 
 
 	/**
@@ -44,8 +46,15 @@ public class InheritanceTree{
 		Vt_ptrs.add(new Declaration("Class", "__isa",
 									 className,new ArrayList<Fparam>(0)));
 		
-		//add hashcode to Vtable
+		//add __delete to Vtable
 		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+		p.add(new Fparam(new ArrayList<String>(),"__Object*","__this"));
+		Vt_ptrs.add(new Declaration("void","__delete",
+									"Object",p));
+		
+		
+		//add hashcode to Vtable
+		p = new ArrayList<Fparam>(0);
 		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
 		Vt_ptrs.add(new Declaration("int32_t","hashCode",
 									 "Object",p));
@@ -92,9 +101,13 @@ public class InheritanceTree{
 		//change __isa field to point to this class's feild
 		Vt_ptrs.get(0).ownerClass = className;
 		
+		//change __delete field to point to this class's feild
+		Vt_ptrs.get(1).ownerClass = className;
+		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
+		
 		//change toString to point to class name
-		Vt_ptrs.get(4).ownerClass = className;
-		Vt_ptrs.get(4).params.get(0).type = className;
+		Vt_ptrs.get(5).ownerClass = className;
+		Vt_ptrs.get(5).params.get(0).type = className;
 
 		
 		//adds virtual Class methods ptrs to virtual Vtable
@@ -163,9 +176,19 @@ public class InheritanceTree{
 		
 		//change __isa methods to point to this class
 		Vt_ptrs.get(0).ownerClass = className;
-		//add __isa to local methods
+		
+		//change __delete field to point to this class's feild
+		Vt_ptrs.get(1).ownerClass = className;
+		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
+		
+		//add __class to local methods
 		local.add(new Declaration("Class","__class",className,
 								  new ArrayList<Fparam>(0)));
+		
+		//add __delete to local methods
+		ArrayList<Fparam> d= new ArrayList<Fparam>(0);
+		d.add(new Fparam(new ArrayList<String>(0),className,"__this"));
+		local.add(Vt_ptrs.get(1));
 		
 		//constructors defined
 		//local methods defined
@@ -206,17 +229,23 @@ public class InheritanceTree{
 	 * if multiple are found keeps method with max overloadNum stored
 	 * returns max overloadNum
 	 */
-	private int overloaded_check(String method,ArrayList<Fparam> params/*,boolean is_virtual*/){
+	private int overloaded_check(String method,ArrayList<Fparam> params,boolean is_virtual){
 		int max=-1;
 		for(int i =0;i<Vt_ptrs.size();i++){
 			//same name test
 			if(method.equals(Vt_ptrs.get(i).name)){
 				//diff params test
 				
-				if((params.size()==Vt_ptrs.get(i).params.size())&&(!typetest(params,Vt_ptrs.get(i).params)))
+				if(params.size()==Vt_ptrs.get(i).params.size())
+				   if(!typetest(params,Vt_ptrs.get(i).params))
 					//store max overloadNum
 					max = Math.max(Vt_ptrs.get(i).overloadNum,max);
-				else; //if(is_virtual)
+				   else if(is_virtual){
+					   Vt_ptrs.get(i).ownerClass = this.className;
+					   //signify to NOT ADD TO VIRTUAL
+					   return Vt_ptrs.get(i).overloadNum-1;
+		
+				   }
 			}	//delete vt_ptr bc its overwritten
 		}
 		for(int j=0;j<local.size();j++){
@@ -231,6 +260,7 @@ public class InheritanceTree{
 		}
 			return max;
 	}
+
 	/**
 	 * helper method used in check_for_overrides() for testing for equal Declarations.
 	 *@param Declaration
@@ -302,7 +332,7 @@ public class InheritanceTree{
 				params.clear();
 				block=null;
 				is_virtual = true;
-				overloaded = 0;
+				overloaded=0;
 				
 				//get info from tree
 				visit(n);
@@ -327,7 +357,7 @@ public class InheritanceTree{
 				visit(n);
 				
 				//search in Vt_ptrs and local for same name diff params
-				overloaded = overloaded_check(methodname,params)+1;
+				overloaded = overloaded_check(methodname,params,is_virtual)+1;
 				
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if(is_virtual) 
@@ -550,21 +580,63 @@ public class InheritanceTree{
 	 * this is meant to be used only on the root Object Tree so that the entire tree is searched
 	 *
 	 */
-	public InheritanceTree search(String name){
+	public InheritanceTree search(ArrayList<String> packages, String name){
 		InheritanceTree found = null;
-		if(this.className.equals(name))
+		if((this.className.equals(name))&&(this.packages.containsAll(packages)))
 			return this;
 		
 		for(int i=0; i< this.subclasses.size();i++){
-			found = subclasses.get(i).search(name);
+			found = subclasses.get(i).search(packages,name);
 			if(found!=null) return found;
 		}
 		return found;
 	
 	}
-	public String search_for_method(boolean on_instance, Declaration method, 
-									ArrayList<String> paramtyps, String method_name){
+	public String search_for_constructor(ArrayList<String> paramtyps){
+		//list of possible constructors
+		LinkedList<Declaration> possible= new LinkedList<Declaration>();
 		
+		//add all constructors to list that have same #params
+		int size= constructors.size();
+		for(int i=0;i<size;i++){
+			if(constructors.get(i).params.size()==paramtyps.size())
+			possible.add(constructors.get(i));
+		}
+		//return if only one
+		if(possible.size()==1)
+			return possible.get(0).name+"_"+possible.get(0).overloadNum;
+		
+		//need to zero out specificity for next check
+		for(Declaration d : possible){
+			d.specificity =0;
+		}
+		
+		//check for specificity
+		int ptsize = paramtyps.size();
+		for(int m = 0;m<ptsize;m++){
+			String type=paramtyps.get(m);
+			for(int c=0;c<possible.size();c++){
+				String pos_type = possible.get(c).params.get(m).type;
+				if(!pos_type.equals(type));
+				else{
+					int casting = gouptree(pos_type,type);
+					if(casting == -1){ possible.remove(c);}
+					else possible.get(c).specificity =possible.get(c).specificity+ casting;
+				}
+			}
+		}
+		Declaration min =possible.get(0);
+		for(int n=0;n<possible.size();n++){
+			if(min.specificity>possible.get(n).specificity)
+				min=possible.get(n);
+		
+		}
+		return min.name+"_"+min.overloadNum;
+	
+	}
+	public String[] search_for_method(boolean on_instance, Declaration method, 
+									ArrayList<String> paramtyps, String method_name){
+		String[] result= new String[2];
 		String accessor;
 		
 		int paramsize=paramtyps.size();
@@ -586,29 +658,29 @@ public class InheritanceTree{
 		//if only one left return it with accessor!!
 		if(possible.size()==1){
 			Declaration choosen = possible.get(0);
+			result[0] = choosen.returntype;
 			accessor= make_accessor(on_instance,choosen.isVirtual);
-			return accessor+choosen.name+"_"+choosen.overloadNum;
+			result[1]= accessor+choosen.name+"_"+choosen.overloadNum;
+			return result;
 		}
 		
-		// CALLING NON_STATIC FROM STATIC CONTEXT CHECK 
-		//if !on_instance and static need to eliminate all non-static methods
-		/*if((!on_instance)&&(method.is_static())){
-			for(int s=0;s<possible.size();s++){//compute size each time so that we dont go too far
-				if(!possible.get(s).is_static())
-					possible.remove(s);//remove non-static methods
-			}
+		//need to zero out specificity for next check
+		for(Declaration d : possible){
+			d.specificity =0;
 		}
-	*/
 		
 		//----SPECIFICITY CHECK
 		
 		for(int m=0;m<paramsize;m++){
 			String type=paramtyps.get(m);
-			int pos_size = possible.size();
-			for(int c=0;c<pos_size;c++){
+			for(int c=0;c<possible.size();c++){
 				String pos_type = possible.get(c).params.get(m).type;
 				if(!pos_type.equals(type));
-				else possible.get(c).specificity =possible.get(c).specificity+ gouptree(pos_type,type);
+				else{
+					int casting = gouptree(pos_type,type);
+					if(casting == -1){ possible.remove(c);}
+					else possible.get(c).specificity =possible.get(c).specificity+ casting;
+				}
 			}
 		}
 		Declaration min =possible.get(0);
@@ -619,9 +691,10 @@ public class InheritanceTree{
 		//find method with smallest number MUST BE ONLY ONE (MIN)
 		//RETURN accessor+NAME+_number
 		accessor = make_accessor(on_instance,min.isVirtual);
-		return accessor+min.name+"_"+min.overloadNum;
-		
-		
+		result[0]= min.returntype;
+		result[1]= accessor+min.name+"_"+min.overloadNum;
+		return result;
+
 		
 	}
 	private String make_accessor(boolean on_instance,boolean isVirtual){
@@ -636,23 +709,25 @@ public class InheritanceTree{
                       *  WRONG: will fix
                       */
             if (castee.equals("char")) {
-                if (casted_to.equals("int"))
-                    return 1;
-                else
+                if (casted_to.equals("short"))
                     return -1;
-            }
+                else
+                    castee = "short"; // has same precidence as a short,
+            } else if (casted_to.equals("char"))
+                return -1;
+            
 
-            final String[] primatives = {"double", "float", "long",
-                "int", "short", "byte" };
+            final ArrayList<String> primatives = (ArrayList) Arrays.asList(
+                    new String[] {"double", "float", "long",
+                    "int", "short", "byte" });
+            
+            if (primatives.contains(casted_to) && primatives.contains(castee))
+                return primatives.indexOf(casted_to) - primatives.indexOf(castee);
 
 		int distance =0;
-		//find root of tree
-		InheritanceTree Object=this;
-		while(Object.superclass !=null){
-			Object = Object.superclass;
-		}
+		
 		//search on root of tree for castee class
-		InheritanceTree type = Object.search(castee);
+		InheritanceTree type = this.root.search(this.packages,castee);
 		
 		while(type.className!=casted_to){
 			distance++;

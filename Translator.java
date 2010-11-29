@@ -50,15 +50,17 @@ public class Translator extends Tool {
 
 	File inputFile = null;
         HashMap<String,Boolean> dependencies;
+        HashMap<ClassStruct,Boolean> classes;
 
 	/** Create a new translator. */
 	public Translator() {
-		
+            // do nothing 
 	}
 
-        public Translator (HashMap<String,Boolean> dependencies) {
+        public Translator (HashMap<String,Boolean> dependencies, HashMap<ClassStruct,Boolean> classes) {
             this();
             this.dependencies = dependencies;
+            this.classes = classes;
         }
 
 	public String getCopy() {
@@ -70,7 +72,7 @@ public class Translator extends Tool {
 	}
 
 	public String getExplanation() {
-		return "This tool translates a subset of Javat to a subset of C++.";
+		return "This tool translates a subset of Java to a subset of C++.";
 	}
 
 	public void init() {
@@ -86,8 +88,8 @@ public class Translator extends Tool {
 				 "Translate .java file to c++.").
 			bool("finddependencies", "finddependencies", false,
 				 "find all classes we need to translate").	
-			bool("testing","testing",false,"Run some Test cases.").
-			bool("test","test",false,"Run some Test cases.");	}
+		bool("testing","testing",false,"Run some Test cases.").
+		bool("testing2","testing2",false, "tester2 for EWalk");}
 
 	public void prepare() {
 		super.prepare();
@@ -126,45 +128,123 @@ public class Translator extends Tool {
 				new Visitor(){
 					public void visitBlock(GNode n)
 					{
-						CppPrinter print= new CppPrinter(n);
-						System.out.println(print.getString());
+						CppPrinter print= new CppPrinter(n,true);
+						
 					}
 					public void visit(Node n)
 					{
 						for(Object o:n) {
 							if(o instanceof Node) dispatch((Node) o);
-						
 						}
 					}
 				}.dispatch(node);
 			
 			}
-		//Some Testing Environments
-		if(runtime.test("test"))
+			if(runtime.test("testing2"))
 			{
-				runtime.console().p("Testing Method Overloading...").pln().flush();
-			
-				/*Create a new visitor to visit the CompilationUnit */
-				new Visitor(){
-					public void visitBlock(GNode n)
-					{
-						//CppWalker walk= new CppWalker(n);
-						//System.out.println(walk.getString());
+				
+				String fullPathName = null;
+				
+				if (VERBOSE) {
+					runtime.console().p("Begining translation...").pln().flush();
+				}
+				
+				// need the original file to be the first in dependencies
+				// list to avoid circular imports
+				if (dependencies.isEmpty()) {
+					try {
+						fullPathName = inputFile.getCanonicalPath();
+						dependencies.put(fullPathName, true);
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-					public void visit(Node n)
-					{
-						for(Object o:n) {
-							if(o instanceof Node) dispatch((Node) o);
+				}
+				
+				
+				// creates the import heirarchy
+				DependencyTree dependency = new DependencyTree(node, fullPathName,
+															   dependencies, classes);
+				
+				//creates tree root a.k.a. the Object class
+				final InheritanceTree Object = new InheritanceTree();
+				
+				//creates the Class class as subclass of Object class
+				final InheritanceTree Class = new InheritanceTree(Object);
+				
+				
+				final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
+				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
+				
+				final LinkedList<GNode> toTree = new LinkedList<GNode>();
+				
+				new Visitor() {
+					
+					InheritanceTree supr;
+					
+					public void visitCompilationUnit(GNode n){
+						//Paiges testing class
+						//cppClass classtester=new cppClass(n);
+						visit(n);
+					}
+					
+					public void visitClassDeclaration(GNode n){
+						//if no extenstion it's superclass is Object
+						supr=Object;
+						visit(n);
 						
+						//if the super class has been defined make the subclass
+						if(supr!=null){
+							inherit.addClassdef((new InheritanceTree(n,supr)));
 						}
+						else toTree.add(n);
+						
 					}
-				}.dispatch(node);
-				//Print the New AST
-				//runtime.console().format(node).pln().flush();
-			}
-		
+					public void visitExtension(GNode n){
+						//find's super class
+						//searches for InheritanceTree with same name as extention
+						//returns null if no tree exists yet
+						
+						/**CURRENTLY CRASHES MAKE REMOVED BY PAIGE 11.25
+						 supr = Object.search(n.getNode(0).getNode(0).getString(0));
+						 */
+					}
+					public void visit(Node n) {
+						for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+					}
+					
+				}.dispatch(node); //end of main dispatch
+				
+				//creates the rest of the tree all nodes whose super exists until all 
+				//trees created
+				InheritanceTree supr;
+				
+				int i=0;
+				while(!toTree.isEmpty()){
+					
+					/**CURRENTLY CRAHES MAKE REMOVED BY PAIGE 11.25
+					 supr = Object.search(toTree.get(i).getNode(3)
+					 .getNode(0).getNode(0).getString(0));
+					 
+					 if(supr!=null){
+					 inherit.addClassdef((new InheritanceTree(toTree.get(i),supr)));
+					 toTree.remove(i);
+					 }
+					 else i++;
+					 if (i==toTree.size()) i=0;
+					 */
+				}
+				
+				
+				inherit.close(); // when all nodes are visited and inheritance files are made close files
+				//print the new Java AST
+						runtime.console().format(node).pln().flush();
+			}//end of runtime.test("Ttesting2") test
+			
+			
 		// Handle the translate option
 		if (runtime.test("translate")) {
+
+                    String fullPathName = null;
 
 			if (VERBOSE) {
 				runtime.console().p("Begining translation...").pln().flush();
@@ -174,17 +254,17 @@ public class Translator extends Tool {
 			// list to avoid circular imports
 			if (dependencies.isEmpty()) {
 				try {
-					dependencies.put(inputFile.getCanonicalPath(), true);
+                                    fullPathName = inputFile.getCanonicalPath();
+                                    dependencies.put(fullPathName, true);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 			
-		
-			
-			// creates the import heirarchy
-			DependencyTree dependency = new DependencyTree(node, dependencies);
 
+                        // creates the import heirarchy
+                        DependencyTree dependency = new DependencyTree(node, fullPathName,
+                                dependencies, classes);
 
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
@@ -204,7 +284,7 @@ public class Translator extends Tool {
 				
 				public void visitCompilationUnit(GNode n){
 					//Paiges testing class
-					cppClass classtester=new cppClass(n);
+					//cppClass classtester=new cppClass(n);
 					visit(n);
 				}
 				
@@ -224,7 +304,10 @@ public class Translator extends Tool {
 					//find's super class
 					//searches for InheritanceTree with same name as extention
 					//returns null if no tree exists yet
+					
+					/**CURRENTLY CRASHES MAKE REMOVED BY PAIGE 11.25
 					supr = Object.search(n.getNode(0).getNode(0).getString(0));
+					 */
 				}
 				public void visit(Node n) {
 					for (Object o : n) if (o instanceof Node) dispatch((Node)o);
@@ -239,15 +322,17 @@ public class Translator extends Tool {
 			int i=0;
 			while(!toTree.isEmpty()){
 				
+				/**CURRENTLY CRAHES MAKE REMOVED BY PAIGE 11.25
 					supr = Object.search(toTree.get(i).getNode(3)
 									 .getNode(0).getNode(0).getString(0));
+				 
 					if(supr!=null){
 						inherit.addClassdef((new InheritanceTree(toTree.get(i),supr)));
 						toTree.remove(i);
 					}
 					else i++;
 				if (i==toTree.size()) i=0;
-				
+				*/
 			}
 				
 			
@@ -258,15 +343,30 @@ public class Translator extends Tool {
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
 
+/*
 		if(runtime.test("finddependencies")){
-		
-		
-		
-		
-		
-		
-		}
+                    DependencyTree dTree = null;
 
+                    try {
+                        dTree = new DependencyTree( (GNode)node, inputFile.getCanonicalPath(),
+                            dependencies, classes);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    
+                    HashMap<ClassStruct,Boolean> classesToTranslate =
+                            dTree.getFileClasses();
+
+                    while (!classes.containsValue(true)) {
+                        classes = dTree.getAllClasses();
+
+                        String fileToBeTranslated = "the file that we pull from allFiles";
+
+                        files.put( fileToBeTranslated , true);
+                        new Translator(classes, files).run(new String[] {"translate", fileToBeTranslated});
+
+		}
+*/
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();
 		}
@@ -304,7 +404,8 @@ public class Translator extends Tool {
             
 		// start with an empty dependency list
 		HashMap<String,Boolean> dependencies = new HashMap<String,Boolean>();
+                HashMap<ClassStruct,Boolean> classes = new HashMap<ClassStruct,Boolean>();
             
-		new Translator(dependencies).run(args);
+		new Translator(dependencies, classes).run(args);
 	}	
 }//end of Translator.java

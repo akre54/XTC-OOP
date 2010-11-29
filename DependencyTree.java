@@ -16,8 +16,6 @@ import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 
-//import xtc.util.Tool;
-
 public class DependencyTree {
 
     public boolean verbose = false;
@@ -27,15 +25,25 @@ public class DependencyTree {
       *  allPaths holds all the dependencies for the current file and *its* depedencies
       *
       *  stored as HashMap so we can specify whether each file (key) has
-      *  been translated, and store them in a collection
+      *  been translated, and store them in a collection. Using HashMap
       */
     private HashMap<String,Boolean> allPaths;
     private HashMap<String,Boolean> filePaths = new HashMap<String,Boolean>();
+    private HashMap<ClassStruct,Boolean> allClasses;
+    private HashMap<ClassStruct,Boolean> fileClasses = new HashMap<ClassStruct,Boolean>();
+    private String currentPackage = "";
+    private String currentSuperClass = "";
+    private String currentFilePath;
 
 
-    public DependencyTree(Node n, HashMap<String,Boolean> oldPaths) {
 
+    public DependencyTree(Node n, String filePath,
+            HashMap<String,Boolean> oldPaths,
+            HashMap<ClassStruct,Boolean> oldClasses) {
+
+        currentFilePath = filePath;
         allPaths = oldPaths;
+        allClasses = oldClasses;
 
         new Visitor() {
 
@@ -66,7 +74,6 @@ public class DependencyTree {
                             pathbuilder.append("/");
 
                         pathbuilder.append(breadcrumb);
-                        //System.out.println(i + " " + n.getString(i));
                     } catch (IndexOutOfBoundsException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
@@ -76,6 +83,7 @@ public class DependencyTree {
                 }
 
                 String pathname = pathbuilder.toString();
+                currentPackage = pathname.replace("/",".");
 
                 File dir = null;
 
@@ -88,15 +96,13 @@ public class DependencyTree {
                 if (dir.exists()) {
                     for (String fileName : dir.list()) {
                         if (fileName.endsWith(".java")) {
-                            // will eventually use Reflection for e.g. finding non-filenamed classes
-                            //addPath(Class.forName(pathname + '/' + fileName));
 
                             addPath(pathname + '/' + fileName);
                             //visitImportDeclaration(pathname + '/' + fileName);
                         }
                     }
-                }
-
+                
+				}
 
             }
 
@@ -115,7 +121,7 @@ public class DependencyTree {
                 // if using the wildcard operator, visit the folder instead
                 try {
                 	if (n.getString(n.getNode(1).size() -1 ).equals("*"))
-                		visitPackageDeclaration( (GNode)n );
+                		// should copy code of visitPackageDeclaration, not use it directly, since there are now modifications specific to packages
                	return;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -142,6 +148,16 @@ public class DependencyTree {
 
                 addPath(filename);
             }
+            public void visitClassDeclaration(GNode n){
+                String className = n.getString(1);
+		visit(n);
+                addClass(className, n);
+            }
+
+            public void visitExtension(GNode n){
+		currentSuperClass = n.getNode(0).getNode(0).getString(0);
+            }
+
 
             public void visit(Node n) {
                 for (Object o : n) {
@@ -158,40 +174,54 @@ public class DependencyTree {
             if ( !allPaths.containsKey(filename) || !(allPaths.get(filename))) {
                 System.out.println("Now translating " + filename);
                 allPaths.put(filename, true);
-                new Translator(allPaths).run(new String[]{"-translate", filename});
+
+                // Translator class should handle all Translations
+                //new Translator(allPaths, allClasses).run(new String[]{"-translate", filename});
             }
-            /* NOTE: I overloaded the Translator constructor to take a HashMap rather
-               than overloading the run method because I thought it looked cleaner.
-               if this causes problems let me know.
-             */
         }
     }
 
     /*
      *  add file path (as string) to both the maps of file-specific
      *  and the whole structure dependencies, using canonical path
-	  *  rather than absolute to avoid collisions
+     *  rather than absolute to avoid collisions
      */
        private void addPath (String s) {
 
            try {
-           		s = (new File(s)).getCanonicalPath();
+              s = (new File(s)).getCanonicalPath();
            } catch (IOException e) {
-               e.printStackTrace();
+              e.printStackTrace();
            }
 
            filePaths.put(s, false);
 
            // don't add duplicates
-           if (null == allPaths.get(s)) {
-           		allPaths.put(s, false);
+           if (!allPaths.containsKey(s)) {
+                allPaths.put(s, false);
            }
        }
 
+    /**
+        *   add class names (as ClassStruct object) to both class
+        *   lists (all classes and file-specific classes)
+        */
+       void addClass (String className, GNode n) {
+
+           ClassStruct c = new ClassStruct(currentFilePath, currentPackage,
+                            currentSuperClass, className, n);
+           
+           fileClasses.put(c, false);
+
+           if (!allClasses.containsKey(c))
+               allClasses.put(c, false);
+
+       }
+
         /**
-         * @return all paths to each dependent file of the whole dependency
-         * structure as ArrayList
-         */
+                * @return all paths to each dependent file of the whole dependency
+                * structure as ArrayList
+                */
         public ArrayList<String> getAllPaths() {
             return new ArrayList<String>(allPaths.keySet());
         }
@@ -202,6 +232,28 @@ public class DependencyTree {
          */
         public ArrayList<String> getFilePaths() {
             return new ArrayList<String>(filePaths.keySet());
+        }
+
+        /**
+         * @return all classes to each dependent file of the whole dependency
+         * structure as ArrayList of ClassStruct
+         */
+        public ArrayList<ClassStruct> getAllClassNames() {
+            return new ArrayList<ClassStruct>(allClasses.keySet());
+        }
+        public HashMap<ClassStruct,Boolean> getAllClasses() {
+            return allClasses;
+        }
+
+
+      /**
+         * @return all classes in the current file
+         */
+        public ArrayList<ClassStruct> getFileClassNames() {
+            return new ArrayList<ClassStruct>(fileClasses.keySet());
+        }
+        public HashMap<ClassStruct,Boolean> getFileClasses() {
+            return fileClasses;
         }
 
        /**
