@@ -266,7 +266,6 @@ public class EWalk
 				if (isPrint) isPrintString = true;
 				visit(n);
 			}
-			public String getType(Node n) {
 			/**helpers method that uses the inheritence tree search for method and returns the string array */
 			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
@@ -330,7 +329,6 @@ public class EWalk
 				/**can put support for handling methods inside an argument here (use search for methods
 				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
 			}
-			
 			public void visitSuperExpression(GNode n)
 			{
 			}
