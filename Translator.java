@@ -165,6 +165,11 @@ public class Translator extends Tool {
                         DependencyTree dependency = new DependencyTree(node, fullPathName,
                                 dependencies, classes);
 
+                        for ( String file : dependency.getFilePaths() ) {
+                            new Translator().run( new String[] {"finddependencies", file});
+                        }
+
+
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
 			
@@ -240,7 +245,9 @@ public class Translator extends Tool {
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
 
-/*
+                // TODO: this whole thing needs to be written to work recursively.
+                // Probably not a good idea to use runtime arguments, since we can't pass
+                // in variables (we need our HashMap of files to translate)
 		if(runtime.test("finddependencies")){
                     DependencyTree dTree = null;
 
@@ -254,16 +261,13 @@ public class Translator extends Tool {
                     HashMap<ClassStruct,Boolean> classesToTranslate =
                             dTree.getFileClasses();
 
-                    while (!classes.containsValue(true)) {
-                        classes = dTree.getAllClasses();
-
-                        String fileToBeTranslated = "the file that we pull from allFiles";
-
-                        files.put( fileToBeTranslated , true);
-                        new Translator(classes, files).run(new String[] {"translate", fileToBeTranslated});
+                    
+                    for (String fileName : dTree.getAllPaths()) {
+                        new Translator(dependencies, classes).run(new String[] {"finddependencies", fileName});
+                    }
 
 		}
-*/
+
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();
 		}

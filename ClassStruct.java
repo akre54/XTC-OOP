@@ -27,4 +27,8 @@ public class ClassStruct {
     public boolean equals (ClassStruct c) {
         return (this.name == c.name) && (this.packageName == c.packageName) ;
     }
+    
+    public boolean pathEquals (ClassStruct c) {
+        return (this.fullPath.equals(c.fullPath));
+    }
 }
