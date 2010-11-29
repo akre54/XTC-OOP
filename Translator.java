@@ -252,7 +252,9 @@ public class Translator extends Tool {
 				
 			
 			inherit.close(); // when all nodes are visited and inheritance files are made close files
-
+			if (VERBOSE)
+				//prints the ast after every translation
+				runtime.console().format(node).pln().flush();
 		}//end of runtime.test("Translate") test
 		//-----------------------------------------------------------------------
 

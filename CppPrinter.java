@@ -362,29 +362,41 @@ public class CppPrinter extends Visitor
 	}
 	public void visitCallExpression(GNode n)
 	{
-		Node primary1 = n.getNode(0);
-		dispatch(primary1);
+		Object primary = n.get(0);
+		if (primary instanceof Node) {
+			dispatch((Node) primary);
+		}
+		else if (primary instanceof String) {
+			printer.append((String)primary);
+		}
 		Object mid = n.get(1);
 		if (mid instanceof Node) {
 			dispatch((Node) mid);
 		}
-		printer.append("->vptr->");
-		Object name =n.get(2);
-		if(name instanceof Node)
-		{
-			dispatch((Node)mid);
-		}
-		else if(name instanceof String)
-		{
+		//printer.append("->vptr->");
+		Object name = n.get(2);
+		if (name instanceof String) {
 			printer.append((String)name);
+		}
+		else if (name instanceof Node) {
+			dispatch((Node)name);
 		}
 		Object arguments = n.get(3);
 		printer.append("(");
-		if(arguments instanceof Node)
-		{
+		if(arguments instanceof Node) {
 			dispatch((Node)arguments);
 		}
+		else if (arguments instanceof String) {
+			printer.append((String)arguments);
+		}
 		printer.append(")");
+		Object print = n.get(1);
+		if (print instanceof Node) {
+			dispatch((Node)print);
+		}
+		else if (print instanceof String) {
+			printer.append((String)print);
+		}
 	}
 	public void visitQualifiedIdentifier(GNode n)
 	{
@@ -398,6 +410,9 @@ public class CppPrinter extends Visitor
 			}
 			if(name.equals("String"))
 			{
+			}
+			else if(name.contains("ArrayOf")) {
+				//nada
 			}
 			else {
 				printer.append("__");

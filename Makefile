@@ -58,7 +58,7 @@ SOURCE = \
 	ConditionalMaker.java \
 	EWalk.java\
 	CppWalker.java\
-	FCname.java
+	ArrayMaker.java
 
 
 
