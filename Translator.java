@@ -28,7 +28,6 @@ import xtc.lang.JavaFiveParser;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.HashMap;
 
@@ -249,12 +248,12 @@ public class Translator extends Tool {
 
 
                     String fullPathName = "";
+                    try { fullPathName = inputFile.getCanonicalPath(); }
+                    catch (IOException e) { }
+
                     // need the original file to be the first in dependencies list
                     if (dependencies.isEmpty()) {
-                        try {
-                            fullPathName = inputFile.getCanonicalPath();
-                            dependencies.put(fullPathName, true);
-                        } catch (IOException e) { }
+                        dependencies.put(fullPathName, true);
                     }
 
                     // recursively find dependencies from input file
@@ -348,9 +347,8 @@ public class Translator extends Tool {
 		if(runtime.test("finddependencies")){
 
                     String fullPathName = "";
-                    try {
-                        fullPathName = inputFile.getCanonicalPath();
-                    } catch (IOException e) { }
+                    try { fullPathName = inputFile.getCanonicalPath(); }
+                    catch (IOException e) { }
 
                     DependencyFinder depend = new DependencyFinder(node, fullPathName);
 
@@ -360,7 +358,7 @@ public class Translator extends Tool {
                     Translator t = null;
                     for ( String filename : depend.getFilePaths() ) {
 
-                        // only translate if not translated. dependencies.get() returns
+                        // only translate if not translated. dependencies.get(filename) returns
                         // a boolean specifiying whether the file has been translated
                         if ( !dependencies.containsKey(filename) || !(dependencies.get(filename))) {
 								
