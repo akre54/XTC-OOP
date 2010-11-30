@@ -1,6 +1,6 @@
 /* info about class structures for DependencyFinder
  *
- * by The Group
+ * (C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka
  */
 
 package xtc.oop;

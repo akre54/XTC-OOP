@@ -1,6 +1,7 @@
 /*
  * Object-Oriented Programming
  * Copyright (C) 2010 Robert Grimm
+ * edits (C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -57,7 +58,8 @@ public class Translator extends Tool {
             // do nothing 
 	}
 
-        public Translator (HashMap<String,Boolean> dependencies, HashMap<ClassStruct,Boolean> classes) {
+        public Translator (HashMap<String,Boolean> dependencies,
+                    HashMap<ClassStruct,Boolean> classes) {
             this();
             this.dependencies = dependencies;
             this.classes = classes;
@@ -103,7 +105,6 @@ public class Translator extends Tool {
 			throw new IllegalArgumentException(file + ": file too large");
 		}
 		inputFile = file;
-		//System.out.println("using this method");
 		return file;
 	}
 
@@ -240,7 +241,6 @@ public class Translator extends Tool {
 			}//end of runtime.test("Ttesting2") test
 			
 			
-		// Handle the translate option
 		if (runtime.test("translate")) {
 
                     if (VERBOSE) {
@@ -257,11 +257,10 @@ public class Translator extends Tool {
                         } catch (IOException e) { }
                     }
 
-
                     // recursively find dependencies from input file
                     Translator t = new Translator(dependencies, classes);
                     t.run(new String[]{"-no-exit", "-finddependencies", fullPathName});
-						  classes = t.classes;
+                    classes = t.classes;
 
                     //creates tree root a.k.a. the Object class
                     final InheritanceTree Object = new InheritanceTree();
@@ -270,7 +269,7 @@ public class Translator extends Tool {
                     final InheritanceTree Class = new InheritanceTree(Object);
 
                     final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,
-						  						(new DependencyFinder(node, fullPathName)).getFileDependencies());
+                            (new DependencyFinder(node, fullPathName)).getFileDependencies());
 
                     /******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
                     final LinkedList<GNode> toTree = new LinkedList<GNode>();
@@ -343,12 +342,9 @@ public class Translator extends Tool {
                         runtime.console().format(node).pln().flush();
                     }
                 }//end of runtime.test("Translate") test
-					  //-----------------------------------------------------------------------
+                //-----------------------------------------------------------------------
 
-                /**
-                             * find dependencies of a single file, recursively calling
-                             * until dependency list is filled
-                             */
+                /* find dependencies of a single file, recursively calling until dependency list is filled */
 		if(runtime.test("finddependencies")){
 
                     String fullPathName = "";
@@ -358,14 +354,14 @@ public class Translator extends Tool {
 
                     DependencyFinder depend = new DependencyFinder(node, fullPathName);
 
-                    // cyclical dependency resolution already handled by dependent files HashMap
                     for (ClassStruct c : depend.getFileClasses())
                         classes.put(c, false);
 
                     Translator t = null;
                     for ( String filename : depend.getFilePaths() ) {
 
-                        // only translate if not translated
+                        // only translate if not translated. dependencies.get() returns
+                        // a boolean specifiying whether the file has been translated
                         if ( !dependencies.containsKey(filename) || !(dependencies.get(filename))) {
 								
                             dependencies.put(filename, true);
@@ -373,15 +369,11 @@ public class Translator extends Tool {
                             t = new Translator(dependencies, classes);
                             t.run( new String[] {"-no-exit", "-finddependencies", filename});
 
-                            //classes.putAll(t.classes);
-
-                            // yes? no?
                             dependencies.putAll(t.dependencies);
                         }
                     }
-                    
-                    
 		}
+                //-----------------------------------------------------------------------
 
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();

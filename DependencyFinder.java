@@ -3,7 +3,7 @@
  *
  * Needs to handle both import statements and all members of package.
  *
- * by The Group
+ * (C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka
  */
 package xtc.oop;
 
@@ -35,10 +35,13 @@ public class DependencyFinder {
 
     public DependencyFinder(Node n, String filePath) {
 
-		  currentParentDirectory = (new File(filePath)).getParent(); // all dependencies are relative to the translated file
+        currentParentDirectory = (new File(filePath)).getParent(); // all dependencies are relative to the translated file
         currentFilePath = filePath;
         currentPackage = "";
         currentSuperClass = "";
+
+        // good idea / bad idea?
+        // gatherDirectoryFiles(currentParentDirectory) // since current directory is treated almost like a package
 
         new Visitor() {
 
@@ -49,9 +52,9 @@ public class DependencyFinder {
                 Node n = g.getNode(1);
 
                 /* support for wildcards... later
-                if ( n.getString(n.size() -1 ).equals("*") )
-                n.remove(n.size());
-                 */
+                               if ( n.getString(n.size() -1 ).equals("*") )
+                               n.remove(n.size());
+                             */
 
 
                 StringBuilder pathbuilder = new StringBuilder();
@@ -73,21 +76,7 @@ public class DependencyFinder {
                 String pathname = pathbuilder.toString();
                 currentPackage = pathname.replace("/",".");
 
-                File dir = null;
-
-                try {
-                    dir = new File(currentParentDirectory, pathname);
-                } catch (NullPointerException e) {
-                    System.out.println(pathname + " could not be found. Exists?");
-                }
-
-                if (dir.exists()) {
-                    for (String fileName : dir.list()) {
-                        if (fileName.endsWith(".java")) {
-                            addPath(pathname + '/' + fileName);
-                        }
-                    }
-                }
+                gatherDirectoryFiles(pathname);
             }
 
             public void visitImportDeclaration(GNode g) {
@@ -105,7 +94,7 @@ public class DependencyFinder {
                             // if using the wildcard operator, visit the folder instead
                             try {
                                     if (n.getString(n.getNode(1).size() -1 ).equals("*"))
-                                            // should copy code of visitPackageDeclaration, not use it directly, since there are now modifications specific to packages
+                                            gatherDirectoryFiles(pathBuilder.toString());
                             return;
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -153,11 +142,27 @@ public class DependencyFinder {
         }.dispatch(n);
     }
 
-    /*
-     *  add file path (as string) to both the maps of file-specific
-     *  and the whole structure dependencies, using canonical path
-     *  rather than absolute to avoid collisions
-     */
+    /* Adds all files in directory to filePaths  */
+    private void gatherDirectoryFiles(String dirPath) {
+        File dir = null;
+
+        try {
+            dir = new File(currentParentDirectory, dirPath);
+        } catch (NullPointerException e) {
+            System.out.println(dirPath + " could not be found. Exists?");
+        }
+
+        if (dir.exists()) {
+            for (String fileName : dir.list()) {
+                if (fileName.endsWith(".java")) {
+                    addPath(dirPath + '/' + fileName);
+                }
+            }
+        }
+    }
+
+    /*  add file path (as string) to file dependencies Map, using canonical path
+        *  rather than absolute to avoid collisions                    */
        private void addPath (String s) {
 
            try {
