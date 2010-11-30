@@ -211,7 +211,10 @@ public class InheritanceBuilder{
 					h_classdef.write(constr.modifiers.get(i)+": ");
 				}		
 				//write className
-				h_classdef.write("__"+t.className+"_"+constr.overloadNum+"(");
+				h_classdef.write("__"+t.className);
+				if(constr.overloadNum!=0)
+					h_classdef.write("_"+constr.overloadNum);
+				h_classdef.write("(");
 				
 				//loop through formal parameter 
 				for(int i =0;i<constr.params.size();i++){
@@ -263,14 +266,20 @@ public class InheritanceBuilder{
 			
 			if (method.name.equals("main")) {
 				buildMain(method);
-				h_classdef.write("\t   static int32_t "+method.name+"_"+method.overloadNum+"(int32_t, char**);\n");
+				h_classdef.write("\t   static int32_t "+method.name);
+				if(method.overloadNum!=0)
+					h_classdef.write("_"+method.overloadNum);
+				h_classdef.write("(int32_t, char**);\n");
 			}
 			else{
 				//h_classdef.write("\t   ");
 				for(int i=0;i<method.modifiers.size();i++){
 					h_classdef.write("\t"+method.modifiers.get(i)+": \n");
 				}
-				h_classdef.write("\t   static "+method.returntype+" "+method.name+"_"+method.overloadNum+"(");
+				h_classdef.write("\t   static "+method.returntype+" "+method.name);
+				if(method.overloadNum!=0)
+					h_classdef.write("_"+method.overloadNum);
+				h_classdef.write("(");
 	
 				for(int j=0; j<method.params.size();j++){
 					
@@ -310,7 +319,10 @@ public class InheritanceBuilder{
 						 "using namespace xtc::oop;\n\n\n"
 						 +"int32_t main(int32_t argc, char *argv[]){\n\n\t"
 						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n\t"
-						 +"NAMEmain->main"+"_"+n.overloadNum+"(argc,argv);\n\treturn 0;\n}");
+						 +"NAMEmain->main");
+						if(n.overloadNum!=0)
+							mainWriter.write("_"+n.overloadNum);
+						mainWriter.write("(argc,argv);\n\treturn 0;\n}");
 		mainWriter.close();
 	}
 	
@@ -330,7 +342,10 @@ public class InheritanceBuilder{
 		for(int index =1;index<t.Vt_ptrs.size();index++){
 			Declaration method = t.Vt_ptrs.get(index);
 			
-			h_classdef.write("\t\t"+method.returntype+" (*"+method.name+"_"+method.overloadNum+")("+t.className);
+			h_classdef.write("\t\t"+method.returntype+" (*"+method.name);
+			if(method.overloadNum!=0)
+				h_classdef.write("_"+method.overloadNum);
+			h_classdef.write(")("+t.className);
 			
 			for(int j=1; j<method.params.size();j++){
 				h_classdef.write(", "+method.params.get(j).type);
@@ -360,16 +375,28 @@ public class InheritanceBuilder{
 			//syntax for an overridden method
 			if((method.ownerClass).equals(t.className)){
 				
-				h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(&__"+t.className+"::"+method.name+"_"+method.overloadNum+")");
+				h_classdef.write(",\n\t\t   "+method.name);
+				if(method.overloadNum!=0)
+					h_classdef.write("_"+method.overloadNum);
+				h_classdef.write("(&__"+t.className+"::"+method.name);
+				if(method.overloadNum!=0)
+					h_classdef.write("_"+method.overloadNum);
+				h_classdef.write(")");
 			}
 			//syntax for a method that needs a this class casting
 			else{
-				h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(("+method.returntype+"(*)("+t.className);
+				h_classdef.write(",\n\t\t   "+method.name);
+				if(method.overloadNum!=0)
+					h_classdef.write("_"+method.overloadNum);
+				h_classdef.write("(("+method.returntype+"(*)("+t.className);
 				
 				for(int j=1; j<method.params.size();j++){
 					h_classdef.write(", "+method.params.get(j).type);
 				}
-				h_classdef.write("))&__"+method.ownerClass+"::"+method.name+"_"+method.overloadNum+")");
+				h_classdef.write("))&__"+method.ownerClass+"::"+method.name);
+				if(method.overloadNum!=0)
+					h_classdef.write("_"+method.overloadNum);
+				h_classdef.write(")");
 			
 			}
 			
@@ -405,7 +432,10 @@ public class InheritanceBuilder{
 
 				//method syntax
 				cpp_methoddef.write("\t"+method.returntype+" __"+t.className+
-									"::"+method.name+"_"+method.overloadNum+"(");
+									"::"+method.name);
+				if(method.overloadNum!=0)
+					cpp_methoddef.write("_"+method.overloadNum);
+				cpp_methoddef.write("(");
 		
 				for(int i=0;i<method.params.size();i++){
 					Fparam param= method.params.get(i);

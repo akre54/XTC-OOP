@@ -261,8 +261,10 @@ public class Translator extends Tool {
                     Translator t = new Translator(dependencies, classes);
                     t.run(new String[]{"-no-exit", "-finddependencies", fullPathName});
                     classes = t.classes;
-
-                    //creates tree root a.k.a. the Object class
+			
+//------------- the rest of translate will be edited to work with hashmap ------------------------
+			
+					//creates tree root a.k.a. the Object class
                     final InheritanceTree Object = new InheritanceTree();
 
                     //creates the Class class as subclass of Object class
