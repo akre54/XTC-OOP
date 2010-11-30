@@ -1,7 +1,6 @@
 package xtc.oop;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Arrays;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
@@ -717,7 +716,7 @@ public class InheritanceTree{
                 return -1;
             
 
-            final ArrayList<String> primatives = (ArrayList) Arrays.asList(
+            final java.util.List<String> primatives = java.util.Arrays.asList(
                     new String[] {"double", "float", "long",
                     "int", "short", "byte" });
             
