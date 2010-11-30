@@ -46,20 +46,19 @@ PACKAGE     = xtc.oop
 PACKAGE_LOC = xtc/oop
 
 SOURCE = \
-	CppPrinter.java\
-	Translator.java \
-	CppCreator.java \
-	InheritanceBuilder.java \
-	Declaration.java \
-	DependencyTree.java \
+	ArrayMaker.java \
 	ClassStruct.java \
+	ConstructorDec.java \
+	CppPrinter.java \
+	CppCreator.java \
+	CppWalker.java \
+	Declaration.java \
+	DependencyFinder.java \
+	EWalk.java \
+	InheritanceBuilder.java \
 	InheritanceTree.java \
 	InstanceField.java \
-	ConstructorDec.java \
-	EWalk.java\
-	CppWalker.java\
-	FCname.java
-
+	Translator.java
 
 
 

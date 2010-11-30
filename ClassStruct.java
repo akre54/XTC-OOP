@@ -1,11 +1,11 @@
-/*
- *  info about class structures for DependencyTree.java
+/* info about class structures for DependencyFinder
+ *
+ * (C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka
  */
 
 package xtc.oop;
 
 import xtc.tree.GNode;
-import java.util.ArrayList;
 
 public class ClassStruct {
 
