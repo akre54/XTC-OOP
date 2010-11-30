@@ -123,6 +123,8 @@ public class EWalk
 				ArrayList<String> fcNamelist =getFcName(n);
 				
 				//get the method name
+				//System.out.println(n.getName());
+				System.out.println(n.getString(2));//Throws Class Cast Exception HeRE
 				String methodName = n.getString(2);
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
