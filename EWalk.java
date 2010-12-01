@@ -57,6 +57,11 @@ public class EWalk
 						visitCastExpression(castex,instanceName);
 					}
 			}
+			/**visit the declarator and update the type */
+			public void visitDeclarator(GNode n)
+			{
+				
+			}
 			/**NOTE: This is not a VISIT method but my own created method*/
 			public void visitCastExpression(Node n, String name) {
 				//get and variable and the new types
@@ -72,7 +77,7 @@ public class EWalk
 			{
 				if(n!=null)
 				{
-					System.out.println("IS CALL?"+n.getName());
+					//System.out.println("IS CALL?"+n.getName());
 					if(n.getName().equals("CallExpression"))
 				   {
 					return true;
@@ -103,17 +108,18 @@ public class EWalk
 			//does all of Call Expressions Heavy Lifting and returns the newmethod arraylist
 			public String[] setMethodInfo(Node n)
 			{
-				Node firstChild = n.getNode(0);
+				/*Node firstChild = n.getNode(0);
 
 				String primaryIdentifier;
-				if(!isCallExpression(firstChild))
+				if(!isCallExpression(firstChild) && isMethodChaining)
 				{
 					isMethodChaining=true;
 					primaryIdentifier=savedReturnType;
+					
 				}
 				else
 				{
-					System.out.println("DEBUG" +n.getName());
+					//System.out.println("DEBUG" +n.getName());
 					
 					primaryIdentifier=n.getString(0);
 				}
@@ -129,10 +135,14 @@ public class EWalk
 				
 				//get the method name
 				//System.out.println(n.getName());
-				System.out.println(n.getString(2));//Throws Class Cast Exception HeRE
+				//System.out.println(n.getString(2));//Throws Class Cast Exception HeRE
 				String methodName = n.getString(2);
+				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ " " + methodName);}
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
+				return methodArray;
+				 */
+				String[] methodArray = new String[5];
 				return methodArray;
 			}
 						/**Helper method returns the arguments in an array list*/
@@ -226,9 +236,44 @@ public class EWalk
 				if (temp.equals("final")) n.set(0,"const");
 			}
 			public void visitFieldDeclaration (GNode n) {
-				visit(n);
+				//visit(n);
+				//get the packge information(Inside Qualified Identifier)
+				//get the type which is located at the second child
+				ArrayList<String> currentPackage = new ArrayList<String>();
+				Object o = n.get(1);
+				if(o!=null)
+				{
+					currentPackage=getPackage((Node)o);
+				}
+				//remove the last Value (its the object name.)
+				String newtype = currentPackage.remove(currentPackage.size()-1);
+				
+				//check to see if current package is now empty
+				//if it is append zero
+				if (currentPackage.isEmpty()) {
+					currentPackage.add("0");
+				}
+				
+				String name="";
+				//get the name Locaed under declarator
+				Object declarators = n.get(2);
+				if(declarators!=null)
+				{
+					Node declarNode=(Node)declarators;
+					Object declarator=declarNode.get(0);
+					if(declarator!=null)
+					{
+						Node declaratorNode = (Node)declarator;
+						name = declaratorNode.getString(0);
+					}
+				}
+				
+				//update the type of the variable
+				System.out.println("Updating Method Information("+name +"," +newtype);
+
+				method.update_type(name,currentPackage, newtype);
 				if (isString) {
-					visit(n);
+					//visit(n);
 					isString = false;
 				}
 				if (isArray) {
@@ -236,6 +281,23 @@ public class EWalk
 					ArrayMaker goArray = new ArrayMaker (n);
 					isArray = false;
 				}
+				visit(n);
+			}
+			/**Helper method that gets an array list of a pack when given  node assuming qualifiedId or Prim*/
+			public ArrayList<String> getPackage(Node n)
+			{
+				ArrayList<String> packages = new ArrayList<String>();
+				//get every child of the given node (either PrimirtiveType or QualifiedIdentifier)
+				//System.out.println("currentNode" +n.getName());
+				Node node = n.getNode(0);
+				//System.out.println("currentNode" +n.getName());
+					for(int i=0; i<node.size(); i++){
+					//for every child in QualifiedIdentifier append it to the array list
+						packages.add(node.getString(i));
+					}
+					
+				
+				return packages;
 			}
 			public void visitDimensions (GNode n) {
 				if(!isArray) {
@@ -267,14 +329,19 @@ public class EWalk
 				if (isPrint) isPrintString = true;
 				visit(n);
 			}
+			
+			/**any time anythign is declared you need to do update type
+			 8/
 			/**helpers method that uses the inheritence tree search for method and returns the string array */
 			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
 				//method .search for type with packages if you dont send a package its the package you're in
 				//what do you send if its your current package
+				if(VERBOSE){System.out.println("Searching For Type ("+ Identifier);}
 				ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
 				//get the last value which is the Classname
-				String className = qualities.remove(qualities.size());
+				//System.out.println("SIZE OF" +qualities.size());
+				String className = qualities.remove(qualities.size()); //getting null pointer exception
 				//questions WHAT DO I DO WITH the rest? Is that needed?
 				
 				
@@ -334,7 +401,14 @@ public class EWalk
 			{
 			}
 			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+				
+				for (Object o : n){ 
+					if (o instanceof Node){ 
+						System.out.println(n.getName());
+						dispatch((Node)o);
+						
+					}
+				}
 			}
 		}.dispatch(node);
 	}
