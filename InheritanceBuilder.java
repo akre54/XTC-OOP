@@ -2,11 +2,6 @@ package xtc.oop;
 import java.util.ArrayList;
 
 import java.io.File;
-import xtc.tree.GNode;
-import xtc.tree.Node;
-import xtc.tree.Visitor;
-
-import xtc.util.Tool;
 
 /*
  * 
@@ -24,7 +19,7 @@ public class InheritanceBuilder{
 	private File source;
 
 	
-	InheritanceBuilder(File jfile,ArrayList<String> files){
+	InheritanceBuilder(File jfile, ArrayList<String> files){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
@@ -459,7 +454,7 @@ public class InheritanceBuilder{
 		}
 		// invokes Vtable constructor
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
-							"\t//===========================================================================\n\n");
+                            "\t//===========================================================================\n\n");
 	}
 	/*
 	 *closes both files
