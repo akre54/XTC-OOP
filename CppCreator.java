@@ -22,7 +22,7 @@ class CppCreator {
  *
  * @param jFile a file whose name ends in .java
  */ 
-	public CppCreator (File jFile, String desc,String end) {
+	public CppCreator (File jFile, String desc, String end) {
 		cFile = convertNameToC (jFile, desc, end);
 		try {
 			outputWriter = new FileWriter(cFile);
@@ -74,31 +74,27 @@ class CppCreator {
 
 
     private static File convertNameToC (File input, String end) {
-		String jname = input.getName ();
-		String cname = jname.substring (0,jname.length()-4) + end; // remove ".java" and add end
-		File cfile = new File (input.getParent (), cname);
-		return cfile;
+        String jname = input.getName();
+        String cname = jname.replace("java", end); // remove ".java" and add end
+        return new File (input.getParent (), cname);
     }
 
 
-	private static File convertNameToC (File input) {
-		String jname = input.getName ();
-		String cname = jname.substring (0,jname.length()-4) + "cpp"; // remove ".java" and add ".cpp"
-		File cfile = new File (input.getParent (), cname);
-		return cfile;
+    private static File convertNameToC (File input) {
+        String jname = input.getName();
+        String cname = jname.replace("java", "cpp"); // remove ".java" and add ".cpp"
+        File cfile = new File (input.getParent(), cname);
+        return cfile;
     }
 
-	private static File convertNameToC (File input,String desc, String end) {
-		String jname = input.getName ();
-		String cname = jname.substring (0,jname.length()-5) +desc + "." + end; // remove ".java" and add desc.end
-		File cfile = new File (input.getParent (), cname);
-		return cfile;
+    private static File convertNameToC (File input, String desc, String end) {
+        String jname = input.getName();
+        String cname = jname.replace(".java", desc + "." + end); // remove ".java" and add desc.end
+        return new File (input.getParent(), cname);
     }
 	
     private static File convertNameToC (String pathName) {
-		String cname = pathName.substring (0,pathName.length()-4) + "cpp"; // remove ".java" and add ".cpp"
-		File cfile = new File (pathName);
-		return cfile;
+       return new File(pathName.replace("java","cpp"));
     }
 
 	public void write (String input) {

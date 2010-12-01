@@ -14,36 +14,34 @@ public class Declaration{
 	public int overloadNum;
 	public int specificity;
 
-        //constructor for Class and Object methods
-	Declaration(String rtype, String mname, String sclass,ArrayList<Fparam> fparams) {
-            name = mname;
-            returntype = rtype;
-            params = new ArrayList<Fparam>(fparams);
-            ownerClass = sclass;
-            modifiers = new ArrayList<String>(0);
-            overloadNum = 0;
-            specificity = 0;
-	}
+	//constructor for Class and Object methods
+	Declaration(String returntype, String name, String ownerClass, ArrayList<Fparam> params) {
+		this.modifiers = new ArrayList<String>(0);//default
+		this.returntype = returntype;
+		this.name = name;
+		this.params = new ArrayList<Fparam>(params);
+		this.ownerClass = ownerClass;
+		this.bnode = null;//default
+		this.variables = new ArrayList<LocalVariable>(0);//default
+		this.isVirtual = true;//default
+		this.overloadNum = 0;//default
+		this.specificity = 0;//default
 	
-	Declaration(int ol, String rtype, String mname, String sclass, ArrayList<Fparam> fparams,
-                    GNode node, ArrayList<LocalVariable> lvar) {
-            this(mname, rtype, sclass, fparams);
-            bnode = node;
-            modifiers = new ArrayList<String>();
-            overloadNum = ol;
 	}
-
-	Declaration(int ol,ArrayList<String> mods, boolean virtual, String rtype, String mname, 
-                    String sclass,ArrayList<Fparam> fparams,GNode node,ArrayList<LocalVariable> lvar){
-            this(ol, rtype, mname, sclass, fparams, node, lvar);
-            isVirtual = virtual;
-            variables = new ArrayList<LocalVariable>(lvar);
-            modifiers = new ArrayList<String>(mods);
+	//constructor for all other methods
+	Declaration(int ol,ArrayList<String> modifiers, boolean isVirtual, String returntype, String name, 
+                    String ownerClass,ArrayList<Fparam> params,GNode bnode,ArrayList<LocalVariable> variables){
+		this(returntype, name, ownerClass, params);
+		this.isVirtual = isVirtual;
+		this.variables.addAll(variables);
+		this.modifiers.addAll(modifiers);
+		this.overloadNum =overloadNum;
+	
 	}
 	
 	/**
 	 * will cycle through all variables for name
-	 * returns the type of that name
+	 * returns the type of that name in arraylist [java,lang,Foo]
 	 *
 	 */
 	public ArrayList<String> search_for_type(String name){
@@ -54,6 +52,7 @@ public class Declaration{
                     return type;
                 }
             }
+			System.out.println("YOU DID NOT UPDATE TYPE SOMEWHERE");
             return null; //error type does not exist
 	}
 	
@@ -76,11 +75,27 @@ public class Declaration{
                 variables.add(new LocalVariable(newpack,newtype,name));
             }
 	}
-	public boolean is_static(){
-            return modifiers.contains("static");
+	/*
+	 * used for checks in accessability of overloading 
+	 */
+	public boolean isprivate(){
+            return modifiers.contains("private");
+	}
+	/*
+	 * possibly better than having a isVirtual field in every declaration
+	 */
+	public boolean isVirtual(){
+		boolean is=true;
+		is= !modifiers.contains("private");
+		is= !modifiers.contains("static");
+		return is;
 	}
 
 }
+/*
+ * defines a Local Variable
+ *
+ */
 class LocalVariable {
 	ArrayList<String> packages;
 	String name;
@@ -93,13 +108,20 @@ class LocalVariable {
 	}
 
 }
+/*
+ * defines a Fparam (full parameter)
+ *
+ */
 class Fparam {
 	public ArrayList<String> modifiers;
 	public String type;
 	public String var_name;
-	Fparam(ArrayList<String> mods, String type, String var_name){
-            this.modifiers = mods;
+        Fparam(String type, String var_name) {
             this.type = type;
             this.var_name = var_name;
+        }
+	Fparam(ArrayList<String> mods, String type, String var_name) {
+            this(type, var_name);
+            this.modifiers = mods;   
 	}
 }

@@ -118,6 +118,7 @@ public class DependencyFinder {
             }
             public void visitClassDeclaration(GNode n){
                 String className = n.getString(1);
+				//currentSuperClass = "Object";
 		visit(n);
                 addClass(className, n);
 
