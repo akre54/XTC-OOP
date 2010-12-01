@@ -59,10 +59,6 @@ public class DependencyFinder {
 
                 StringBuilder pathbuilder = new StringBuilder();
 
-                if (excludedPackages.contains(n.getString(0))) {
-                    return; // we don't want to convert anything in java.*, javax.* ...
-                }
-
                 for (int i = 0; i < n.size(); i++) {
                     String breadcrumb = n.getString(i);
 
@@ -83,9 +79,8 @@ public class DependencyFinder {
 
                 Node n = g.getNode(1);
 
-                // only add if not part of java std library
                 if (excludedPackages.contains(n.getString(0))) {
-                    return;
+                    return; // don't convert anything in java.*, javax.*, etc.
                 }
 
                 StringBuilder pathbuilder = new StringBuilder(); // build filename from recursing tree through its children
@@ -125,6 +120,9 @@ public class DependencyFinder {
                 String className = n.getString(1);
 		visit(n);
                 addClass(className, n);
+
+                // reset superclass to blank
+                currentSuperClass = "";
             }
 
             public void visitExtension(GNode n){
@@ -182,9 +180,6 @@ public class DependencyFinder {
                             className, currentSuperClass, n);
            
            fileClasses.add(c);
-
-           // reset superclass to blank
-           currentSuperClass = "";
        }
 
 
