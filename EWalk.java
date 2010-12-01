@@ -34,8 +34,8 @@ public class EWalk
 				isString = false,
 				isArray = false,
 				isPrintString = false;
-			StringBuffer fcName;
-			ArrayList<String> fcNameList;
+			StringBuffer fcName= new StringBuffer();
+			ArrayList<String> fcNameList=new ArrayList<String>();
 			public void visitPrimitiveType (GNode n) {
 				String type = n.getString(0);
 				if (type.equals("int")) {
@@ -77,7 +77,7 @@ public class EWalk
 			{
 				if(n!=null)
 				{
-					//System.out.println("IS CALL?"+n.getName());
+					System.out.println("IS CALL?"+n.getName());
 					if(n.getName().equals("CallExpression"))
 				   {
 					return true;
@@ -95,7 +95,7 @@ public class EWalk
 				//new method name to override in the tree
 				String newMethod= methodArray[1];
 				savedReturnType = methodArray[0];
-
+				
 				//code to replace the old method name with the new method name in the tree	
 				//where the current method name is current located as position 2
 				n.set(2,newMethod);
@@ -108,21 +108,23 @@ public class EWalk
 			//does all of Call Expressions Heavy Lifting and returns the newmethod arraylist
 			public String[] setMethodInfo(Node n)
 			{
-				/*Node firstChild = n.getNode(0);
-
-				String primaryIdentifier;
-				if(!isCallExpression(firstChild) && isMethodChaining)
+								String primaryIdentifier=" ";
+				Node firstChild= n.getNode(0);
+				if(isMethodChaining)
 				{
-					isMethodChaining=true;
+					//store the method return type
 					primaryIdentifier=savedReturnType;
-					
 				}
-				else
-				{
-					//System.out.println("DEBUG" +n.getName());
-					
-					primaryIdentifier=n.getString(0);
-				}
+				if(isCallExpression(firstChild))
+					{
+						isMethodChaining=true;
+						dispatch(firstChild);
+					}
+					else if(firstChild!=null)
+					{
+					primaryIdentifier=firstChild.getString(0);
+					}
+				
 				
 				//visit the arguments node
 				Node arguments=n.getNode(3);
@@ -130,23 +132,17 @@ public class EWalk
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				if(VERBOSE) System.out.println("New Array List Created...\n");
 				
-				//Node fcName=n.getNode(2);//where will the fcnameList be?
 				//gets the FCNameList Node and visits it using the getFCName method
 				ArrayList<String> fcNamelist =getFcName(n);
 				
 				//get the method name
-				//System.out.println(n.getName());
-				//System.out.println(n.getString(2));//Throws Class Cast Exception HeRE
 				String methodName = n.getString(2);
-				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ " " + methodName);}
+				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
 				return methodArray;
-				 */
-				String[] methodArray = new String[5];
-				return methodArray;
 			}
-						/**Helper method returns the arguments in an array list*/
+			/**Helper method returns the arguments in an array list*/
 			public ArrayList<String> getArgumentTypes(Node n)
 			{
 				//get the type for every argument in the argument Node
@@ -163,6 +159,7 @@ public class EWalk
 				return argumentList;
 				
 			}
+			
 			/**Node that gets the FC name before a method and returns an array list of the fcNamelist*/
 			public ArrayList<String> getFcName(Node n){
 				
@@ -336,21 +333,26 @@ public class EWalk
 			/**helpers method that uses the inheritence tree search for method and returns the string array */
 			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
+				if(VERBOSE){System.out.println("Running"+ Identifier+"," + nameList +","+name+","+argumentList);}
 				//method .search for type with packages if you dont send a package its the package you're in
 				//what do you send if its your current package
-				if(VERBOSE){System.out.println("Searching For Type ("+ Identifier);}
-				ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
-				//get the last value which is the Classname
-				//System.out.println("SIZE OF" +qualities.size());
-				String className = qualities.remove(qualities.size()); //getting null pointer exception
-				//questions WHAT DO I DO WITH the rest? Is that needed?
 				
-				
-				
-				//get the inheritance name of 
-				InheritanceTree b =tree.root.search(qualities,className); //search takes the current method name?
-				//when there are no arguments sends a NullPointerException
-				
+				InheritanceTree b;
+				if(isInstance)
+				{
+					ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
+					//remove the last value from the arrayList (thats always the class name
+					//questions WHAT DO I DO WITH the rest? Is that needed?
+					String className =(String)qualities.remove(1);
+					//get the inheritance name of 
+					b =tree.root.search(qualities,className); //search takes the current method name?
+					//when there are no arguments sends a NullPointerException
+				}
+				else {
+					b=tree;
+				}
+
+				if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}
 				//returns an array of string 0= return type and 1=new method string
 				return b.search_for_method(isInstance,method,argumentList,name);
 			}
@@ -405,7 +407,6 @@ public class EWalk
 				
 				for (Object o : n){ 
 					if (o instanceof Node){ 
-						System.out.println(n.getName());
 						dispatch((Node)o);
 						
 					}
