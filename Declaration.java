@@ -27,7 +27,7 @@ public class Declaration{
 	
 	Declaration(int ol, String rtype, String mname, String sclass, ArrayList<Fparam> fparams,
                     GNode node, ArrayList<LocalVariable> lvar) {
-            this(mname, rtype, sclass, fparams);
+            this( rtype, mname,sclass, fparams);
             bnode = node;
             modifiers = new ArrayList<String>();
             overloadNum = ol;
@@ -35,7 +35,7 @@ public class Declaration{
 
 	Declaration(int ol,ArrayList<String> mods, boolean virtual, String rtype, String mname, 
                     String sclass,ArrayList<Fparam> fparams,GNode node,ArrayList<LocalVariable> lvar){
-            this(ol, rtype, mname, sclass, fparams, node, lvar);
+            this(ol,rtype, mname, sclass, fparams, node, lvar);
             isVirtual = virtual;
             variables = new ArrayList<LocalVariable>(lvar);
             modifiers = new ArrayList<String>(mods);

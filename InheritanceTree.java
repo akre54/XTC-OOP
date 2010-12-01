@@ -351,7 +351,7 @@ public class InheritanceTree{
 					//add it to local with true as isvirtual field
 					local.add(new Declaration(overloaded,modifiers,is_virtual,retrn,methodname,className,params,
 								block,new ArrayList<LocalVariable>(0)));
-
+				
 									
 			}
 			public void visitBlock(GNode n){
@@ -623,14 +623,19 @@ public class InheritanceTree{
 		LinkedList<Declaration> possible= new LinkedList<Declaration>();
 
 		for (Declaration j : Vt_ptrs) {
-                    if ((j.name.equals(method_name)) && (j.params.size() == paramtyps.size()))
-                        possible.add(j);
+			
+			if ((j.name.equals(method_name)) && ((j.params.size()-1) == paramtyps.size())){
+				possible.add(j);						
+				
+			}
 		}
 
 		for (Declaration l : local ) {
-                    if ((l.name.equals(method_name)) && (!l.isVirtual)
+			
+			if ((l.name.equals(method_name)) && (!l.isVirtual)
                            && (l.params.size() == paramtyps.size())) {
                         possible.add(l);
+						
                     }
 		}
 		
