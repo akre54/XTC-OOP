@@ -51,7 +51,6 @@ SOURCE = \
 	ConstructorDec.java \
 	CppPrinter.java \
 	CppCreator.java \
-	CppWalker.java \
 	Declaration.java \
 	DependencyFinder.java \
 	EWalk.java \
