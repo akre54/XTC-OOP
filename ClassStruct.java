@@ -1,11 +1,12 @@
-/*
- *  info about class structures for DependencyTree.java
+/* info about class structures for DependencyFinder,
+ * Translator, and InheritanceBuilder
+ *
+ * (C) 2010 P.Hammer, A.Krebs, L. Pelka, P.Ponzeka
  */
 
 package xtc.oop;
 
 import xtc.tree.GNode;
-import java.util.ArrayList;
 
 public class ClassStruct {
 
@@ -25,6 +26,10 @@ public class ClassStruct {
 
     /*      comparison by name and package      */
     public boolean equals (ClassStruct c) {
-        return (this.name == c.name) && (this.packageName == c.packageName) ;
+        return (this.name.equals(c.name)) && (this.packageName.equals(c.packageName)) ;
+    }
+    
+    public boolean fromSameFile (ClassStruct c) {
+        return (this.fullPath.equals(c.fullPath));
     }
 }

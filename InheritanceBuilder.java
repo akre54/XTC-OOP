@@ -2,11 +2,6 @@ package xtc.oop;
 import java.util.ArrayList;
 
 import java.io.File;
-import xtc.tree.GNode;
-import xtc.tree.Node;
-import xtc.tree.Visitor;
-
-import xtc.util.Tool;
 
 /*
  * 
@@ -24,7 +19,7 @@ public class InheritanceBuilder{
 	private File source;
 
 	
-	InheritanceBuilder(File jfile,ArrayList<String> files){
+	InheritanceBuilder(File jfile, ArrayList<String> files){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
@@ -99,8 +94,8 @@ public class InheritanceBuilder{
 							
 							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
 					// #includes all files its dependent on
-						for(int i=0;i<files.size();i++){
-							cpp_methoddef.write("#include \""+files.get(i)+"\"\n");
+						for (String file : files) {
+							cpp_methoddef.write("#include \""+file+"\"\n");
 						}
 							cpp_methoddef.write("#include <sstream>\n\n"+
 											//"using xtc::oop::"+cpp_methoddef.cFile.getName()+";\n"+
@@ -178,17 +173,16 @@ public class InheritanceBuilder{
 	 */
 	private void write_all_feilds(InheritanceTree t){
 		
-		//loops through fields and prints out in proper syantax
-		for(int index =0;index<t.fields.size();index++){
-			InstanceField f = t.fields.get(index);
-			
-			for(int j=0; j<f.modifiers.size();j++){
-				h_classdef.write("\t   "+f.modifiers.get(j)+": ");
-			}
-			
-			h_classdef.write(f.type+" "+f.var_name+";\n");
-			
-		}
+            //loops through fields and prints out in proper syantax
+            for (InstanceField f : t.fields) {
+
+                for(String modifier : f.modifiers){
+                    h_classdef.write("\t   "+modifier+": ");
+                }
+
+                h_classdef.write(f.type+" "+f.var_name+";\n");
+
+            }
 		
 	}
 	
@@ -200,52 +194,49 @@ public class InheritanceBuilder{
 	 */	
 	private void write_all_constructors(InheritanceTree t){
 		
-		int size = t.constructors.size();
-			for(int index =0;index < size ;index++){
-				Declaration constr= t.constructors.get(index);
-				
-				h_classdef.write("\t   ");
-				
-				//loop through constructor modifiers
-				for(int i =0;i<constr.modifiers.size();i++){	
-					h_classdef.write(constr.modifiers.get(i)+": ");
-				}		
-				//write className
-				h_classdef.write("__"+t.className+"_"+constr.overloadNum+"(");
-				
-				//loop through formal parameter 
-				for(int i =0;i<constr.params.size();i++){
-					Fparam fp= constr.params.get(i);
-					
-					if(i>0)h_classdef.write(",");//comma
-					
-					//loop through formal parameter's modifiers
-					for(int j =0;j<fp.modifiers.size();j++){	
-						h_classdef.write( fp.modifiers.get(j)+" ");
-					}
-					//writes formal parameter's type and name
-					h_classdef.write(fp.type+" "+fp.var_name);
-				}
-				//intialize __vptr
-				h_classdef.write("):__vptr(&__vtable)");
-				
-				// intialize all the instance fields
-				for(int i =0; i< t.fields.size();i++){
-					InstanceField f = t.fields.get(i);
-					
-					h_classdef.write(","+f.var_name+"("+f.value+")");
-				
-				}
-				h_classdef.write("{\n\t\t");
-			
-			//**  cppBlock is called on constructor's block node  **//
-			EWalk changes = new EWalk(t,constr,constr.bnode);
-				CppPrinter print = new CppPrinter(constr.bnode);
-				h_classdef.write(print.getString().toString());//write body of the constructor
-				h_classdef.write("\n\t   };\n\n");
-			
-			}
-		
+            for (Declaration constr : t.constructors ) {
+
+                h_classdef.write("\t   ");
+
+                //loop through constructor modifiers
+                for (String modifier : constr.modifiers) {
+                    h_classdef.write(modifier + ": ");
+                }
+                //write className
+                h_classdef.write("__" + t.className + "_" + constr.overloadNum + "(");
+
+                //loop through formal parameter
+                for (int i = 0; i < constr.params.size(); i++) {
+                    Fparam fp = constr.params.get(i);
+
+                    if (i > 0) {
+                        h_classdef.write(","); //comma
+                    }
+
+                    //loop through formal parameter's modifiers
+                    for (String modifier : fp.modifiers) {
+                        h_classdef.write(modifier + " ");
+                    }
+                    //writes formal parameter's type and name
+                    h_classdef.write(fp.type + " " + fp.var_name);
+                }
+                //intialize __vptr
+                h_classdef.write("):__vptr(&__vtable)");
+
+                // intialize all the instance fields
+                for (InstanceField f : t.fields) {
+                    h_classdef.write("," + f.var_name + "(" + f.value + ")");
+                }
+
+                h_classdef.write("{\n\t\t");
+
+                //**  cppBlock is called on constructor's block node  **//
+                EWalk changes = new EWalk(t, constr, constr.bnode);
+                CppPrinter print = new CppPrinter(constr.bnode);
+                h_classdef.write(print.getString().toString()); //write body of the constructor
+                h_classdef.write("\n\t   };\n\n");
+            }
+
 	}
 	
 	
@@ -256,33 +247,31 @@ public class InheritanceBuilder{
 	 *
 	 */		
 	private void write_all_methods(InheritanceTree t){
-		//loops through local methods and prints out in proper syantax
-		int size = t.local.size();
-		for(int index = 0; index < size ;index++){
-			Declaration method = t.local.get(index);
-			
-			if (method.name.equals("main")) {
-				buildMain(method);
-				h_classdef.write("\t   static int32_t "+method.name+"_"+method.overloadNum+"(int32_t, char**);\n");
-			}
-			else{
-				//h_classdef.write("\t   ");
-				for(int i=0;i<method.modifiers.size();i++){
-					h_classdef.write("\t"+method.modifiers.get(i)+": \n");
-				}
-				h_classdef.write("\t   static "+method.returntype+" "+method.name+"_"+method.overloadNum+"(");
-	
-				for(int j=0; j<method.params.size();j++){
-					
-					if(j==0)// print first param without ","
-						h_classdef.write(method.params.get(j).type);
+            //loops through local methods and prints out in proper syantax
+            for (Declaration method : t.local) {
 
-					else h_classdef.write(","+method.params.get(j).type);
-				
-				}
-				h_classdef.write(");\n");
-			}
-		}
+                if (method.name.equals("main")) {
+                    buildMain(method);
+                    h_classdef.write("\t   static int32_t "+method.name+"_"+method.overloadNum+"(int32_t, char**);\n");
+                }
+                else {
+                    //h_classdef.write("\t   ");
+                    for (String modifier : method.modifiers) {
+                            h_classdef.write("\t"+modifier+": \n");
+                    }
+                    h_classdef.write("\t   static "+method.returntype+" "+method.name+"_"+method.overloadNum+"(");
+
+                    for(int j=0; j<method.params.size();j++){
+
+                        if(j==0) // print first param without ","
+                            h_classdef.write(method.params.get(j).type);
+                        else
+                            h_classdef.write(","+method.params.get(j).type);
+
+                    }
+                    h_classdef.write(");\n");
+                }
+            }
 	}
 
 	/** 
@@ -306,11 +295,11 @@ public class InheritanceBuilder{
 		
 		//create the main.cpp
 		mainWriter.write("#include <iostream>\n\n"+
-						 "#include \""+h_classdef.cFile.getName()+"\"\n\n"+
-						 "using namespace xtc::oop;\n\n\n"
-						 +"int32_t main(int32_t argc, char *argv[]){\n\n\t"
-						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n\t"
-						 +"NAMEmain->main"+"_"+n.overloadNum+"(argc,argv);\n\treturn 0;\n}");
+                         "#include \""+h_classdef.cFile.getName()+"\"\n\n"+
+                         "using namespace xtc::oop;\n\n\n"
+                         +"int32_t main(int32_t argc, char *argv[]){\n\n\t"
+                         +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n\t"
+                         +"NAMEmain->main"+"_"+n.overloadNum+"(argc,argv);\n\treturn 0;\n}");
 		mainWriter.close();
 	}
 	
@@ -326,17 +315,15 @@ public class InheritanceBuilder{
 		
 		//ptr for __class()
 		h_classdef.write("\t\tClass __isa;\n");
+
 		//loops through vtable and prints out in proper syntax
-		for(int index =1;index<t.Vt_ptrs.size();index++){
-			Declaration method = t.Vt_ptrs.get(index);
-			
-			h_classdef.write("\t\t"+method.returntype+" (*"+method.name+"_"+method.overloadNum+")("+t.className);
-			
-			for(int j=1; j<method.params.size();j++){
-				h_classdef.write(", "+method.params.get(j).type);
-			}
-			h_classdef.write(");\n");
-			
+		for (Declaration method : t.Vt_ptrs){
+                    h_classdef.write("\t\t"+method.returntype+" (*"+method.name+"_"+method.overloadNum+")("+t.className);
+
+                    for (Fparam param : method.params ) {
+                        h_classdef.write(", "+param.type);
+                    }
+                    h_classdef.write(");\n");
 		}
 	}
 	
@@ -350,30 +337,27 @@ public class InheritanceBuilder{
 	 *
 	 */	
 	private void write_assign_method_ptrs(InheritanceTree t){
-		//ptr for __class()
-		h_classdef.write("\t\t   "+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
-		
-		//loops through vtable and prints out in proper syntax
-		for(int index =1;index<t.Vt_ptrs.size();index++){
-			Declaration method = t.Vt_ptrs.get(index);
-			
-			//syntax for an overridden method
-			if((method.ownerClass).equals(t.className)){
-				
-				h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(&__"+t.className+"::"+method.name+"_"+method.overloadNum+")");
-			}
-			//syntax for a method that needs a this class casting
-			else{
-				h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(("+method.returntype+"(*)("+t.className);
-				
-				for(int j=1; j<method.params.size();j++){
-					h_classdef.write(", "+method.params.get(j).type);
-				}
-				h_classdef.write("))&__"+method.ownerClass+"::"+method.name+"_"+method.overloadNum+")");
-			
-			}
-			
-		}
+            //ptr for __class()
+            h_classdef.write("\t\t   "+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
+
+            //loops through vtable and prints out in proper syntax
+            for(Declaration method : t.Vt_ptrs) {
+
+                //syntax for an overridden method
+                if((method.ownerClass).equals(t.className)){
+                    h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(&__"+t.className+"::"+method.name+"_"+method.overloadNum+")");
+                }
+
+                //syntax for a method that needs a this class casting
+                else {
+                    h_classdef.write(",\n\t\t   "+method.name+"_"+method.overloadNum+"(("+method.returntype+"(*)("+t.className);
+
+                    for (Fparam j : method.params) {
+                        h_classdef.write(", "+j.type);
+                    }
+                    h_classdef.write("))&__"+method.ownerClass+"::"+method.name+"_"+method.overloadNum+")");
+                }
+            }
 	}
 
 	
@@ -399,37 +383,34 @@ public class InheritanceBuilder{
 							"}\n");
 		
 	//--- adds all methods to METHODDEF	
-		int size = t.local.size();
-		for(int index=1;index<size;index++){
-			Declaration method = t.local.get(index);
+                for (Declaration method : t.local) {
 
-				//method syntax
-				cpp_methoddef.write("\t"+method.returntype+" __"+t.className+
-									"::"+method.name+"_"+method.overloadNum+"(");
-		
-				for(int i=0;i<method.params.size();i++){
-					Fparam param= method.params.get(i);
-					
-					//first param without ","
-					if(i==0)cpp_methoddef.write(param.type+" "+param.var_name);
-					else cpp_methoddef.write(","+param.type+" "+param.var_name);
+                    //method syntax
+                    cpp_methoddef.write("\t"+method.returntype+" __"+t.className+"::"+method.name+"_"+method.overloadNum+"(");
 
-				}
-				//calls to CppMethod to create the body of the method
-				cpp_methoddef.write("){\n");
-			
-				//**  cppBlock is called on method's block node  **//
-				//cppMethod mblock = new cppMethod(t.local.get(index).mnode);
-			EWalk changes = new EWalk(t,method,method.bnode);
-				CppPrinter mblock=new CppPrinter(method.bnode);
-				cpp_methoddef.write(mblock.getString().toString());//write body of the method
-				cpp_methoddef.write("\n\t   }\n\n");
-			
-				cpp_methoddef.write("\n\n");
-		}
+                    for(int i=0;i<method.params.size();i++){
+                        Fparam param= method.params.get(i);
+
+                        //first param without ","
+                        if(i==0)cpp_methoddef.write(param.type+" "+param.var_name);
+                        else cpp_methoddef.write(","+param.type+" "+param.var_name);
+
+                    }
+                    //calls to CppMethod to create the body of the method
+                    cpp_methoddef.write("){\n");
+
+                    //**  cppBlock is called on method's block node  **//
+                    //cppMethod mblock = new cppMethod(t.local.get(index).mnode);
+                    EWalk changes = new EWalk(t,method,method.bnode);
+                    CppPrinter mblock = new CppPrinter(method.bnode);
+                    cpp_methoddef.write(mblock.getString().toString());//write body of the method
+                    cpp_methoddef.write("\n\t   }\n\n");
+
+                    cpp_methoddef.write("\n\n");
+                }
 		// invokes Vtable constructor
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
-							"\t//===========================================================================\n\n");
+                            "\t//===========================================================================\n\n");
 	}
 	/*
 	 *closes both files

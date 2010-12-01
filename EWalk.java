@@ -125,9 +125,11 @@ public class EWalk
 				if(VERBOSE) System.out.println("New Array List Created...\n");
 				Node fcName=n.getNode(2);//where will the fcnameList be?
 				//gets the FCNameList Node and visits it using the getFCName method
-				ArrayList<String> fcNamelist =getFcName(fcName);
+				ArrayList<String> fcNamelist =getFcName(n);
 				
 				//get the method name
+				//System.out.println(n.getName());
+				System.out.println(n.getString(2));//Throws Class Cast Exception HeRE
 				String methodName = n.getString(2);
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
