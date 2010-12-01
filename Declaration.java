@@ -97,9 +97,12 @@ class Fparam {
 	public ArrayList<String> modifiers;
 	public String type;
 	public String var_name;
-	Fparam(ArrayList<String> mods, String type, String var_name){
-            this.modifiers = mods;
+        Fparam(String type, String var_name) {
             this.type = type;
             this.var_name = var_name;
+        }
+	Fparam(ArrayList<String> mods, String type, String var_name) {
+            this(type, var_name);
+            this.modifiers = mods;   
 	}
 }

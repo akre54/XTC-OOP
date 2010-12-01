@@ -25,56 +25,54 @@ public class InheritanceTree{
 	public ArrayList<String> packages;
 
 
-	/**
-	 * The constructor for creating the Object class Inheritance tree.
-	 * @param none
-	 * 
-	 */
-	InheritanceTree(){
+       /**
+              * The constructor for creating the Object class Inheritance tree.
+              * @param none
+              */
+	InheritanceTree() {
 
-		className = "Object";
-		superclass = null; //no superclass for Object
+            className = "Object";
+            superclass = null; //no superclass for Object
 
-		fields = new ArrayList<InstanceField>(); //no instancefields in Object
-		Vt_ptrs = new ArrayList<Declaration>(); // for Vtable
-		
-		//add __isa to Vtable
-		Vt_ptrs.add(new Declaration("Class", "__isa",
-                                    className,new ArrayList<Fparam>(0)));
-		
-		//add __delete to Vtable
-		ArrayList<Fparam> p = new ArrayList<Fparam>();
-		p.add(new Fparam(new ArrayList<String>(),"__Object*","__this"));
-		Vt_ptrs.add(new Declaration("void", "__delete",
-                                    "Object", p));
-		
-		//add hashcode to Vtable
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
-		Vt_ptrs.add(new Declaration("int32_t", "hashCode",
-                                    "Object", p));
-		//add equals to Vtable
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
-		p.add(new Fparam(new ArrayList<String>(),"Object","other"));
-		Vt_ptrs.add(new Declaration("bool", "equals",
-                                    "Object", p));
-		//add getClass to Vtable
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
-		Vt_ptrs.add(new Declaration("Class","getClass",
-                                    "Object",p));
-		//add toString to Vtable
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Object","__this"));
-		Vt_ptrs.add(new Declaration("String","toString",
-                                    "Object",p));
+            fields = new ArrayList<InstanceField>(); //no instancefields in Object
+            Vt_ptrs = new ArrayList<Declaration>(); // for Vtable
 
-		//subclass are initalized to a 0 element arraylist
-		subclasses = new ArrayList<InheritanceTree>(0);
-		
-		this.root = this;
+            //add __isa to Vtable
+            Vt_ptrs.add(new Declaration("Class", "__isa",
+                                className, new ArrayList<Fparam>()));
 
+            //add __delete to Vtable
+            ArrayList<Fparam> p = new ArrayList<Fparam>();
+            p.add(new Fparam("__Object*","__this"));
+            Vt_ptrs.add(new Declaration("void", "__delete",
+                                "Object", p));
+
+            //add hashcode to Vtable
+            p.clear();
+            p.add(new Fparam("Object","__this"));
+            Vt_ptrs.add(new Declaration("int32_t", "hashCode",
+                                "Object", p));
+            //add equals to Vtable
+            p.clear();
+            p.add(new Fparam("Object","__this"));
+            p.add(new Fparam("Object","other"));
+            Vt_ptrs.add(new Declaration("bool", "equals",
+                                "Object", p));
+            //add getClass to Vtable
+            p.clear();
+            p.add(new Fparam("Object","__this"));
+            Vt_ptrs.add(new Declaration("Class","getClass",
+                                "Object",p));
+            //add toString to Vtable
+            p.clear();
+            p.add(new Fparam("Object","__this"));
+            Vt_ptrs.add(new Declaration("String","toString",
+                                "Object",p));
+
+            //subclass are initalized to a 0 element arraylist
+            subclasses = new ArrayList<InheritanceTree>();
+
+            this.root = this;
 	}
 	
 	/**
@@ -97,41 +95,41 @@ public class InheritanceTree{
 		//change __delete field to point to this class's feild
 		Vt_ptrs.get(1).ownerClass = className;
 		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
-		
+
 		//change toString to point to class name
 		Vt_ptrs.get(5).ownerClass = className;
 		Vt_ptrs.get(5).params.get(0).type = className;
 
 		
 		//adds virtual Class methods ptrs to virtual Vtable
-		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+		ArrayList<Fparam> p = new ArrayList<Fparam>();
+		p.add(new Fparam("Class","__this"));
 		Vt_ptrs.add(new Declaration("String","getName",
-									 "Class",p));
+                                    "Class",p));
 		
 		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+		p.add(new Fparam("Class","__this"));
 		Vt_ptrs.add(new Declaration("String","getSuperclass",
                                     "Class",p));
 		
 		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+		p.add(new Fparam("Class","__this"));
 		Vt_ptrs.add(new Declaration("String","getComponentType",
                                     "Class",p));
 		
 		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+		p.add(new Fparam("Class","__this"));
 		Vt_ptrs.add(new Declaration("String","isPrimitive",
                                     "Class",p));
 		
                 p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+		p.add(new Fparam("Class","__this"));
 		Vt_ptrs.add(new Declaration("String","isArray",
                                     "Class",p));
 		
 		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
-		p.add(new Fparam(new ArrayList<String>(),"Object","o"));
+		p.add(new Fparam("Class","__this"));
+		p.add(new Fparam("Object","o"));
 		Vt_ptrs.add(new Declaration("String","isInstance",
                                     "Class",p));
 		
@@ -172,12 +170,13 @@ public class InheritanceTree{
 
 
 		//add __class to local methods
-		local.add(new Declaration("Class","__class",className,								  new ArrayList<Fparam>(0)));
+		local.add(new Declaration("Class","__class",className,
+                                new ArrayList<Fparam>()));
 
 
 		//add __delete to local methods
-		ArrayList<Fparam> d= new ArrayList<Fparam>(0);
-		d.add(new Fparam(new ArrayList<String>(0),className,"__this"));
+		ArrayList<Fparam> d = new ArrayList<Fparam>();
+		d.add(new Fparam(className,"__this"));
 		local.add(Vt_ptrs.get(1));
 		
 		//constructors defined
@@ -399,7 +398,7 @@ public class InheritanceTree{
 			}
 			public void visitFormalParameters(GNode n){
 				//add __this parameter for virtual methods
-				if((is_virtual)&&(!is_constructor)) params.add(new Fparam(new ArrayList<String>(0),className,"__this"));
+				if((is_virtual)&&(!is_constructor)) params.add(new Fparam(className,"__this"));
 				visit(n);
 			}
 			public void visitFormalParameter(GNode n){//variable name
@@ -578,7 +577,7 @@ public class InheritanceTree{
 	}
 	public String search_for_constructor(ArrayList<String> paramtyps){
 		//list of possible constructors
-		LinkedList<Declaration> possible= new LinkedList<Declaration>();
+		LinkedList<Declaration> possible = new LinkedList<Declaration>();
 		
 		//add all constructors to list that have same #params
 		for (Declaration i : constructors) {
@@ -591,23 +590,21 @@ public class InheritanceTree{
                     return possible.get(0).name+"_"+possible.get(0).overloadNum;
 		
 		//need to zero out specificity for next check
-		for(Declaration d : possible){
+		for (Declaration d : possible) {
                     d.specificity = 0;
 		}
 		
 		//check for specificity
-		int ptsize = paramtyps.size();
-		for(int m = 0;m<ptsize;m++){
-			String type=paramtyps.get(m);
-			for(int c=0;c<possible.size();c++){
-				String pos_type = possible.get(c).params.get(m).type;
-				if(!pos_type.equals(type));
-				else {
-                                    int casting = gouptree(pos_type,type);
-                                    if(casting == -1){ possible.remove(c);}
-                                    else possible.get(c).specificity =possible.get(c).specificity+ casting;
-				}
-			}
+		for(int m=0; m<paramtyps.size(); m++) {
+                    String type=paramtyps.get(m);
+                    for (Declaration c : possible) {
+                        String pos_type = c.params.get(m).type;
+                        if (pos_type.equals(type)) {
+                            int castdist = gouptree(pos_type, type);
+                            if (castdist == -1) possible.remove(c);
+                            else c.specificity = c.specificity + castdist;
+                        }
+                    }
 		}
 		Declaration min = possible.get(0);
 		for (Declaration n : possible) {
@@ -618,8 +615,7 @@ public class InheritanceTree{
 	
 	}
 	public String[] search_for_method(boolean on_instance, Declaration method, 
-                                ArrayList<String> paramtyps, String method_name){
-		String[] result= new String[2];
+                                ArrayList<String> paramtyps, String method_name) {
 		String accessor;
 		
 		//-----ACCESSABLE/SAME NAME/SAME #PARAMS CHECK
@@ -639,17 +635,18 @@ public class InheritanceTree{
 		}
 		
 		//if only one left return it with accessor!!
-		if (possible.size()==1) {
+		if (possible.size() == 1) {
                     Declaration choosen = possible.get(0);
-                    accessor= make_accessor(on_instance, choosen.isVirtual);
-                    result[0] = choosen.returntype;
-                    result[1]= accessor+choosen.name+"_"+choosen.overloadNum;
-                    return result;
+                    accessor = make_accessor(on_instance, choosen.isVirtual);
+                    return new String[] {
+                            choosen.returntype,
+                            accessor+choosen.name+"_"+choosen.overloadNum
+                    };
 		}
 		
 		//need to zero out specificity for next check
-		for(Declaration d : possible){
-			d.specificity =0;
+		for (Declaration d : possible) {
+                    d.specificity = 0;
 		}
 		
 		//----SPECIFICITY CHECK
@@ -666,61 +663,54 @@ public class InheritanceTree{
                     }
 		}
 		Declaration min = possible.get(0);
-		for(Declaration n : possible ){
-                    if(min.specificity>n.specificity)
-                        min=n;
+		for (Declaration n : possible ) {
+                    if (min.specificity > n.specificity)
+                        min = n;
 		}
 		//find method with smallest number MUST BE ONLY ONE (MIN)
 		//RETURN accessor+NAME+_number
-		accessor = make_accessor(on_instance,min.isVirtual);
-		result[0] = min.returntype;
-		result[1] = accessor+min.name+"_"+min.overloadNum;
-		return result;
-
-		
+		accessor = make_accessor(on_instance, min.isVirtual);
+		return new String[] {
+                        min.returntype,
+                        accessor+min.name+"_"+min.overloadNum
+                };
 	}
-	private String make_accessor(boolean on_instance,boolean isVirtual){
+	private String make_accessor(boolean on_instance, boolean isVirtual) {
 		if ((on_instance) && (isVirtual))
                     return "->vtpr->";
 		else if ((on_instance) && (!isVirtual))
-                    return".";
+                    return ".";
 		else
                     return "";
 	}
 
-	private int gouptree(String casted_to, String castee){
-
-            if (castee.equals("char")) {
-                if (casted_to.equals("short"))
-                    return -1;
-                else
-                    castee = "short"; // has same precidence as a short, but can't be casted to short
-            } else if (casted_to.equals("char")) {
-                if (casted_to.equals("int"))
-                    return 1;
-                else
-                    return -1;
-            }
-                
-            
-
+	private int gouptree(String casted_to, String castee) {
             final java.util.List<String> primatives = java.util.Arrays.asList(new String[]
                     {"double", "float", "long", "int", "short", "byte" });
+
+            // special-case char conversion
+            if (castee.equals("char")) {
+                if (casted_to.equals("short")) return -1;
+                else castee = "short"; // has same precidence as short, but can't be casted to short
+            } else if (casted_to.equals("char")) {
+                if (casted_to.equals("int")) return 1;
+                else return -1;
+            }
             
             if (primatives.contains(casted_to) && primatives.contains(castee))
                 return primatives.indexOf(casted_to) - primatives.indexOf(castee);
 
-		int distance = 0;
-		
-		//search on root of tree for castee class
-		InheritanceTree type = this.root.search(this.packages,castee);
-		
-		while( !type.className.equals(casted_to) ){
-                    distance++;
-                    type = type.superclass;
-		}
-		
-		return distance;
+            int distance = 0;
+
+            //search on root of tree for castee class
+            InheritanceTree type = this.root.search(this.packages,castee);
+
+            while( !type.className.equals(casted_to) ){
+                distance++;
+                type = type.superclass;
+            }
+
+            return distance;
 	}
 
 	
