@@ -6,6 +6,7 @@
 
 package xtc.oop;
 
+import java.io.File;
 import xtc.tree.GNode;
 
 public class ClassStruct {
@@ -31,5 +32,13 @@ public class ClassStruct {
     
     public boolean fromSameFile (ClassStruct c) {
         return (this.fullPath.equals(c.fullPath));
+    }
+
+
+    /* @return just name of file (ie ImportFile from ImportFile.java,
+        * used for cpp import headers */
+    public String cppName () {
+        String jName = (new File(fullPath)).getName();
+        return jName.replace(".java","");
     }
 }
