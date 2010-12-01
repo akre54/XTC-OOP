@@ -123,7 +123,6 @@ public class EWalk
 				//create a new argumentTypes arraylist call the getarguments method on the arguments node
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				if(VERBOSE) System.out.println("New Array List Created...\n");
-				
 				Node fcName=n.getNode(2);//where will the fcnameList be?
 				//gets the FCNameList Node and visits it using the getFCName method
 				ArrayList<String> fcNamelist =getFcName(fcName);
@@ -184,13 +183,13 @@ public class EWalk
 				if(VERBOSE) System.out.println("Size of n is\t\t\t\t"+n.size());
 				if(VERBOSE) System.out.println("Setting n[0] to:\t\t\t"+fcName);
 				if(isPrintln) {
-					n.set(0,null);
-					n.set(2,fcName.toString());
-					n.set(1,"<<std::endl");
+					n.set(0,fcName.toString());
+					n.set(1,n.get(3));
+					n.set(2,"<<std::endl");
 				}
 				else {
-					n.set(0,null);
-					n.set(2,fcName.toString());
+					n.set(0,fcName.toString());
+					n.set(1,null);
 				}
 				visit(n.getNode(3));
 				visit(n.getNode(3));
