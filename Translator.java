@@ -171,7 +171,8 @@ public class Translator extends Tool {
 				final InheritanceTree Class = new InheritanceTree(Object);
 				
 				
-				final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,dependency.getFileDependencies());
+				final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,
+                                        dependency.getCppDependencies(DependencyOrigin.IMPORT));
 				/******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
 				
 				final LinkedList<GNode> toTree = new LinkedList<GNode>();
@@ -270,7 +271,7 @@ public class Translator extends Tool {
                     final InheritanceTree Class = new InheritanceTree(Object);
 
                     final InheritanceBuilder inherit = new InheritanceBuilder(inputFile,
-                            (new DependencyFinder(node, fullPathName)).getFileDependencies());
+                            (new DependencyFinder(node, fullPathName)).getCppDependencies(DependencyOrigin.IMPORT));
 
                     /******** cppMethod cprint = new cppMethod(/*methoddec NODE)*/
                     final LinkedList<GNode> toTree = new LinkedList<GNode>();
@@ -358,7 +359,7 @@ public class Translator extends Tool {
                         classes.put(c, false);
 
                     Translator t = null;
-                    for ( String filename : depend.getFilePaths() ) {
+                    for ( String filename : depend.getFileDependencyPaths() ) {
 
                         // only translate if not translated. dependencies.get(filename) returns
                         // a boolean specifiying whether the file has been translated

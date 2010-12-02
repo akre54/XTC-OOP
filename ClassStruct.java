@@ -7,22 +7,26 @@
 package xtc.oop;
 
 import java.io.File;
+import java.util.ArrayList;
 import xtc.tree.GNode;
 
 public class ClassStruct {
 
-    String fullPath;
+    String filePath;
     String packageName;
     String name;
     String superClass;
+    ArrayList<FileDependency> fileDependencies;
     GNode n; // of Class
 
-    public ClassStruct(String path, String packName, String className, String superClassName, GNode gn) {
-        fullPath = path;
-        packageName = packName;
-        name = className;
-        superClass = superClassName;
-        n = gn;
+    public ClassStruct(String filePath, String packageName, String name,
+            String superClass, ArrayList<FileDependency> fileDependencies, GNode n) {
+        this.filePath = filePath;
+        this.packageName = packageName;
+        this.name = name;
+        this.superClass = superClass;
+        this.fileDependencies = fileDependencies;
+        this.n = n;
     }
 
     /*      comparison by name and package      */
@@ -31,14 +35,38 @@ public class ClassStruct {
     }
     
     public boolean fromSameFile (ClassStruct c) {
-        return (this.fullPath.equals(c.fullPath));
+        return (this.filePath.equals(c.filePath));
+    }
+}
+
+/* Origin of a dependency, used for tracking call heirarchy */
+enum DependencyOrigin {
+    IMPORT, PACKAGE, CURRENTDIRECTORY
+}
+
+class FileDependency {
+    
+    public String fullPath;
+    public DependencyOrigin origin;
+
+    public FileDependency(String fullPath, DependencyOrigin origin) {
+        this.fullPath = fullPath;
+        this.origin = origin;
     }
 
+    public boolean equals(FileDependency other) {
+        return this.fullPath.equals((other.fullPath));
+    }
+
+    public String javaFileName() {
+        return (new File(fullPath)).getName();
+    }
 
     /* @return just name of file (ie ImportFile from ImportFile.java,
         * used for cpp import headers */
-    public String cppName () {
-        String jName = (new File(fullPath)).getName();
-        return jName.replace(".java","");
+    public String cppFileName() {
+        return javaFileName().replace(".java",".cpp");
     }
+
 }
+
