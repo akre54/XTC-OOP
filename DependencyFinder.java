@@ -24,7 +24,7 @@ public class DependencyFinder {
        *  filePaths holds canonical paths to file's dependencies
        *  fileClasses holds ClassStructs with info about each class in file
        */
-    private ArrayList<String> filePaths = new ArrayList<String>();
+    private ArrayList<FileDependency> fileDependencies = new ArrayList<FileDependency>();
     private ArrayList<ClassStruct> fileClasses = new ArrayList<ClassStruct>();
     private String currentPackage, currentSuperClass, currentFilePath, currentParentDirectory;
 
@@ -72,7 +72,7 @@ public class DependencyFinder {
                 String pathname = pathbuilder.toString();
                 currentPackage = pathname.replace("/",".");
 
-                gatherDirectoryFiles(pathname);
+                gatherDirectoryFiles(pathname, DependencyOrigin.PACKAGE);
             }
 
             public void visitImportDeclaration(GNode g) {
@@ -114,7 +114,7 @@ public class DependencyFinder {
 
                 String filename = pathbuilder.toString();
 
-                addPath(filename);
+                addPath(filename, DependencyOrigin.IMPORT);
             }
             public void visitClassDeclaration(GNode n){
                 String className = n.getString(1);
@@ -142,7 +142,7 @@ public class DependencyFinder {
     }
 
     /* Adds all files in directory to filePaths  */
-    private void gatherDirectoryFiles(String dirPath) {
+    private void gatherDirectoryFiles(String dirPath, DependencyOrigin origin) {
         File dir = null;
 
         try {
@@ -154,7 +154,7 @@ public class DependencyFinder {
         if (dir.exists()) {
             for (String fileName : dir.list()) {
                 if (fileName.endsWith(".java")) {
-                    addPath(dirPath + '/' + fileName);
+                    addPath(dirPath + '/' + fileName, origin);
                 }
             }
         }
@@ -162,13 +162,13 @@ public class DependencyFinder {
 
     /*  add file path (as string) to file dependencies Map, using canonical path
         *  rather than absolute to avoid collisions                    */
-       private void addPath (String s) {
+       private void addPath (String path, DependencyOrigin origin) {
 
            try {
-              s = (new File(currentParentDirectory, s)).getCanonicalPath();
+              path = (new File(currentParentDirectory, path)).getCanonicalPath();
            } catch (IOException e) { }
 
-           filePaths.add(s);
+           fileDependencies.add(new FileDependency(path, origin));
        }
 
     /**
@@ -178,8 +178,7 @@ public class DependencyFinder {
        void addClass (String className, GNode n) {
 
            ClassStruct c = new ClassStruct(currentFilePath, currentPackage,
-                            className, currentSuperClass, n);
-           
+                            className, currentSuperClass, fileDependencies, n);
            fileClasses.add(c);
        }
 
@@ -187,8 +186,52 @@ public class DependencyFinder {
       /**
          * @return all paths to each dependent file of the current file
          */
-        public ArrayList<String> getFilePaths() {
-            return filePaths;
+        public ArrayList<String> getFileDependencyPaths() {
+            ArrayList<String> paths = new ArrayList<String>();
+
+            for (FileDependency d : fileDependencies) {
+                paths.add(d.fullPath);
+            }
+
+            return paths;
+        }
+
+        /* returns list of cpp-formatted dependencies, including
+               * proper syntax for easy printing */
+        public ArrayList<String> getCppDependencies() {
+
+            ArrayList<String> files = new ArrayList<String>();
+
+            for (FileDependency d : fileDependencies) {
+                switch (d.origin) {
+                    case IMPORT:
+                        files.add("#include " + d.cppFileName());
+                    case PACKAGE:
+                        files.add("namespace " + currentPackage);
+                    case CURRENTDIRECTORY:
+                        files.add(d.cppFileName());
+                }
+            }
+
+            return files;
+        }
+
+        /* Get dependices sorted by specific origin (i.e. get just package
+               * imports or just includes) */
+        public ArrayList<String> getCppDependencies(DependencyOrigin origin) {
+
+            ArrayList<String> files = new ArrayList<String>();
+            
+            for (FileDependency d : fileDependencies) {
+                switch (origin) {
+                    case IMPORT:
+                        files.add("#include " + d.cppFileName());
+                    case PACKAGE:
+                        files.add("namespace " + "package name"); // FIX THIS
+                }
+            }
+
+            return files;
         }
 
       /**
@@ -196,33 +239,5 @@ public class DependencyFinder {
             */
         public ArrayList<ClassStruct> getFileClasses() {
             return fileClasses;
-        }
-
-       /**
-	     *  todo: use regex to only replace files that end in .java, not just
-             *  anywhere in the file (low priority)
-             *
-             *  @return canonical paths to CPP filenames
-             */
-        public ArrayList<String> getFileDependencies() {
-            ArrayList<String> translatedLocations = filePaths;
-
-            for (int i=0; i<translatedLocations.size(); i++) {
-
-                translatedLocations.set(
-                        i,
-                        translatedLocations.get(i).replace(".java", "_methoddef.cpp")
-                    );
-
-                translatedLocations.set(
-                        i,
-                        translatedLocations.get(i).replace("/", ".")
-                    );
-                
-                // using "/" as path separator char. If we ever use this on
-                // Windows, should probably replace with File.pathSeparator
-            }
-
-            return translatedLocations;
         }
 }

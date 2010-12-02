@@ -53,6 +53,19 @@ namespace __rt {
   // function.
   java::lang::Object null();
 
+  // The virtual destructor for objects, implemented as a template
+  // function.  The destructor must be virtual because C++'s delete
+  // determines the size of memory to be deallocate baed on the
+  // pointer's static type.  Consequently, every translated class
+  // needs its own virtual destructor, which simply invokes C++'s
+  // delete on the pointer.  Thanks to Louis Sanchez for suggesting
+  // the use of a template function instead of generating the same
+  // code (modulo type declaration) over and over again.
+  template<typename T>
+  void __delete(T* ptr) {
+    delete ptr;
+  }
+
 }
 
 // ==========================================================================
@@ -84,13 +97,6 @@ namespace java {
       // object on subsequent invocations.
       static Class __class();
 
-      // The virtual destructor.  This method must be virtual
-      // because C++'s delete determines the size of the memory
-      // to be deallocated based on the pointer's static type.
-      // Consequently, every class needs its own __delete(),
-      // which simply invokes C++' delete on the pointer.
-      static void __delete(__Object*);
-
       // The methods implemented by java.lang.Object.
       static int32_t hashCode(Object);
       static bool equals(Object, Object);
@@ -112,7 +118,7 @@ namespace java {
 
       __Object_VT()
       : __isa(__Object::__class()),
-        __delete(&__Object::__delete),
+        __delete(&__rt::__delete<__Object>),
         hashCode(&__Object::hashCode),
         equals(&__Object::equals),
         getClass(&__Object::getClass),
@@ -135,9 +141,6 @@ namespace java {
       // The function retturning the class object representing
       // java.lang.String.
       static Class __class();
-
-      // The virtual destructor.
-      static void __delete(__String*);
 
       // The methods implemented by java.lang.String.
       static int32_t hashCode(String);
@@ -163,7 +166,7 @@ namespace java {
 
       __String_VT()
       : __isa(__String::__class()),
-        __delete(&__String::__delete),
+        __delete(&__rt::__delete<__String>),
         hashCode(&__String::hashCode),
         equals(&__String::equals),
         getClass((Class(*)(String))&__Object::getClass),
@@ -203,9 +206,6 @@ namespace java {
       // java.lang.Class.
       static Class __class();
       
-      // The virtual destructor.
-      static void __delete(__Class*);
-
       // The instance methods of java.lang.Class.
       static String toString(Class);
       static String getName(Class);
@@ -236,7 +236,7 @@ namespace java {
 
       __Class_VT()
       : __isa(__Class::__class()),
-        __delete(__Class::__delete),
+        __delete(__rt::__delete<__Class>),
         hashCode((int32_t(*)(Class))&__Object::hashCode),
         equals((bool(*)(Class,Object))&__Object::equals),
         getClass((Class(*)(Class))&__Object::getClass),
@@ -319,6 +319,8 @@ namespace java {
 
       static Class __class();
 
+      // The virtual destructor.  We cannot reuse the above template
+      // function since arrays require more work on deletion.
       static void __delete(__Array* __this) {
         delete[] __this->__data;
         delete __this;
