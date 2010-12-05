@@ -29,28 +29,43 @@ import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 
+//code needs for recording logs
+import java.util.logging.*;
+import java.io.*;
+
 import xtc.util.Tool;
-/**A "Stupid" print, it just prints everything it sees and assumes that every String inside the AST is proper C++ code, there are special catches and cases
- for brackets, etc but there is no intelligent code in here */
+/**A "Stupid" printer, it only prints the basic cases and checks for requried grammar syntax, it assumes
+ that all the code given to it has already been processed. This will print the required braces and brackets but 
+ not much further*/
 public class CppPrinter extends Visitor
 {
+	private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("CppPrinterLog");
 	private StringBuilder printer; //a StringBuilder that stores the code translated by the print
-	public boolean DEBUG = false;
-	public boolean isPrivate; //a global boolean that keeps track of the current modifier status
+	private boolean DEBUG = false;
+	/*A global boolean that keeps track of the current modifier status*/
+	private boolean isPrivate; 	
+	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
 	{
+		
+//		setupLog("CppPrinter");
 		printer = new StringBuilder(); //intialize Stringbuilder
+		
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
 	}
+
+	/**consturctor used that sets the debugging option*/
 	public CppPrinter(GNode n, boolean debug)
 	{
+//		setupLog("CppPrinter");
 		DEBUG= debug;
+//		logger.fine("Writing to the Log");
 		printer = new StringBuilder(); //intialize Stringbuilder
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
 	}
-	/*visit cast expression and print the c++ version of the java AST values*/
+	/**visit cast expression and print the c++ version of the java AST values*/
 	public void visitCastExpression(GNode n)
 	{
 		print("(");
@@ -60,6 +75,8 @@ public class CppPrinter extends Visitor
 		//visit the next batch of code
 		visitChildren(n, 1,n.size(),"");
 	}
+	
+	/**visit cast expression on primitive types and print the c++ equivalent */
 	public void visitBasicCastExpression(GNode n)
 	{
 		print("(");
@@ -70,7 +87,7 @@ public class CppPrinter extends Visitor
 		visitChildren(n, 1,n.size(),"");
 	}
 	/***********************Expressions***********************/
-	/*Visit a conditional expression and print the c++ equivalent**/
+	/**Visit a conditional expression and print the c++ equivalent**/
 	public void visitConditionalExpression(GNode n)
 	{
 		print("(");
@@ -84,11 +101,11 @@ public class CppPrinter extends Visitor
 	/** Visit the selection expression i.e. java.lang*/
 	public void visitSelectionExpression(GNode n)
 	{
-		//prints the selection expression
+			//prints the selection expression
 		Node prim = n.getNode(0);
 		dispatch(prim);
 		//print a . at the end of each expression
-		print(".");
+		print("::");	
 		Object o =n.get(1);
 		if(o instanceof String) //make sure the object o is an string
 		{
@@ -126,7 +143,7 @@ public class CppPrinter extends Visitor
 	{
 		setUnary(n);
 	}
-	/*calls default unary behavior*/
+	/**calls default unary behavior*/
 	public void visitPreDecrementExpression(GNode n)
 	{
 		setUnary(n);
@@ -171,18 +188,18 @@ public class CppPrinter extends Visitor
 	{
 		setBinary(n);
 	}
-	//visits the 3rd node of Expression and dispatches on it to print the subtree properly */
+	/**visits the 3rd node of Expression and dispatches on it to print the subtree properly */
 	public void visitExpression(Node n)
 	{
 		Node b=n.getNode(3);
 		dispatch(b);
 	}
-	/*calls the default binary behavior*/
+	/**calls the default binary behavior*/
 	public void visitAdditiveExpression(GNode n)
 	{
 		setBinary(n);
 	}
-	/*replaces "this" with __this for propery c++ conversion*/
+	/**replaces "this" with __this for propery c++ conversion*/
 	public void visitThisExpression(GNode n)
 	{
 		print("__this.");
@@ -194,7 +211,7 @@ public class CppPrinter extends Visitor
 		print("superclass.");
 		visit(n);
 	}
-	/**set the default binary behavior*/
+	/**set the default binary behavior See setBinary*/
 	public void visitMultiplicativeExpression(GNode n)
 	{
 		setBinary(n);
@@ -224,7 +241,7 @@ public class CppPrinter extends Visitor
 		print(n.getString(0)+":\n");
 		visitChildren(n,1,n.size(),"");
 	}
-	/*print c++ break statement  call setBreCon to get code if inside of break statement*/
+	/**print c++ break statement  call setBreCon to get code if inside of break statement*/
 	public void visitBreakStatement(GNode n)
 	{
 		print("break");
@@ -239,19 +256,13 @@ public class CppPrinter extends Visitor
 	/**get code inside of trycatchfinallystatement*/
 	public void visitTryCatchFinallyStatement(GNode n)
 	{
-		
 		print("try {\n");
 		Node block = n.getNode(0);
 		dispatch(block);
 		print("} ");
 		visitChildren(n, 1, n.size(), "");
-		/*for (int i=1; i<n.size(); i++) {
-			
-			Node catch1 = n.getNode(i);
-			dispatch(catch1);
-		}*/
 	}
-	//print throw statement (handling excpetions? */
+	/**print throw statement (handling excpetions? */
 	public void visitThrowStatement(GNode n)
 	{
 		print("throw ");
@@ -281,6 +292,7 @@ public class CppPrinter extends Visitor
 		visitChildren(n, 1, n.size(), "");
 		print("}\n");
 	}
+	/**visit the case clause usually inside a switch statement*/
 	public void visitCaseClause(GNode n)
 	{
 		print("case");
@@ -288,7 +300,8 @@ public class CppPrinter extends Visitor
 		print(":");
 		visitChildren(n, 1, n.size(), "");
 	}
-	/*visit if/Else statements nodes aka Conditional statments*/
+	/**visit if/Else statements nodes aka Conditional statments
+	 Else statements are nested so this handling has to be a bit more inteligent*/
 	public void visitConditionalStatement(GNode n)
 	{
 		print("if(");
@@ -309,7 +322,7 @@ public class CppPrinter extends Visitor
 					print("} \n");
 				}
 				else
-				{	//System.out.println("NOT A BLOCK");
+				{	
 					dispatch(cond);
 				}
 			}
@@ -319,6 +332,7 @@ public class CppPrinter extends Visitor
 		
 	}	
 	////////////////Loops////////////////////////
+	/**visiting the Do While statement in the AST*/
 	public void visitDoWhileStatement(GNode n)
 	{
 		print("do{\n");
@@ -327,6 +341,7 @@ public class CppPrinter extends Visitor
 		visitChildren(n, 1, n.size(), "");
 		print(");\n");
 	}
+	/**visit the regular while statement */
 	public void visitWhileStatement(GNode n)
 	{
 		print("\n while(");
@@ -336,11 +351,13 @@ public class CppPrinter extends Visitor
 		visitChildren(n, 1, n.size(), "");
 		print("} \n");
 	}
+	/** This is NOT a visitor, it is called in the VisitForStatement to print the right code for a forloop*/
 	public void visitForUpdate(Node n)
 	{
 		Node d= n.getNode(4);
 		dispatch(d);
 	}
+	/**Tis is NOT a visitor, it is called to dispatch on for loop inti properly*/
 	public void visitForInit(Node n)
 	{
 		Node b=n.getNode(0);
@@ -350,6 +367,7 @@ public class CppPrinter extends Visitor
 		Node d= n.getNode(2);
 		dispatch(d);	
 	}	
+	/** Print out the basic ForLoop Control Text*/
 	public void visitBasicForControl(GNode n)
 	{
 		//basic control node
@@ -362,6 +380,7 @@ public class CppPrinter extends Visitor
 		visitForUpdate(a);
 		print(")");
 	}
+	/** Vistiro visits the ForLoop AST Node and acts accordingly */
 	public void visitForStatement(GNode n)
 	{
 		print("for");
@@ -371,6 +390,7 @@ public class CppPrinter extends Visitor
 		print("}\n");	
 	}	
 	/***********************Classes ******************************/
+	/**Visit a New ClassExpresions Node i.e. Class c = new Class()*/
 	public void visitNewClassExpression(GNode n)
 	{
 		print("new ");
@@ -397,7 +417,7 @@ public class CppPrinter extends Visitor
 			}			
 		}
 	}
-	/**visit call expression where a method is called */
+	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
 	{
 		//visit all the children minus the arguments
@@ -414,26 +434,24 @@ public class CppPrinter extends Visitor
 	 */
 	public void visitQualifiedIdentifier(GNode n)
 	{
-		//visit every child
-		//visitChildren(n, 0, n.size(), "");
 		for(int i=0; i<n.size();i++)
 		{
 			String name = n.getString(i);
-			//print("__");
 			print(name);
-			
 		}
 	}
 	/**********************Other***************************/
+	/**Visists the argument Node and prints the children with a comma (,) i.e. (a, b,c)*/
 	public void visitArguments(GNode n)
 	{
 		visitChildren(n, 0, n.size(), ",");
 	}
+	/**visits the formal parameter node */
 	public void visitFormalParameter(GNode n)
 	{
 		visitChildren(n, 0, n.size(), " ");
 	}
-			
+	/**visits and print out catch clause*/
 	public void visitCatchClause(GNode n)
 	{
 		print("catch(");
@@ -441,6 +459,7 @@ public class CppPrinter extends Visitor
 		print("){\n");
 		visitChildren(n, 1, n.size(), "");
 	}
+	/**visit and print default label*/
 	public void visitDefaultClause(GNode n)
 	{
 		//print the proper java code
@@ -451,6 +470,7 @@ public class CppPrinter extends Visitor
 		visitChildren(n,0,n.size(),"");
 		
 	}
+	/**visit and print field declarations prints a ; and new line at the end of each node*/
 	public void visitFieldDeclaration(GNode n)
 	{
 		//add a new tab to the front of the declaration
@@ -459,15 +479,18 @@ public class CppPrinter extends Visitor
 		//visit all of the field declarations children
 		visitChildren(n,0,n.size(),"");
 		
-		//append the semicolon and new line symbol
+		//append the semicolon and new line symbolat the end of each declaration
 		print(";\n");
 	}
+	
+	/** print static modifier */
 	public void visitInitializer(GNode n)
 	{
 		print("static");
 		
 		visitChildren(n,1,n.size(),"");
 	}
+	/*print final**/
 	public void visitLocalVariableDeclaration(GNode n)
 	{
 		print("final");
@@ -477,8 +500,8 @@ public class CppPrinter extends Visitor
 			visitChildren(n,2,n.size()," , ");
 		}	
 	}
-	/**Visits the modifier node, checks for isPrivate condition to see the current modifier of the scope
-	 Also currently ignores protected*/
+	/**Visits the modifier node checks to see the  current modifier condition and the curret scope condition and prints out the 
+	 modifier accordingly, also prints everything other then public and private in the else statement */
 	public void visitModifier(GNode n)
 	{
 		//run check to see if isPrivate is one
@@ -504,7 +527,7 @@ public class CppPrinter extends Visitor
 		}
 	}
 	
-	/**Visit the declarators */
+	/**Visit the declarators i.e. int i = 5; */
 	public void visitDeclarator(GNode n)
 	{
 		print(" " +n.getString(0));
@@ -523,15 +546,14 @@ public class CppPrinter extends Visitor
 			checkInstance(two);
 		}
 	}
+	/**Visit the type node and print it*/
 	public void visitType(GNode n)
 	{
 		visitChildren(n, 0, n.size(), "");
-		//print(" ");
 	}
 	/**edited visitor method checks the instance of every node to decide whether to visit or print*/						   
 	public void visit(Node n)
 	{
-		System.out.println(n);
 		if(n!=null){
 		for(Object o:n) {
 				checkInstance(o);
@@ -543,7 +565,7 @@ public class CppPrinter extends Visitor
 	 @param Node n is the parent node
 	 @param int start is the starting child (0 for all)
 	 @param int end is the ending child (n.size for all)
-	 @param string seperator is the seperating string value (i.e. " ", "," etc)
+	 @param string seperator is the seperating string value (i.e. " ", "," etc Only prints as a seperator (a,b,c)
 	 */
 	 public void visitChildren(Node n, int start, int end, String seperator)
 	{
@@ -561,7 +583,7 @@ public class CppPrinter extends Visitor
 	}
 	
 	
-	/**Checks instances of a given node and calls appropiate action*/
+	/**Runs instanceof checks on a given node and calls appropiate action*/
 	public void checkInstance (Object o)
 	{
 		//make sure the object isn't null
@@ -594,27 +616,15 @@ public class CppPrinter extends Visitor
 		else
 			return false;			
 	}
+	/**checks for calls inside break and continue statements and prints those values*/
 	public void setBreCon(GNode n)
 	{
-		//checks for calls inside break and continue statements and prints those values
-
-		for (int i=0; i<n.size(); i++) {//for every child of N get it and check to see if its an instance of string or Node
+			for (int i=0; i<n.size(); i++) {//for every child of N get it and check to see if its an instance of string or Node
 			Object o=n.get(i);
-			if (o!=null) {
-			}
+				checkInstance (o);
 			
-			if(o instanceof String)//if object o is a string print it
-				print(" "+(String)o);
-			else if(o instanceof Node) //if its a node call dispatch on it
-				dispatch((Node) o);
-	
-			if (o!=null) {
-				if(i!=(n.size()-1)){
-				}
-							   
+		print(";\n"); //append a new line
 			}
-		}
-		print(";\n"); //append a new link 
 	}
 	/**for expressions "recursively" calls dispatch on the operands and print the middle operator*/						   
 	public void setBinary(GNode n)
@@ -631,20 +641,7 @@ public class CppPrinter extends Visitor
 	/**for unary expressions such as -A checks to see intances of children */						   
 	public void setUnary(GNode n)
 	{
-		for(int i=0;i<n.size();i++) //for every child in N check its instance and act acoordingl
-		{
-			Object k=n.get(i);
-			if(k instanceof Node) //visit Nodees
-			{
-				dispatch((Node)k);
-			}
-			else { //else print the strings
-					if(n.getString(i)!=null)
-					{		////add the string to the print
-						print(n.getString(i));
-					}
-			}
-		}
+		visitChildren(n, 0,n.size(),"");
 	}
 	/**A Method that takes a string to be appended to the stringbuilder and also if 
 	 debug is set to true it prints to the screen*/
@@ -659,5 +656,26 @@ public class CppPrinter extends Visitor
 	{
 		return printer;
 	}	
+	public void setupLog(String name)
+	{
+		//delete the file if it already exists
+		File f = new File(name+".log");
+		if(f.exists())//delete it
+		{
+			f.delete();
+		}
+		
+		try {
+			// Create a file handler that write log record to a file called my.log
+			FileHandler handler = new FileHandler(name+".log",true);
+			
+			// Add to the desired logger
+			//Logger logger = Logger.getLogger("com.mycompany");
+			logger.addHandler(handler);
+		} catch (IOException e) {
+		}
+		
+		
+	}
 }
 

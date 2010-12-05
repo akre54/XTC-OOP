@@ -7,46 +7,46 @@ import java.util.ArrayList;
 import xtc.oop.ArrayMaker;
 
 /**
- * Translates stuff.
+ * Does all the smart Translating, visits 
  * 
  */ 
-public class EWalk
+public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true;
-	public InheritanceTree tree;
-	public Declaration method;
-	public boolean isInstance; //check for callExpression (needed for chaining)
-	public boolean isMethodChaining;//check if methodChaining is enacted
-	public String savedReturnType;
-	EWalk (final InheritanceTree treeClass, final Declaration treeMethod, GNode n) {
-		if (VERBOSE) System.out.println("EWalk Called");
+	boolean VERBOSE = true; //debugging boolean
+	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
+	private Declaration method; //the given Declaration Object passed in the constructor
+	private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
+	private boolean isMethodChaining;//check if methodChaining is enacted (Starts if a CallExpression is the first child of another CallExpression)
+	private String savedReturnType; //saves the return type of a method for method chaining (starting at the bottom CallExpression
+	
+	/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
+	public EWalk (final InheritanceTree treeClass, final Declaration treeMethod, GNode n) {
+		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
 		method=treeMethod;
+		
 		eWalker(n);
+		eRunner(n);
 	}
-
-	private void eWalker (final GNode n) {
+	
+	/**Handles, System.out.print, 
+	 Arrays
+	 Super
+	 Casts
+	 Method Calling/Chaining
+	 */
+	 private void eWalker (final GNode n) { 
 		Node node = n;
 		new Visitor() {
 			boolean inCall = false,
 				isPrint = false,
 				isPrintln = false,
-				isString = false,
 				isArray = false,
-				isPrintString = false;
+				isPrintString = false;	
+			boolean isString = false;
 			StringBuffer fcName= new StringBuffer();
 			ArrayList<String> fcNameList=new ArrayList<String>();
-			public void visitPrimitiveType (GNode n) {
-				String type = n.getString(0);
-				if (type.equals("int")) {
-					n.set(0,"int32_t");
-					if (VERBOSE) System.out.println("changing int to int32_t");
-				} if (type.equals("boolean")) {
-					n.set(0,"bool");
-					if (VERBOSE) System.out.println("changing boolean to bool");
-				}
-				visit(n);
-			}
+			
 			public void visitExpression(GNode n)
 			{
 				Node primary = n.getNode(0);
@@ -77,7 +77,7 @@ public class EWalk
 			{
 				if(n!=null)
 				{
-					System.out.println("IS CALL?"+n.getName());
+					if(VERBOSE) System.out.println("IS CALL?"+n.getName());
 					if(n.getName().equals("CallExpression"))
 				   {
 					return true;
@@ -105,7 +105,7 @@ public class EWalk
 				
 				
 			}
-			//does all of Call Expressions Heavy Lifting and returns the newmethod arraylist
+			/**does all of Call Expressions Heavy Lifting and returns the newmethod arraylist*/
 			public String[] setMethodInfo(Node n)
 			{
 								String primaryIdentifier=" ";
@@ -124,8 +124,6 @@ public class EWalk
 					{
 					primaryIdentifier=firstChild.getString(0);
 					}
-				
-				
 				//visit the arguments node
 				Node arguments=n.getNode(3);
 				//create a new argumentTypes arraylist call the getarguments method on the arguments node
@@ -159,7 +157,6 @@ public class EWalk
 				return argumentList;
 				
 			}
-			
 			/**Node that gets the FC name before a method and returns an array list of the fcNamelist*/
 			public ArrayList<String> getFcName(Node n){
 				
@@ -207,12 +204,14 @@ public class EWalk
 				return fcNameList;
 				
 			}
+			/** Grabs full qualified names i.e. java.lang */
 			public void visitSelectionExpression (GNode n) {
 				visit(n);	
 				if (inCall);
 				fcName.append(n.getString(1)+"->");
 				fcNameList.add(n.getString(1));
 			}
+			/**End value of a static variable or just a local variable */
 			public void visitPrimaryIdentifier (GNode n) {
 				if (inCall) {
 					inCall = false;
@@ -223,16 +222,15 @@ public class EWalk
 				}
 				visit(n);
 			}
+			/**Visists additve expression and replaces + with <<*/
 			public void visitAdditiveExpression (GNode n) {
 				if(isPrint) {
 					if(isPrintString) n.set(1,"<<");
 				}
 				visit(n);
 			}
-			public void visitModifier (GNode n) {
-				String temp = n.getString(0);
-				if (temp.equals("final")) n.set(0,"const");
-			}
+			
+			/**Gets back ingormation inside identifier calls inheritencetree to update the method type  Also has support for an rray*/
 			public void visitFieldDeclaration (GNode n) {
 				//visit(n);
 				//get the packge information(Inside Qualified Identifier)
@@ -267,7 +265,7 @@ public class EWalk
 				}
 				
 				//update the type of the variable
-				System.out.println("Updating Method Information("+name +"," +newtype);
+				if (VERBOSE) System.out.println("Updating Method Information("+name +"," +newtype);
 
 				method.update_type(name,currentPackage, newtype);
 				if (isString) {
@@ -311,26 +309,9 @@ public class EWalk
 					visit(n);
 				}
 			}
-			public void visitQualifiedIdentifier (GNode n) {
-				if (!isString) {
-					String temp = n.getString(0);
-					if (temp.equals("String")) isString = true;
-				}
-				visit(n);
-			}
-			public void visitStringLiteral (GNode n) {
-				if (isString) {
-					String temp = n.getString(0);
-					n.set(0,"__rt::stringify("+temp+")");
-					isString = false; //make sure it only happens once
-				}
-				if (isPrint) isPrintString = true;
-				visit(n);
-			}
 			
-			/**any time anythign is declared you need to do update type
-			 8/
-			/**helpers method that uses the inheritence tree search for method and returns the string array */
+			/**helper method that uses the inheritence tree search for method and 
+			 returns the givne string array that should contain the return type and methodname */
 			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
 				if(VERBOSE){System.out.println("Running"+ Identifier+"," + nameList +","+name+","+argumentList);}
@@ -400,18 +381,73 @@ public class EWalk
 				/**can put support for handling methods inside an argument here (use search for methods
 				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
 			}
+			public void visitQualifiedIdentifier (GNode n) {
+				if (!isString) {
+					String temp = n.getString(0);
+					if (temp.equals("String")) isString = true;
+				}
+				visit(n);
+			}
+			public void visitStringLiteral (GNode n) {
+				if (isString) {
+					String temp = n.getString(0);
+					n.set(0,"__rt::stringify("+temp+")");
+					isString = false; //make sure it only happens once
+				}
+				if (isPrint) isPrintString = true;
+				visit(n);
+			}
 			public void visitSuperExpression(GNode n)
 			{
 			}
 			public void visit(Node n) {
-				
+				if(n!=null){
 				for (Object o : n){ 
 					if (o instanceof Node){ 
 						dispatch((Node)o);
 						
 					}
 				}
+				}//make sure n is not null
 			}
+		}.dispatch(node); 
+	}//end of eWalker Method
+	
+	/**Follows eWalker
+	 Handles
+	 Types
+	 Modifiers*/
+	public void eRunner(final GNode n)
+	{
+		Node node = n;
+		
+		new Visitor(){
+			
+			public void visitPrimitiveType (GNode n) {
+				String type = n.getString(0);
+				if (type.equals("int")) {
+					n.set(0,"int32_t");
+					if (VERBOSE) System.out.println("changing int to int32_t");
+				} if (type.equals("boolean")) {
+					n.set(0,"bool");
+					if (VERBOSE) System.out.println("changing boolean to bool");
+				}
+				visit(n);
+			}
+			public void visitModifier (GNode n) {
+				String temp = n.getString(0);
+				if (temp.equals("final")) n.set(0,"const");
+			}			
+			public void visit(Node n) {
+				if(n!=null){
+					for (Object o : n){ 
+						if (o instanceof Node){ 
+							dispatch((Node)o);
+							
+						}
+					}
+				}//make sure n is not null
+			}		
 		}.dispatch(node);
 	}
 }

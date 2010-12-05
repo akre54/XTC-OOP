@@ -29,14 +29,13 @@ public class Declaration{
 	
 	}
 	//constructor for all other methods
-	Declaration(int ol,ArrayList<String> modifiers, boolean isVirtual, String returntype, String name, 
+	Declaration(int overloadNum,ArrayList<String> modifiers, boolean isVirtual, String returntype, String name,
                     String ownerClass,ArrayList<Fparam> params,GNode bnode,ArrayList<LocalVariable> variables){
 		this(returntype, name, ownerClass, params);
 		this.isVirtual = isVirtual;
 		this.variables.addAll(variables);
 		this.modifiers.addAll(modifiers);
-		this.overloadNum =overloadNum;
-	
+		this.overloadNum = overloadNum;
 	}
 	
 	/**
@@ -119,6 +118,7 @@ class Fparam {
         Fparam(String type, String var_name) {
             this.type = type;
             this.var_name = var_name;
+            this.modifiers = new ArrayList<String>();
         }
 	Fparam(ArrayList<String> mods, String type, String var_name) {
             this(type, var_name);
