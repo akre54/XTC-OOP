@@ -5,7 +5,8 @@ public class demo {
 		int [] x = new int[1];
 
 		int name = new Integer(args);
-		//a = new int[1];
+		a = new int[1];
+		a = new int[methodname()];
 		//a[0]=1;
 	}
 }

@@ -131,11 +131,7 @@ public class EWalk
 				//create a new argumentTypes arraylist call the getarguments method on the arguments node
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				if(VERBOSE) System.out.println("New Array List Created...\n");
-<<<<<<< HEAD
 				Node fcName=n.getNode(2);//where will the fcnameList be?
-=======
-				
->>>>>>> b484e0773197922d2d37fea64d8691bec2f03ea5
 				//gets the FCNameList Node and visits it using the getFCName method
 				ArrayList<String> fcNamelist =getFcName(n);
 				
@@ -358,7 +354,7 @@ public class EWalk
 
 				if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}
 				//returns an array of string 0= return type and 1=new method string
-				return b.search_for_method(isInstance,method,argumentList,name);
+				return b.search_for_method(isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
 			 is currently used when get the types for values in an argument*/
