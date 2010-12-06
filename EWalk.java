@@ -18,8 +18,7 @@ public class EWalk //extends Visitor
 	private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
 	private boolean isMethodChaining;//check if methodChaining is enacted (Starts if a CallExpression is the first child of another CallExpression)
 	private String savedReturnType; //saves the return type of a method for method chaining (starting at the bottom CallExpression
-	
-	/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
+		/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
 	public EWalk (final InheritanceTree treeClass, final Declaration treeMethod, GNode n) {
 		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
@@ -42,8 +41,10 @@ public class EWalk //extends Visitor
 				isPrint = false,
 				isPrintln = false,
 				isArray = false,
-				isPrintString = false;	
-			boolean isString = false;
+				isPrintString = false,	
+				isString = false,
+				isSuper;//flag that saves whether super is inside a call expression
+
 			StringBuffer fcName= new StringBuffer();
 			ArrayList<String> fcNameList=new ArrayList<String>();
 			
@@ -86,10 +87,23 @@ public class EWalk //extends Visitor
 				}
 				 return false;
 			}
-			/**Visit a Call expression and call the necessary inheritence checks*/
+			/**Visit a Call expression and call the necessary inheritence checks
+			 should have a check for superExpression*/
 			public void visitCallExpression (GNode n) {
 				if(VERBOSE) System.out.println("\nVisiting a Call Expression node:");
 				inCall = true; //start looking for fully qualified name
+				
+				//get the first child
+				Object first = n.get(0);
+				//check to see if its null
+				if(first!=null){
+					//if it isn't null check to see if its primary or super
+					Node firstc= (Node) first;
+					if(firstc.getName().equals("SuperExpression")){
+						//if its super set the is super flag true
+					   isSuper=true;
+					}
+				}
 				
 				String[] methodArray=setMethodInfo(n);
 				//new method name to override in the tree
@@ -102,13 +116,14 @@ public class EWalk //extends Visitor
 				
 				//if(VERBOSE) System.out.println("fully qualified name: "+fcName);
    				//Object garbage = n.remove(0); //having trouble removing nodes!!!
-				
+					   
+								
 				
 			}
 			/**does all of Call Expressions Heavy Lifting and returns the newmethod arraylist*/
 			public String[] setMethodInfo(Node n)
 			{
-								String primaryIdentifier=" ";
+				String primaryIdentifier=" ";
 				Node firstChild= n.getNode(0);
 				if(isMethodChaining)
 				{
@@ -137,7 +152,7 @@ public class EWalk //extends Visitor
 				String methodName = n.getString(2);
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-				String[] methodArray = getMethodInfo(primaryIdentifier,fcNameList, methodName,argumentTypes);
+				String[] methodArray = getMethodInfo(n,primaryIdentifier,fcNameList, methodName,argumentTypes);
 				return methodArray;
 			}
 			/**Helper method returns the arguments in an array list*/
@@ -311,8 +326,9 @@ public class EWalk //extends Visitor
 			}
 			
 			/**helper method that uses the inheritence tree search for method and 
-			 returns the givne string array that should contain the return type and methodname */
-			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
+			 returns the givne string array that should contain the return type and methodname 
+			 puts in check for isSuper flag*/
+			public String[] getMethodInfo(Node n,String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
 				if(VERBOSE){System.out.println("Running"+ Identifier+"," + nameList +","+name+","+argumentList);}
 				//method .search for type with packages if you dont send a package its the package you're in
@@ -321,19 +337,30 @@ public class EWalk //extends Visitor
 				InheritanceTree b;
 				if(isInstance)
 				{
+					
 					ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
 					//remove the last value from the arrayList (thats always the class name
-					//questions WHAT DO I DO WITH the rest? Is that needed?
 					String className =(String)qualities.remove(1);
 					//get the inheritance name of 
 					b =tree.root.search(qualities,className); //search takes the current method name?
 					//when there are no arguments sends a NullPointerException
+					if(VERBOSE){System.out.println("On Instance"+ isInstance+"," + method +","+argumentList+","+name);}
 				}
-				else {
+				else if (isSuper) 
+				{
+						if(VERBOSE){System.out.println("On Super"+ isInstance+"," + method +","+argumentList+","+name);}
+					//call the search for method on the superclass's tree
+					b=tree.superclass; //superclass is a public variable
+					
+					//if isSuper put the class name as a string on the first child
+					if(isSuper){
+						n.set(0,b.className);
+					}
+				}
+				else{
+					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}
 					b=tree;
 				}
-
-				if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}
 				//returns an array of string 0= return type and 1=new method string
 				return b.search_for_method(isInstance,argumentList,name);
 			}
@@ -397,8 +424,17 @@ public class EWalk //extends Visitor
 				if (isPrint) isPrintString = true;
 				visit(n);
 			}
+			
+			/**Gets the classes super class 
+			 finds the proper method in the inheritence tree of the superclass
+			 */
 			public void visitSuperExpression(GNode n)
-			{
+			{ 
+				InheritanceTree superclass = tree.superclass;
+				
+				//get the parameters 
+				
+				//get the class name
 			}
 			public void visit(Node n) {
 				if(n!=null){

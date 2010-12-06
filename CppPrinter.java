@@ -421,7 +421,7 @@ public class CppPrinter extends Visitor
 	public void visitCallExpression(GNode n)
 	{
 		//visit all the children minus the arguments
-		visitChildren(n, 0, 3, "");
+		visitChildren(n, 1, 3, "");
 		
 		//visit the arguments
 		print("(");
