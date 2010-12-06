@@ -272,7 +272,7 @@ public class Translator extends Tool {
                         // only translate if not translated. dependencies.get(filename) returns
                         // a boolean specifiying whether the file has been translated
                         //if ( !dependencies.containsKey(filename) || !(dependencies.get(filename))) {
-				If(!dependencies.containsvalue(filename)){		
+				if(!dependencies.containsvalue(filename)){		
 
 					t = new Translator(dependencies, classes);
 					t.run( new String[] {"-no-exit", "-finddependencies", filename});
