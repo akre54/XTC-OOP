@@ -223,6 +223,7 @@ public class InheritanceBuilder{
                 h_classdef.write("{\n\t\t");
 
                 //**  cppBlock is called on constructor's block node  **//
+				System.out.println("Given Node:" + constr.bnode);
                 EWalk changes = new EWalk(t,constr,constr.bnode);
                 CppPrinter print = new CppPrinter(constr.bnode);
                 h_classdef.write(print.getString().toString());//write body of the constructor
