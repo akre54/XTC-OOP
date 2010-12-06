@@ -420,6 +420,24 @@ public class CppPrinter extends Visitor
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
 	{
+		//check the first child to see if its a primaryIdentifier 
+		Object o= n.get(0);
+		if (o!=null)
+		{
+			if(isNode(o))
+			{
+				Node oNode = (Node)o;
+				//if it is a primaryIdentifier print out a check statement
+				if (oNode.getName().equals("PrimaryIdentifier") ){
+					
+					print("__rt::CheckNotNull("+oNode.getString(0)+")");
+				}
+				//else its not a PrimaryIdentifier Node dispatch on it as normal
+				else{
+					dispatch(oNode);
+				}
+			}
+		}
 		//visit all the children minus the arguments
 		visitChildren(n, 1, 3, "");
 		
