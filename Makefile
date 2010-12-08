@@ -58,7 +58,8 @@ SOURCE = \
 	InheritanceTree.java \
 	InstanceField.java \
 	Log.java\
-	Translator.java
+	Translator.java\
+	Tester.java
 
 
 
