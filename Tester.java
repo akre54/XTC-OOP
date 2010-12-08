@@ -2,22 +2,24 @@ package xtc.oop;
 
 
 import java.io.*;
+import java.util.*;
 /**@author Paige Ponzeka */
 
-/**Implements Runs some Test Cases based on assigned level
+/**MUST BE RUN FROM OOP ROOT FOLDER!
+ Implements Runs some Test Cases based on assigned level
   Currently has no error checking... Ignores anything that is not a java file*/
 public class Tester
 {
 	private final String folderName= "TestCases"; //the default location for all the test cases
 	private String[][] test={
-	{"0","Exit","Type Zero To Exit"},
-	{"1","Basic", "Primitive,Strings,Print,Arrays"},
-	{"2","LoopsConditonals","If/Else,Switch,Loops etc"},
-	{"3","Methods","Returning Method,Method Calls"},
-	{"4","Instances","Instances,Recievers,Arrays of Objects"},
-	{"5","MethodChaining","On Instance"},
-	{"6","Dependency",""},
-	{"7","Inheritance",""}
+	{"0","Type Zero To Exit"},
+	{"1","Primitive,Strings,Print,Arrays"},
+	{"2","If/Else,Switch,Loops etc"},
+	{"3","Returning Method,Method Calls"},
+	{"4","Instances,Recievers,Arrays of Objects"},
+	{"5","MethodChaining"},
+	{"6","Dependency"},
+	{"7","Inheritance"}
 
 	};
 	/**Calling This constructor will prompt you for all the test cases*/	
@@ -53,8 +55,7 @@ public class Tester
 			System.out.println("IO error!");
 			System.exit(1);
 		}
-		//try to convert to number
-		//if given failrs or zero exit
+		//try to convert to number if fails or zero exit
 		try
 		{
 			// the String to int conversion
@@ -62,14 +63,14 @@ public class Tester
 			
 			
 			//check to see if its Zero
-			// print out the value after the conversion
-			//System.out.println("int i = " + i);
 			if(level==0)
 			{
 				System.out.println("Operation Cancelled");
 			}
-			else { // call the level 
-				runTest(level);
+			else { // call the level
+				
+				//print all the files in that level and let a user choose the file to call translator on
+				chooseFile(level);
 			}
 
 		}
@@ -79,47 +80,68 @@ public class Tester
 			System.exit(1);
 		}
 	}
-/**Constructor Runs only current level*/
-
-	public Tester(int level)
-	{
-		
-		System.out.print(test[0][1]);
-		runTest(level);
-	}
-	/**Constructor recursivly runs up the levels 1,2,3,4 etc*/
-	public Tester(int level, boolean all)
-	{
-		//if all is true
-		if(all)
-		{//for each level given run a call to this(n)
-			for(int i=1;i<=level;i++)
-			{
-				runTest(i);
-			}
-		}
-	}
-	/**runs the test on the given level calling translator on each file in the level*/
-	public void runTest(int level)
+	/**For every File in that level folder print then out*/
+	public void chooseFile(int level)
 	{
 		String currentFolder= folderName+"/"+level+"/";
-		//do all the files in that level
+
 		//calls a file reader to get all the files in a folder with the ending .java
 		String[] filenames= getFilesInLevel(level);
-		System.out.println("\n\n\n\n\nRunning- Level: "+level + "\t File:"+filenames[0]+"\n");
-		//for each file call translator .java making sure to send the file name as an argument
-		String[] arguments= new String[2];
-		arguments[0]="-printJavaAST";
-		System.out.println("LENGTH"+filenames.length);
+		
+		//User Messages
+		System.out.println("Choose a File To Translate:");
+		System.out.println("0 - Exit");
 		for(int i=0;i<filenames.length;i++)
 		{
-			System.out.println("File"+filenames[i]);
-			arguments[1]=currentFolder+filenames[i];
+			System.out.println(""+(i+1)+" - "+filenames[i]);
+			
+		}
+		//  open up standard input
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String fileNumberAsString  = null;
+		//  read the file number from the command-line
+		try {
+			fileNumberAsString = br.readLine();
+		} catch (IOException ioe) {
+			System.out.println("IO error!");
+			System.exit(1);
+		}
+		//try to convert to number if fails or zero exit
+		try
+		{
+			// the String to int conversion
+			int fileNumber = Integer.parseInt(fileNumberAsString.trim());
+			//check to see if its Zero
+			if(level==0)
+			{
+				System.out.println("Operation Cancelled");
+			}
+			else { // call the level
+				
+				compileJava(currentFolder,filenames[(fileNumber-1)]);
+				
+				//runTest(currentFolder, filenames[(fileNumber-1)]);
+			}
+		}
+		catch (NumberFormatException nfe)
+		{
+			System.out.println("ERROR: " + nfe.getMessage());
+			System.exit(1);
+		}
 		
+		
+	}
+	/**runs the test on the given level calling translator on each file in the level*/
+	public void runTest(String location, String FileName)
+	{
+			//for each file call translator .java making sure to send the file name as an argument
+			String[] arguments= new String[2];
+			arguments[0]="-printJavaAST";
+			arguments[1]=location+FileName;
+					
 			//Translator t=new Translator();
 			new Translator().run(arguments);
-			System.out.println("Args ran");
-		}
+			//System.out.println("Args ran");
 	}
 	/**@return String[] of all the files in the given subdirectory, 
 	 filter to make sure only files and end in .java are included */
@@ -139,6 +161,60 @@ public class Tester
 		//	//}
 		}*/
 		return files;
+	}
+	/**Calls Terminal Command to compile Java Code based on given file name*/
+	public void compileJava(String folder,String fileName)
+	{
+		System.out.println("Compiling Java...");
+		String cmd = "javac "+folder+fileName;
+		runCommand(cmd);
+		runJava(folder, fileName);
+	}
+	/**Runs Compiled Java*/
+	public void runJava(String folder, String fileName)
+	{
+		//remove .java
+		System.out.println("Running Java...");
+		String className= removeJava(fileName);
+		String cmd = "java -cp "+folder+" " +className;
+		runCommand(cmd);
+	}
+	public String removeJava(String fileName)
+	{
+		StringTokenizer st = new StringTokenizer(fileName, ".");
+		return st.nextToken();
+	}
+	public void runCommand(String command)
+	{
+		try
+        {            
+			
+            Runtime rt = Runtime.getRuntime();
+            Process proc = rt.exec(command);
+            InputStream stderr = proc.getErrorStream();
+            InputStreamReader isr = new InputStreamReader(stderr);
+            BufferedReader br = new BufferedReader(isr);
+            String line = null;
+            while ( (line = br.readLine()) != null)
+                System.out.println(line);
+            int exitVal = proc.waitFor();
+			InputStream istrm = proc.getInputStream();
+			InputStreamReader istrmrdr = new InputStreamReader(istrm);
+			BufferedReader buffrdr = new BufferedReader(istrmrdr);
+			
+			String data;
+			while ((data = buffrdr.readLine()) != null) {
+				System.out.println(data);
+			}
+			
+		} catch (Throwable t)
+		{
+            t.printStackTrace();
+		}
+	}
+	/**Calls Terminal Command to Compile c++ Generated Code, Prints it to the terminal*/
+	public void compileCpp(String fileName)
+	{
 	}
 }
 
