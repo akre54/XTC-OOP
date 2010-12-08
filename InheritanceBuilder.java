@@ -15,13 +15,17 @@ public class InheritanceBuilder{
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
 	private File source;
+	ArrayList<Classes> dependentFiles;
+	ArrayList<String> pkg;
 
 	
-	InheritanceBuilder(File jfile, ArrayList<String> files){
+	InheritanceBuilder(File jfile, ArrayList<Classes> files){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
 		 */
+		
+		dependentFiles = files;
 		source = jfile;
 		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
 		h_classdef.write("/* Object-Oriented Programming\n"+
@@ -45,7 +49,7 @@ public class InheritanceBuilder{
 						  "*/\n\n"+
 						 
 						 "#pragma once\n\n"+
-						 
+					//get rid of these calls and have them added to dependentFiles for base file	 
 						 "#include \"java_lang.h\"\n"+
 
 						 "using java::lang::Object;\n"+
@@ -56,13 +60,7 @@ public class InheritanceBuilder{
 						 "using java::lang::String;\n"+
 						 "using java::lang::ArrayOfInt;\n"+
 						 "using java::lang::ArrayOfObject;\n"+
-						 "using java::lang::ArrayOfClass;\n"+
-
-						 
-						 "namespace xtc {\n"+
-						 "\tnamespace oop{\n\n"+
-						 "\ttypedef std::string String;\n"
-						 );
+						 "using java::lang::ArrayOfClass;\n");
 							 
 		
 		/*
@@ -91,18 +89,30 @@ public class InheritanceBuilder{
 							"*/\n\n"+
 							
 							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
-					// #includes all files its dependent on
-						for (String file : files) {
-                                                        cpp_methoddef.write("#include \""+file+"\"\n");
-						}
+					
 							cpp_methoddef.write("#include <sstream>\n\n"+
-											//"using xtc::oop::"+cpp_methoddef.cFile.getName()+";\n"+
-							
-							"namespace xtc {\n"+
-							"\tnamespace oop{\n\n"
 							);
-		
-		
+							for(String p: pkg){
+								cpp_methoddef.write("namespace"++"{\n");
+							}
+
+	}//end of constructor
+	/** helper method prints all dependency includes and usings after methoddec has added any 
+	 * extra dependencies 
+	 */
+	private void writedependencies(InheritanceTree t){
+		for(String file: dependentFiles){
+			cpp_classdef.write("#include"+file+"\"\n");//#include .h
+			for(String classes: file){
+				cpp_classdef.write("using "+classes+";\n");//using :: :: ;
+				//must have __class as well as class
+			}
+		}
+		for(String p: t.packages){
+			cpp_classdef.write("namespace"++"{\n");
+		}
+		cpp_classdef.write("\ttypedef std::string String;\n");
+	
 	}
 						
 	/*
@@ -158,10 +168,6 @@ public class InheritanceBuilder{
 			"\t};\n\n"/* -----------end of stuct __ClassName_VT in .h file -------------------*/
 						 
 		);// end of writing
-		
-		
-		// define method in methoddef.cpp
-		addMethodDec(t);
 					
 	}//end of addClassdef
 	
@@ -430,6 +436,8 @@ public class InheritanceBuilder{
 		// invokes Vtable constructor
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
                             "\t//===========================================================================\n\n");
+		//now write the .h file
+		addClassdef(t);
 	}
 	/*
 	 *closes both files

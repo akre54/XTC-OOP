@@ -34,6 +34,7 @@ import java.util.HashMap;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
+import java.util.ArrayList;
 
 import xtc.util.Tool;
 
@@ -51,6 +52,7 @@ public class Translator extends Tool {
 	File inputFile = null;
         HashMap<DependencyFinder,Boolean> dependencies;
         HashMap<ClassStruct,Boolean> classes;
+		HashMap<File,ArrayListClassStruct> files;
 
 	/** Create a new translator. */
 	public Translator() {
@@ -113,6 +115,7 @@ public class Translator extends Tool {
 		Result result = parser.pCompilationUnit(0);
 		return (Node)parser.value(result);
 	}
+	private void print
 
 	//-----------------------------------------------------------------------
 	public void process(Node node) {
@@ -151,7 +154,7 @@ public class Translator extends Tool {
                     if (VERBOSE) {
                         runtime.console().p("Begining translation...").pln().flush();
                     }
-
+			files.put(inputFile,new ArrayList<ClassStruct>(0);
 
                     String fullPathName = "";
                     try { fullPathName = inputFile.getCanonicalPath(); }
@@ -166,6 +169,59 @@ public class Translator extends Tool {
                     Translator t = new Translator(dependencies, classes);
                     t.run(new String[]{"-no-exit", "-finddependencies", fullPathName});
                     classes = t.classes;
+			
+					/*** 
+					 //---- creates all InheritanceTrees ----
+					 
+					 int leftTotranslate = classes.size();
+					 While(classes.containsValue(false)){
+						
+						for(ClassStruct c : classes){
+							if( c.extension ==null){//*** extends object
+								new InheritanceTree(c.pkgs,c.node,Object);
+								
+								classes.remove(c);
+					 
+							}
+							else{
+								InheritanceTree superclass = Object.search(c.pkgs,c.extension);	
+								if (superclass!=null)//**extends an already translated class
+									new InheritanceTree(c.pkgs,c.node,superclass);
+									classes.remove(c);
+							}
+						 
+						}
+						//if you didnt translate anything this round then 
+						//search in directory for extensions
+						if (leftTotranslate == classes.size()){
+							for(classStruct c: classes)
+								for( classStruct d: dirclasses){
+									if (c.extension.equals(d.classname))
+										classes.put(d, true);
+								}
+							}
+					 
+						}
+						leftTotranslate = classes.size();
+					 }
+					 
+					//----- creates all methoddef files first (to check for extra needed dependencies)
+					 for(InheritanceTree subclass: Object.subclasses){
+						printCPP(subclass);
+					 }
+					 if (cls.subclasses.size()==0)
+					 
+					 // have to group by file 
+					 // create all methoddefs for classes
+					 // write dependencies
+					 // create all classdefs for classes
+					 
+					 
+					 
+					 
+					 ****/
+			
+			
 			
 //------------- the rest of translate will be edited to work with hashmap ------------------------
 			
@@ -255,7 +311,7 @@ public class Translator extends Tool {
 
                 /* find dependencies of a single file, recursively calling until dependency list is filled */
 		if(runtime.test("finddependencies")){
-
+			files.put(inputFile,new ArrayList<ClassStruct>(0);
 			String fullPathName = "";
 			try { fullPathName = inputFile.getCanonicalPath(); }
 			catch (IOException e) { }

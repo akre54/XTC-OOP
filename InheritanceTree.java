@@ -31,7 +31,11 @@ public class InheritanceTree{
 	 * 
 	 */
 	InheritanceTree(){
-
+		this.packages = new ArrayList<String>(0);
+		this.root = this;
+		packages.add("java");
+		packages.add("lang");
+		
 		className = "Object";
 		superclass = null; //no superclass for Object
 
@@ -73,7 +77,7 @@ public class InheritanceTree{
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
 		
-		this.root = this;
+		
 
 	}
 	
@@ -84,6 +88,7 @@ public class InheritanceTree{
 	InheritanceTree(InheritanceTree supr){
 
 		this.root = supr.root;
+		this.packages = supr.packages;
 
 		superclass = supr;
 		className = "Class";
@@ -147,8 +152,9 @@ public class InheritanceTree{
 	 * will create vtable for class and then attach the tree to the superclass tree.
 	 * @param GNode (classdeclaration), InheritanceTree (superclass's).
 	 */
-	InheritanceTree(GNode n, InheritanceTree supr){
+	InheritanceTree(ArrayList<String> packages,GNode n, InheritanceTree supr){
 		this.root = supr.root;
+		this.packages= packages;
 		superclass = supr;
 		className = n.getString(1);
 		
