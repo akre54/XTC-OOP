@@ -29,20 +29,21 @@ public class EWalk //extends Visitor
 		eRunner(n);
 	}
 	
-	/**Handles, System.out.print, 
-	 Arrays
-	 Super
-	 Casts
-	 Method Calling/Chaining
-	 */
-	 private void eWalker (final GNode n) { 
+	/**Does in-tree translation of javaAST.
+	   Handles, System.out.print, 
+	   Arrays
+	   Super
+	   Casts
+	   Method Calling/Chaining
+	*/
+	private void eWalker (final GNode n) { 
 		Node node = n;
 		new Visitor() {
 			boolean inCall = false,
 				isPrint = false,
 				isPrintln = false,
 				isArray = false,
-				isPrintString = false;	
+				isPrintString = false;
 			boolean isString = false;
 			StringBuffer fcName= new StringBuffer();
 			ArrayList<String> fcNameList=new ArrayList<String>();
@@ -76,15 +77,15 @@ public class EWalk //extends Visitor
 			public boolean isCallExpression(Node n)
 			{
 				if(n!=null)
-				{
-					if(VERBOSE) System.out.println("IS CALL?"+n.getName());
-					if(n.getName().equals("CallExpression"))
-				   {
-					return true;
-				   }
+					{
+						if(VERBOSE) System.out.println("IS CALL?"+n.getName());
+						if(n.getName().equals("CallExpression"))
+							{
+								return true;
+							}
 				  
-				}
-				 return false;
+					}
+				return false;
 			}
 			/**Visit a Call expression and call the necessary inheritence checks*/
 			public void visitCallExpression (GNode n) {
@@ -108,21 +109,21 @@ public class EWalk //extends Visitor
 			/**does all of Call Expressions Heavy Lifting and returns the newmethod arraylist*/
 			public String[] setMethodInfo(Node n)
 			{
-								String primaryIdentifier=" ";
+				String primaryIdentifier=" ";
 				Node firstChild= n.getNode(0);
 				if(isMethodChaining)
-				{
-					//store the method return type
-					primaryIdentifier=savedReturnType;
-				}
+					{
+						//store the method return type
+						primaryIdentifier=savedReturnType;
+					}
 				if(isCallExpression(firstChild))
 					{
 						isMethodChaining=true;
 						dispatch(firstChild);
 					}
-					else if(firstChild!=null)
+				else if(firstChild!=null)
 					{
-					primaryIdentifier=firstChild.getString(0);
+						primaryIdentifier=firstChild.getString(0);
 					}
 				//visit the arguments node
 				Node arguments=n.getNode(3);
@@ -151,7 +152,7 @@ public class EWalk //extends Visitor
 				
 				/*if the argumentlist is empty return a arraylist of the string 0 */
 				if (argumentList.isEmpty()) {
-					 argumentList.add("0");
+					argumentList.add("0");
 				}
 				
 				return argumentList;
@@ -238,9 +239,9 @@ public class EWalk //extends Visitor
 				ArrayList<String> currentPackage = new ArrayList<String>();
 				Object o = n.get(1);
 				if(o!=null)
-				{
-					currentPackage=getPackage((Node)o);
-				}
+					{
+						currentPackage=getPackage((Node)o);
+					}
 				//remove the last Value (its the object name.)
 				String newtype = currentPackage.remove(currentPackage.size()-1);
 				
@@ -254,15 +255,15 @@ public class EWalk //extends Visitor
 				//get the name Locaed under declarator
 				Object declarators = n.get(2);
 				if(declarators!=null)
-				{
-					Node declarNode=(Node)declarators;
-					Object declarator=declarNode.get(0);
-					if(declarator!=null)
 					{
-						Node declaratorNode = (Node)declarator;
-						name = declaratorNode.getString(0);
+						Node declarNode=(Node)declarators;
+						Object declarator=declarNode.get(0);
+						if(declarator!=null)
+							{
+								Node declaratorNode = (Node)declarator;
+								name = declaratorNode.getString(0);
+							}
 					}
-				}
 				
 				//update the type of the variable
 				if (VERBOSE) System.out.println("Updating Method Information("+name +"," +newtype);
@@ -287,10 +288,10 @@ public class EWalk //extends Visitor
 				//System.out.println("currentNode" +n.getName());
 				Node node = n.getNode(0);
 				//System.out.println("currentNode" +n.getName());
-					for(int i=0; i<node.size(); i++){
+				for(int i=0; i<node.size(); i++){
 					//for every child in QualifiedIdentifier append it to the array list
-						packages.add(node.getString(i));
-					}
+					packages.add(node.getString(i));
+				}
 					
 				
 				return packages;
@@ -311,7 +312,7 @@ public class EWalk //extends Visitor
 			}
 			
 			/**helper method that uses the inheritence tree search for method and 
-			 returns the givne string array that should contain the return type and methodname */
+			   returns the givne string array that should contain the return type and methodname */
 			public String[] getMethodInfo(String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
 				if(VERBOSE){System.out.println("Running"+ Identifier+"," + nameList +","+name+","+argumentList);}
@@ -320,15 +321,15 @@ public class EWalk //extends Visitor
 				
 				InheritanceTree b;
 				if(isInstance)
-				{
-					ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
-					//remove the last value from the arrayList (thats always the class name
-					//questions WHAT DO I DO WITH the rest? Is that needed?
-					String className =(String)qualities.remove(1);
-					//get the inheritance name of 
-					b =tree.root.search(qualities,className); //search takes the current method name?
-					//when there are no arguments sends a NullPointerException
-				}
+					{
+						ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
+						//remove the last value from the arrayList (thats always the class name
+						//questions WHAT DO I DO WITH the rest? Is that needed?
+						String className =(String)qualities.remove(1);
+						//get the inheritance name of 
+						b =tree.root.search(qualities,className); //search takes the current method name?
+						//when there are no arguments sends a NullPointerException
+					}
 				else {
 					b=tree;
 				}
@@ -338,7 +339,7 @@ public class EWalk //extends Visitor
 				return b.search_for_method(isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
-			 is currently used when get the types for values in an argument*/
+			   is currently used when get the types for values in an argument*/
 			public String getType(Node n)
 			{
 				//check for primitative types
@@ -349,28 +350,28 @@ public class EWalk //extends Visitor
 					return "String";
 				}
 				else if(n.getName().equals("BooleanLiteral"))
-				{
-					return "boolean";
-				}
+					{
+						return "boolean";
+					}
 				else if(n.getName().equals("NullLiteral"))
-				{
-					return "null";
-				}
+					{
+						return "null";
+					}
 				else if(n.getName().equals("FloatingPointLiteral"))
-				{
-					return "float";
-				}
+					{
+						return "float";
+					}
 				else if(n.getName().equals("CharLiteral"))
-				{
-					return "char";
-				}
+					{
+						return "char";
+					}
 				else if (n.getName().equals("CallExpression"))
-				{
-					//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-					String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
-					methodArray=setMethodInfo(n);
-					return methodArray[0];
-				}
+					{
+						//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
+						String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
+						methodArray=setMethodInfo(n);
+						return methodArray[0];
+					}
 				else{ //return the name of the primaryIdentifier
 					//call the method in the inheritence tree to get the type of the primaryIden
 					
@@ -379,7 +380,7 @@ public class EWalk //extends Visitor
 					return type;
 				}
 				/**can put support for handling methods inside an argument here (use search for methods
-				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
+				   to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
 			}
 			public void visitQualifiedIdentifier (GNode n) {
 				if (!isString) {
@@ -402,21 +403,21 @@ public class EWalk //extends Visitor
 			}
 			public void visit(Node n) {
 				if(n!=null){
-				for (Object o : n){ 
-					if (o instanceof Node){ 
-						dispatch((Node)o);
+					for (Object o : n){ 
+						if (o instanceof Node){ 
+							dispatch((Node)o);
 						
+						}
 					}
-				}
 				}//make sure n is not null
 			}
 		}.dispatch(node); 
 	}//end of eWalker Method
 	
 	/**Follows eWalker
-	 Handles
-	 Types
-	 Modifiers*/
+	   Handles
+	   Types
+	   Modifiers*/
 	public void eRunner(final GNode n)
 	{
 		Node node = n;
@@ -440,7 +441,7 @@ public class EWalk //extends Visitor
 			}			
 			public void visit(Node n) {
 				if(n!=null){
-					for (Object o : n){ 
+					for (Object o : n){
 						if (o instanceof Node){ 
 							dispatch((Node)o);
 							
