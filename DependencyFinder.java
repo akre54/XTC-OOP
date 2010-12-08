@@ -41,7 +41,7 @@ public class DependencyFinder {
         currentSuperClass = "";
 
         // good idea / bad idea?
-        // gatherDirectoryFiles(currentParentDirectory) // since current directory is treated almost like a package
+        gatherDirectoryFiles(currentParentDirectory, DependencyOrigin.CURRENTDIRECTORY); // since current directory is treated almost like a package
 
         new Visitor() {
 
