@@ -119,8 +119,6 @@ public class Tester
 			else { // call the level
 				
 				compileJava(currentFolder,filenames[(fileNumber-1)]);
-				
-				//runTest(currentFolder, filenames[(fileNumber-1)]);
 			}
 		}
 		catch (NumberFormatException nfe)
@@ -150,17 +148,13 @@ public class Tester
 		File dir=new File(folderName+"/"+level);
 		  FilenameFilter onlyJava = new FileListFilter("", "java");
 		String[] files = dir.list(onlyJava);
-		/*if(files==null){
-			//dir doesn't exist as a directory
-		//}
-		//else {
-			//for (int i=0; i<files.length; i++) {
-				//get the name of the file 
-			//	System.out.println(files[i]);
-				//String filename=children[i];
-		//	//}
-		}*/
 		return files;
+	}
+	public void runTranslation(String folder, String filename)
+	{
+		String cmd="Java xtc.oop.Translator -translate "folder +" " filename+;
+		runCommand(cmd);
+		
 	}
 	/**Calls Terminal Command to compile Java Code based on given file name*/
 	public void compileJava(String folder,String fileName)
@@ -188,7 +182,6 @@ public class Tester
 	{
 		try
         {            
-			
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec(command);
             InputStream stderr = proc.getErrorStream();
@@ -201,7 +194,6 @@ public class Tester
 			InputStream istrm = proc.getInputStream();
 			InputStreamReader istrmrdr = new InputStreamReader(istrm);
 			BufferedReader buffrdr = new BufferedReader(istrmrdr);
-			
 			String data;
 			while ((data = buffrdr.readLine()) != null) {
 				System.out.println(data);
@@ -215,6 +207,19 @@ public class Tester
 	/**Calls Terminal Command to Compile c++ Generated Code, Prints it to the terminal*/
 	public void compileCpp(String fileName)
 	{
+	}
+	/**Runs cpp files*/
+	public void runCpp(String fileName)
+	{
+	}
+	/**compares the results of the java and Cpp files and prints out messages*/
+	public void compareResults()
+	{
+		//print java string
+		//print cpp string
+		//append the results to a continuing log, TimeStamp : file.java Output, file.cpp Output
+		//compare the two result strings
+		//prints out message based on results
 	}
 }
 
