@@ -18,7 +18,7 @@ public class EWalk //extends Visitor
 	private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
 	private boolean isMethodChaining;//check if methodChaining is enacted (Starts if a CallExpression is the first child of another CallExpression)
 	private String savedReturnType; //saves the return type of a method for method chaining (starting at the bottom CallExpression
-		/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
+	/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
 	public EWalk (final InheritanceTree treeClass, final Declaration treeMethod, GNode n) {
 		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
@@ -457,9 +457,38 @@ public class EWalk //extends Visitor
 	public void eRunner(final GNode n)
 	{
 		Node node = n;
-		
 		new Visitor(){
-			
+			boolean
+				makingName = false;
+			StringBuffer reciever;
+			public void visitCallExpression (GNode n) {
+				if(!makingName) {
+					makingName = true;				
+					reciever = new StringBuffer();
+				}
+				reciever = new StringBuffer (n.getString(0)+"("+reciever.toString()+")");  //creates methodname(previous reciever)
+				visit(n);
+			}
+			public void visitSelectionExpression (GNode n) {
+				if (!makingName) {
+					makingName = true;				
+					reciever = new StringBuffer();
+				}
+				reciever.append(n.getString(2)+".");
+				visit(n);
+			}
+			public void visitPrimaryIdentifier (GNode n) {
+				if (!makingName) {
+					makingName = true;
+					reciever = new StringBuffer();
+				}
+				reciever.append(n.getString(0)+".");
+				visit(n);
+			}
+			public void visitArguments (GNode n) {
+				n.add(0,reciever.toString());
+				visit(n);
+			}
 			public void visitPrimitiveType (GNode n) {
 				String type = n.getString(0);
 				if (type.equals("int")) {
