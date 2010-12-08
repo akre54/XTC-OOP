@@ -149,6 +149,7 @@ public class DependencyFinder {
             dir = new File(currentParentDirectory, dirPath);
         } catch (NullPointerException e) {
             System.out.println(dirPath + " could not be found. Exists?");
+            Object.class.getProtectionDomain().getCodeSource().getLocation(); // failsafe
         }
 
         if (dir.exists()) {
@@ -184,8 +185,8 @@ public class DependencyFinder {
 
 
       /**
-         * @return all paths to each dependent file of the current file
-         */
+           * @return all paths to each dependent file of the current file
+           */
         public ArrayList<String> getFileDependencyPaths() {
             ArrayList<String> paths = new ArrayList<String>();
 
@@ -208,8 +209,8 @@ public class DependencyFinder {
                         files.add("#include " + d.cppFileName());
                     case PACKAGE:
                         files.add("namespace " + currentPackage);
-                    case CURRENTDIRECTORY:
-                        files.add(d.cppFileName());
+                    /* case CURRENTDIRECTORY:
+                                        files.add(d.cppFileName()); */ // needed? If no package specified, default to same "" package
                 }
             }
 
@@ -234,10 +235,69 @@ public class DependencyFinder {
             return files;
         }
 
+        /** use static method to return all imports */
+        public ArrayList<String> getImports(ArrayList<ClassStruct> classes) {
+            return DependencyFinder.getImports(classes, currentFilePath);
+        }
+
+        public String getFilePath() {
+            return currentFilePath;
+        }
+
       /**
             * @return classes in the current file
             */
         public ArrayList<ClassStruct> getFileClasses() {
             return fileClasses;
+        }
+
+        /** allows us to use Set .contains() method, compare by file path only */
+        public boolean equals (DependencyFinder other) {
+            return this.currentFilePath.equals(other.currentFilePath);
+        }
+
+        public boolean equals (String otherPath) {
+            return this.currentFilePath.equals(otherPath);
+        }
+
+        public static ArrayList<String> getImports(ArrayList<ClassStruct> classes, String filename) {
+            ArrayList<String> imports = new ArrayList<String>();
+
+            // really ugly, but works....
+            for (ClassStruct c : classes) {
+                if (c.filePath.equals(filename)) {
+                    for (FileDependency f : c.fileDependencies)
+                        if (!imports.contains(f.fullPath))
+                            imports.add(f.fullPath);
+                }
+            }
+
+            return imports;
+        }
+
+        /**
+               * @return package name as using directory
+               * i.e. package xtc.oop.B becomes using namespace xtc::oop::b
+               */
+        public static String getNamespace(ArrayList<ClassStruct> classes, String filename) {
+            for (ClassStruct c : classes) {
+                if (c.filePath.equals(filename)) {
+                    return "using namespace " + c.packageName.replaceAll(".", "::") + ";";
+                }
+            }
+            assert false; // should never reach here
+            return "";
+        }
+
+        public static ArrayList<String> getUsingDeclarations(ArrayList<ClassStruct> classes, String filename) {
+            ArrayList<String> usings = new ArrayList<String>();
+
+            for (ClassStruct c : classes) {
+                if (c.filePath.equals(filename)) {
+                    usings.add( c.packageName.replaceAll(".", "::")
+                            + "::" + c.className + ";" );
+                }
+            }
+            return usings;
         }
 }
