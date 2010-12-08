@@ -14,16 +14,16 @@ public class ClassStruct {
 
     String filePath;
     String packageName;
-    String name;
+    String className;
     String superClass;
     ArrayList<FileDependency> fileDependencies;
     GNode n; // of Class
 
-    public ClassStruct(String filePath, String packageName, String name,
+    public ClassStruct(String filePath, String packageName, String className,
             String superClass, ArrayList<FileDependency> fileDependencies, GNode n) {
         this.filePath = filePath;
         this.packageName = packageName;
-        this.name = name;
+        this.className = className;
         this.superClass = superClass;
         this.fileDependencies = fileDependencies;
         this.n = n;
@@ -31,7 +31,7 @@ public class ClassStruct {
 
     /*      comparison by name and package      */
     public boolean equals (ClassStruct c) {
-        return (this.name.equals(c.name)) && (this.packageName.equals(c.packageName)) ;
+        return (this.className.equals(c.className)) && (this.packageName.equals(c.packageName)) ;
     }
     
     public boolean fromSameFile (ClassStruct c) {
