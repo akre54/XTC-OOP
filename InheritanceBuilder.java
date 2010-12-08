@@ -14,15 +14,19 @@ public class InheritanceBuilder{
 	
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
-	private File source;
+        DependencyFinder dependencies;
+        ArrayList<ClassStruct> classes;
+	private File jfile;
 
 	
-	InheritanceBuilder(File jfile, ArrayList<String> files){
+	InheritanceBuilder(DependencyFinder dependencies, ArrayList<ClassStruct> classes){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
 		 */
-		source = jfile;
+                this.dependencies = dependencies;
+                this.classes = classes;
+		jfile = new File(dependencies.getFilePath());
 		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
 		h_classdef.write("/* Object-Oriented Programming\n"+
 						  "* Copyright (C) 2010 Robert Grimm\n"+
@@ -92,8 +96,8 @@ public class InheritanceBuilder{
 							
 							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
 					// #includes all files its dependent on
-						for (String file : files) {
-                                                        cpp_methoddef.write("#include \""+file+"\"\n");
+						for (String importDeclaration : dependencies.getCppDependencies(DependencyOrigin.IMPORT) ) {
+                                                        cpp_methoddef.write(importDeclaration);
 						}
 							cpp_methoddef.write("#include <sstream>\n\n"+
 											//"using xtc::oop::"+cpp_methoddef.cFile.getName()+";\n"+
@@ -282,7 +286,7 @@ public class InheritanceBuilder{
 	 * @param GNode A method declaration GNode
 	 */ 
 	private void buildMain(Declaration n) {
-		CppCreator mainWriter = new CppCreator(source, "main.cpp");
+		CppCreator mainWriter = new CppCreator(jfile, "main.cpp");
 		//change parameters for c++
 		
 		n.returntype = "int32_t";
