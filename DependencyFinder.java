@@ -233,11 +233,17 @@ public class DependencyFinder {
             for (FileDependency d : fileDependencies) {
                 switch (origin) {
                     case IMPORT:
+<<<<<<< HEAD
                         files.add("#include \"" + d.hFileName() + "\"");
 								break;
                     case PACKAGE:
                         files.add("namespace " + "package name"); // FIX THIS
 								break;
+=======
+                        files.add("#include \"" + d.hFileName() + "\"");break;
+                    case PACKAGE:
+                        files.add("namespace " + "package name");break; // FIX THIS
+>>>>>>> 497821647c355806102506405f2f5905a1ff60c4
                 }
             }
 
@@ -264,7 +270,13 @@ public class DependencyFinder {
                 * @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo"
                 */
         public ArrayList<String> getPackageToNamespace() {
+<<<<<<< HEAD
 		  	return new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
+=======
+		
+           return new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
+			
+>>>>>>> 497821647c355806102506405f2f5905a1ff60c4
         }
 
         /** allows us to use Set .contains() method, compare by file path only */
