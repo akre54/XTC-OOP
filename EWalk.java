@@ -120,6 +120,19 @@ public class EWalk //extends Visitor
 								
 				
 			}
+			/**checks node name to see if the name is primaryIdentifier*/
+			public boolean isPrimaryIdentifier(Node n)
+			{
+				if(n.getName().equals("PrimaryIdentifier"))
+				   {
+					  return true;
+				   }
+				   else
+				   {
+					   return false;
+				   }
+				   
+			}
 			/**does all of Call Expressions Heavy Lifting and returns the newmethod arraylist*/
 			public String[] setMethodInfo(Node n)
 			{
@@ -137,8 +150,18 @@ public class EWalk //extends Visitor
 					}
 					else if(firstChild!=null)
 					{
-					primaryIdentifier=firstChild.getString(0);
+						//check to see if its primaryidentifier
+						if((isPrimaryIdentifier(firstChild)))
+						{
+							primaryIdentifier=firstChild.getString(0);
+						}
+						//else dispatch on the firstchild
+						else 
+						{
+							dispatch(firstChild);
+						}
 					}
+				
 				//visit the arguments node
 				Node arguments=n.getNode(3);
 				//create a new argumentTypes arraylist call the getarguments method on the arguments node
