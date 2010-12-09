@@ -63,11 +63,13 @@ public class InheritanceBuilder{
 						 "using java::lang::ArrayOfClass;\n");	
 						// #includes all files its dependent on
 						for (String importDeclaration : dependencies.getCppDependencies(DependencyOrigin.IMPORT) ) {
-							cpp_methoddef.write(importDeclaration+"\n");
-							cpp_methoddef.write(dependencies.getNamespace(dependencies.getFileClasses(),dependencies.getFilePath())+"\n");
+							h_classdef.write(importDeclaration+"\n");
+							h_classdef.write(dependencies.getNamespace(dependencies.getFileClasses(),dependencies.getFilePath())+"\n");
 						}
+		//ArrayList<String> g=new ArrayList<String>(dependencies.getPackageToNamespace());
+		//System.out.println(g);
 						for(String p: dependencies.getPackageToNamespace()){
-							cpp_methoddef.write("namespace"+p+"{\n");
+							h_classdef.write("namespace"+p+"{\n");
 						}
 							 
 		
