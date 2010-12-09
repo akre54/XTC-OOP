@@ -37,6 +37,11 @@ public class ClassStruct {
     public boolean fromSameFile (ClassStruct c) {
         return (this.filePath.equals(c.filePath));
     }
+
+    /**  @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo" */
+    public ArrayList<String> getPackage() {
+        return new ArrayList<String>(java.util.Arrays.asList(packageName.split(".")));
+    }
 }
 
 /* Origin of a dependency, used for tracking call heirarchy */
@@ -67,6 +72,8 @@ class FileDependency {
     public String cppFileName() {
         return javaFileName().replace(".java",".cpp");
     }
-
+    public String hFileName() {
+        return javaFileName().replace(".java","_dataLayout.h");
+    }
 }
 
