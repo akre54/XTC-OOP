@@ -152,7 +152,7 @@ public class Tester
 	}
 	public void runTranslation(String folder, String filename)
 	{
-		String cmd="Java xtc.oop.Translator -translate "folder +" " filename+;
+		String cmd="Java xtc.oop.Translator -translate "+folder +" "+filename;
 		runCommand(cmd);
 		
 	}

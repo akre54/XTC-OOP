@@ -380,7 +380,7 @@ public class InheritanceBuilder{
 	 *    CALLS TO CPPMETHOD to build the body
 	 *	 then ends method "}"
 	 */
-	private void addMethodDec(InheritanceTree t){
+	public void addMethodDec(InheritanceTree t){
 		
 		//writes the __class() method
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
