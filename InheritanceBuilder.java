@@ -6,7 +6,6 @@
 
 package xtc.oop;
 
-import java.util.ArrayList;
 import java.io.File;
 
 public class InheritanceBuilder{
@@ -66,11 +65,9 @@ public class InheritanceBuilder{
 							h_classdef.write(importDeclaration+"\n");
 							h_classdef.write(dependencies.getNamespace(dependencies.getFileClasses(),dependencies.getFilePath())+"\n");
 						}
-		//ArrayList<String> g=new ArrayList<String>(dependencies.getPackageToNamespace());
-		//System.out.println(g);
-						for(String p: dependencies.getPackageToNamespace()){
-							h_classdef.write("namespace"+p+"{\n");
-						}
+						for(String p : dependencies.getPackageToNamespace()){
+							h_classdef.write("namespace "+p+" {\n");
+                                                }
 							 
 		
 		/*
@@ -102,7 +99,7 @@ public class InheritanceBuilder{
 				
 							cpp_methoddef.write("#include <sstream>\n\n");
 							for(String p: dependencies.getPackageToNamespace()){
-								cpp_methoddef.write("namespace"+p+"{\n");
+								cpp_methoddef.write("namespace "+p+" {\n");
 							}
 
 	}//end of constructor
