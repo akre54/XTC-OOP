@@ -197,6 +197,10 @@ public class DependencyFinder {
             return paths;
         }
 
+        public String getPackageName() {
+            return currentPackage;
+        }
+
         /* returns list of cpp-formatted dependencies, including
                * proper syntax for easy printing */
         public ArrayList<String> getCppDependencies() {
@@ -207,10 +211,13 @@ public class DependencyFinder {
                 switch (d.origin) {
                     case IMPORT:
                         files.add("#include " + d.cppFileName());
+								break;
                     case PACKAGE:
                         files.add("namespace " + currentPackage);
+								break;
                     /* case CURRENTDIRECTORY:
-                                        files.add(d.cppFileName()); */ // needed? If no package specified, default to same "" package
+                                        files.add(d.cppFileName()); // needed? If no package specified, default to same "" package
+													 break; */
                 }
             }
 
@@ -227,8 +234,10 @@ public class DependencyFinder {
                 switch (origin) {
                     case IMPORT:
                         files.add("#include \"" + d.hFileName() + "\"");
+								break;
                     case PACKAGE:
                         files.add("namespace " + "package name"); // FIX THIS
+								break;
                 }
             }
 
@@ -255,10 +264,7 @@ public class DependencyFinder {
                 * @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo"
                 */
         public ArrayList<String> getPackageToNamespace() {
-			
-           ArrayList<String> a= new ArrayList<String>(java.util.Arrays.asList(currentPackage.split(".")));
-			System.out.println(a.size()+" "+a.get(0));
-			return a;
+		  	return new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
         }
 
         /** allows us to use Set .contains() method, compare by file path only */
