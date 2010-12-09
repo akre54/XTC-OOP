@@ -31,7 +31,7 @@ class CppCreator {
 		}
     }
 
-   /* public CppCreator (File jFile, String name) {
+   public CppCreator (File jFile, String name) {
 		cFile = createCustom (jFile, name);
 		try {
 			outputWriter = new FileWriter(cFile);
@@ -46,7 +46,7 @@ class CppCreator {
 	  path = path.substring (0,(path.length()-(temp.length()))) + newName;//cuts the last temp number of characters off
 	  File output = new File(path);
 	  return output;
-    }*/
+    }
 	
 
 	public CppCreator (File jFile) {

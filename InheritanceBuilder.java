@@ -15,17 +15,17 @@ public class InheritanceBuilder{
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
         DependencyFinder dependencies;
-        ArrayList<ClassStruct> classes;
+	
 	private File jfile;
 
 	
-	InheritanceBuilder(DependencyFinder dependencies, ArrayList<ClassStruct> classes){
+	InheritanceBuilder(DependencyFinder dependencies){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
 		 */
                 this.dependencies = dependencies;
-                this.classes = classes;
+			
 		jfile = new File(dependencies.getFilePath());
 		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
 		h_classdef.write("/* Object-Oriented Programming\n"+
@@ -60,7 +60,15 @@ public class InheritanceBuilder{
 						 "using java::lang::String;\n"+
 						 "using java::lang::ArrayOfInt;\n"+
 						 "using java::lang::ArrayOfObject;\n"+
-						 "using java::lang::ArrayOfClass;\n");
+						 "using java::lang::ArrayOfClass;\n");	
+						// #includes all files its dependent on
+						for (String importDeclaration : dependencies.getCppDependencies(DependencyOrigin.IMPORT) ) {
+							cpp_methoddef.write(importDeclaration+"\n");
+							cpp_methoddef.write(dependencies.getNamespace(dependencies.getFileClasses(),dependencies.getFilePath())+"\n");
+						}
+						for(String p: dependencies.getPackageToNamespace()){
+							cpp_methoddef.write("namespace"+p+"{\n");
+						}
 							 
 		
 		/*
@@ -89,35 +97,13 @@ public class InheritanceBuilder{
 							"*/\n\n"+
 							
 							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
-					// #includes all files its dependent on
-						for (String importDeclaration : dependencies.getCppDependencies(DependencyOrigin.IMPORT) ) {
-                                                        cpp_methoddef.write(importDeclaration);
-						}
-							cpp_methoddef.write("#include <sstream>\n\n"+
-							);
-							for(String p: pkg){
-								cpp_methoddef.write("namespace"++"{\n");
+				
+							cpp_methoddef.write("#include <sstream>\n\n");
+							for(String p: dependencies.getPackageToNamespace()){
+								cpp_methoddef.write("namespace"+p+"{\n");
 							}
 
 	}//end of constructor
-	/** helper method prints all dependency includes and usings after methoddec has added any 
-	 * extra dependencies 
-	 */
-	private void writedependencies(InheritanceTree t){
-		for(String file: dependentFiles){
-			cpp_classdef.write("#include"+file+"\"\n");//#include .h
-			for(String classes: file){
-				cpp_classdef.write("using "+classes+";\n");//using :: :: ;
-				//must have __class as well as class
-			}
-		}
-		for(String p: t.packages){
-			cpp_classdef.write("namespace"++"{\n");
-		}
-		cpp_classdef.write("\ttypedef std::string String;\n");
-	
-	}
-						
 	/*
 	 * writes to the h_classdef file GNode n's class declaration and Vtable
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
@@ -447,10 +433,12 @@ public class InheritanceBuilder{
 	 *
 	 */
 	public void close(){
-		h_classdef.write("\t}//ends oop namespace\n}//ends xtc namespace");
-		h_classdef.close();
-		cpp_methoddef.write("\t}//ends oop namespace\n}//ends xtc namespace");
+		for(String p: dependencies.getPackageToNamespace()){
+			h_classdef.write("}\n");
+			cpp_methoddef.write("}\n");
+		}
 		cpp_methoddef.close();
+		h_classdef.close();
 	}
 	//--------------end of methods -------------------------
 	

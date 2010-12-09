@@ -54,11 +54,12 @@ SOURCE = \
 	Declaration.java \
 	DependencyFinder.java \
 	EWalk.java \
+	Translator.java\
 	InheritanceBuilder.java \
 	InheritanceTree.java \
 	InstanceField.java \
-	Log.java\
-	Translator.java
+	Log.java
+	
 
 
 
