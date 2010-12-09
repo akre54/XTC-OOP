@@ -36,6 +36,8 @@ public class Declaration{
 		this.variables.addAll(variables);
 		this.modifiers.addAll(modifiers);
 		this.overloadNum = overloadNum;
+		this.bnode =bnode;
+		System.out.println();
 	}
 	
 	/**
