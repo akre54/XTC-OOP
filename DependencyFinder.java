@@ -41,7 +41,7 @@ public class DependencyFinder {
         currentSuperClass = "";
 
         // good idea / bad idea?
-        // gatherDirectoryFiles(currentParentDirectory) // since current directory is treated almost like a package
+        gatherDirectoryFiles(currentParentDirectory, DependencyOrigin.CURRENTDIRECTORY); // since current directory is treated almost like a package
 
         new Visitor() {
 
@@ -226,7 +226,7 @@ public class DependencyFinder {
             for (FileDependency d : fileDependencies) {
                 switch (origin) {
                     case IMPORT:
-                        files.add("#include " + d.cppFileName());
+                        files.add("#include \"" + d.hFileName() + "\"");
                     case PACKAGE:
                         files.add("namespace " + "package name"); // FIX THIS
                 }
@@ -249,6 +249,13 @@ public class DependencyFinder {
             */
         public ArrayList<ClassStruct> getFileClasses() {
             return fileClasses;
+        }
+
+        /**
+                * @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo"
+                */
+        public ArrayList<String> getPackageToNamespace() {
+            return new ArrayList<String>(java.util.Arrays.asList(currentPackage.split(".")));
         }
 
         /** allows us to use Set .contains() method, compare by file path only */
@@ -277,7 +284,7 @@ public class DependencyFinder {
 
         /**
                * @return package name as using directory
-               * i.e. package xtc.oop.B becomes using namespace xtc::oop::b
+               * i.e. package xtc.oop.B; becomes using namespace xtc::oop::B;
                */
         public static String getNamespace(ArrayList<ClassStruct> classes, String filename) {
             for (ClassStruct c : classes) {
