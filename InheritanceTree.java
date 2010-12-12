@@ -76,8 +76,6 @@ public class InheritanceTree{
 
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
-		
-		
 
 	}
 	
@@ -85,60 +83,83 @@ public class InheritanceTree{
 	 * The constructor for creating the Class class.
 	 * @param InheritanceTree (the Object inheritance tree)
 	 */
-	InheritanceTree(InheritanceTree supr){
-
+	InheritanceTree(InheritanceTree supr,String string_or_class){
 		this.root = supr.root;
 		this.packages = supr.packages;
-
 		superclass = supr;
-		className = "Class";
+		className = string_or_class;
 		
 		//copies the superclass's Vtable into virtual Vtable
 		Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
 		
-		//change __isa field to point to this class's feild
+		//change __isa field to point to this className's feild
 		Vt_ptrs.get(0).ownerClass = className;
 		
-		//change __delete field to point to this class's feild
+		//change __delete field to point to this classNames's feild
 		Vt_ptrs.get(1).ownerClass = className;
 		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
 		
-		//change toString to point to class name
+		//change toString to point to className's toString method
 		Vt_ptrs.get(5).ownerClass = className;
 		Vt_ptrs.get(5).params.get(0).type = className;
 
 		
-		//adds virtual Class methods ptrs to virtual Vtable
-		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
-		Vt_ptrs.add(new Declaration("String","getName",
+		if(string_or_class.equals("Class")){
+		
+		
+			//adds virtual Class methods ptrs to virtual Vtable
+			ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+			p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+			Vt_ptrs.add(new Declaration("String","getName",
 									 "Class",p));
 		
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
-		Vt_ptrs.add(new Declaration("String","getSuperclass",
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+			Vt_ptrs.add(new Declaration("String","getSuperclass",
                                     "Class",p));
 		
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
-		Vt_ptrs.add(new Declaration("String","getComponentType",
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+			Vt_ptrs.add(new Declaration("String","getComponentType",
                                     "Class",p));
 		
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
-		Vt_ptrs.add(new Declaration("String","isPrimitive",
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+			Vt_ptrs.add(new Declaration("String","isPrimitive",
                                     "Class",p));
 		
-                p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
-		Vt_ptrs.add(new Declaration("String","isArray",
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+			Vt_ptrs.add(new Declaration("String","isArray",
                                     "Class",p));
 		
-		p.clear();
-		p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
-		p.add(new Fparam(new ArrayList<String>(),"Object","o"));
-		Vt_ptrs.add(new Declaration("String","isInstance",
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
+			p.add(new Fparam(new ArrayList<String>(),"Object","o"));
+			Vt_ptrs.add(new Declaration("String","isInstance",
                                     "Class",p));
+		}
+		else{
+			//change hashCode to point to className's hashCode
+			Vt_ptrs.get(2).ownerClass = className;
+			Vt_ptrs.get(2).params.get(0).type = className;
+			
+			//change equals to point to className's equals
+			Vt_ptrs.get(3).ownerClass = className;
+			Vt_ptrs.get(3).params.get(0).type = className;
+			
+			//add virtual String methods ptrs to virtual Vtable
+			ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+			p.add(new Fparam(new ArrayList<String>(),"String","__this"));
+			Vt_ptrs.add(new Declaration("int32_t","length",
+										"String",p));
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),"String","__this"));
+			p.add(new Fparam(new ArrayList<String>(),"int32_t","idx"));
+			Vt_ptrs.add(new Declaration("char","charAt",
+										"String",p));
+		
+		}
 		
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);

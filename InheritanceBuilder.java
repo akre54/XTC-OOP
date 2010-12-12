@@ -101,6 +101,7 @@ public class InheritanceBuilder{
 							for(String p: dependencies.getPackageToNamespace()){
 								cpp_methoddef.write("namespace "+p+" {\n");
 							}
+							cpp_methoddef.write("\n\n");
 
 	}//end of constructor
 	/*
@@ -383,18 +384,20 @@ public class InheritanceBuilder{
 		
 		//writes the __class() method
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
-							"::"+t.local.get(0).name+"_0(){\n\t"+
-							"\n\tstatic Class k = new __Class(__rt::stringify(\"xtc.oop."+t.className+"\"),__rt::null());"+
-							"\n\treturn k;\n\t"+
+							"::"+t.local.get(0).name+"(){"+
+							"\n\t\tstatic Class k = new __Class(__rt::stringify(\"xtc.oop."+t.className+"\"),__rt::null());"+
+							"\n\t\treturn k;\n\t"+
 							"}\n");
 		//writes the __delete() method
 		cpp_methoddef.write("\t"+t.local.get(1).returntype+" __"+t.className+
-							"::"+t.local.get(1).name+"_0(__"+t.className+"* __this){\n\t"+
-							"delete __this\n\t"+
+							"::"+t.local.get(1).name+"(__"+t.className+"* __this){\n\t\t"+
+							"delete __this;\n\t"+
 							"}\n");
 		
 	//--- adds all methods to METHODDEF	
-		for (Declaration method : t.local) {
+		int size = t.local.size();
+		for (int j =2;j<size;j++) {
+			Declaration method= t.local.get(j);
                     //method syntax
                     cpp_methoddef.write("\t"+method.returntype+" __"+t.className+
                                                             "::"+method.name);
@@ -417,9 +420,8 @@ public class InheritanceBuilder{
                     EWalk changes = new EWalk(t,method,method.bnode);
                     CppPrinter mblock=new CppPrinter(method.bnode);
                     cpp_methoddef.write(mblock.getString().toString());//write body of the method
-                    cpp_methoddef.write("\n\t   }\n\n");
+                    cpp_methoddef.write("\n\t}\n\n");
 
-                    cpp_methoddef.write("\n\n");
 		}
 		// invokes Vtable constructor
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
