@@ -103,17 +103,21 @@ public class EWalk //extends Visitor
 						//if its super set the is super flag true
 					   isSuper=true;
 					}
+					if(VERBOSE) System.out.println("NAME:" +firstc.getName());
+					dispatch(firstc); //visit the node
+
 				}
 				
 				String[] methodArray=setMethodInfo(n);
 				//new method name to override in the tree
 				String newMethod= methodArray[1];
 				savedReturnType = methodArray[0];
-				
+				if(VERBOSE) System.out.println("NEW METHOD" + newMethod);
 				//code to replace the old method name with the new method name in the tree	
 				//where the current method name is current located as position 2
-				n.set(2,newMethod);
-				
+				if(newMethod!=null)
+					n.set(2,newMethod);
+				visit(n);
 				//if(VERBOSE) System.out.println("fully qualified name: "+fcName);
    				//Object garbage = n.remove(0); //having trouble removing nodes!!!
 					   
@@ -136,6 +140,10 @@ public class EWalk //extends Visitor
 			/**does all of Call Expressions Heavy Lifting and returns the newmethod arraylist*/
 			public String[] setMethodInfo(Node n)
 			{
+				//gets the FCNameList Node and visits it using the getFCName method
+				ArrayList<String> fcNamelist =getFcName(n);
+				
+				
 				String primaryIdentifier=" ";
 				Node firstChild= n.getNode(0);
 				if(isMethodChaining)
@@ -168,14 +176,25 @@ public class EWalk //extends Visitor
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				if(VERBOSE) System.out.println("New Array List Created...\n");
 				
-				//gets the FCNameList Node and visits it using the getFCName method
-				ArrayList<String> fcNamelist =getFcName(n);
-				
-				//get the method name
+								//get the method name
+				String[] methodArray= new String[2];
 				String methodName = n.getString(2);
+				//run checks for system.out.println and break from get method info
+				if(methodName.equals("System->out->println"))  
+				{
+					//isPrintln=true;
+					return methodArray;
+				}
+				else if(methodName.equals("System->out->print")) {
+					//isPrint=true;
+					return methodArray;
+				}
+
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
+				//run a check for System.out.print and println
+				System.out.println(isPrintln);
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-				String[] methodArray = getMethodInfo(n,primaryIdentifier,fcNameList, methodName,argumentTypes);
+				methodArray = getMethodInfo(n,primaryIdentifier,fcNameList, methodName,argumentTypes);
 				return methodArray;
 			}
 			/**Helper method returns the arguments in an array list*/
@@ -198,8 +217,6 @@ public class EWalk //extends Visitor
 			/**Node that gets the FC name before a method and returns an array list of the fcNamelist*/
 			public ArrayList<String> getFcName(Node n){
 				
-				fcNameList = new ArrayList<String>();
-				fcName = new StringBuffer();
 				//visit(n);
 				fcName.append(n.getString(2));
 				fcNameList.add(n.getString(2)); 
@@ -209,6 +226,7 @@ public class EWalk //extends Visitor
 				//String className = fcNameList.get(size-2);//SOURCE OF ARRAY OUT OF BOUNDS
 				fcNameList.remove(size-1);
 				//fcNameList.remove(size-2);//SOURCE OF ARRAY OUT OF BOUNDS
+				if(VERBOSE){System.out.println("FULLNAME" +fcName);}
 				if (fcName.toString().contains("System.out.print")) {
 					isPrint = true;
 					if (fcName.toString().contains("System->out->__vptr->println")) {
@@ -226,15 +244,21 @@ public class EWalk //extends Visitor
 					//other
 				}
 				if(VERBOSE) System.out.println("Size of n is\t\t\t\t"+n.size());
-				if(VERBOSE) System.out.println("Setting n[0] to:\t\t\t"+fcName);
+				//if(VERBOSE) System.out.println("Setting n[0] to:\t\t\t"+fcName);
+				if(VERBOSE) System.out.println("Println?" +isPrintln);
 				if(isPrintln) {
-					n.set(0,null);
+					if(VERBOSE) System.out.println("Setting n[0] to:\t\t\t"+fcName);
+					n.set(0, null);
 					n.set(2,fcName.toString());
 					n.set(1,"<<std::endl");
+					if(VERBOSE) System.out.println("N STRING" +n.toString());
 				}
 				else {
+					if(VERBOSE) System.out.println("Setting n[0] to:\t\t\t"+fcName);
+					
 					n.set(0,null);
 					n.set(2,fcName.toString());
+					if(VERBOSE) System.out.println("N STRING" +n.toString());
 				}
 				visit(n.getNode(3));
 				visit(n.getNode(3));
@@ -247,6 +271,7 @@ public class EWalk //extends Visitor
 				visit(n);	
 				if (inCall);
 				fcName.append(n.getString(1)+"->");
+				if (VERBOSE) System.out.println("FC:"+ n.getString(1));
 				fcNameList.add(n.getString(1));
 			}
 			/**End value of a static variable or just a local variable */
@@ -254,6 +279,8 @@ public class EWalk //extends Visitor
 				if (inCall) {
 					inCall = false;
 					fcName.append(n.getString(0)+"->");
+					if (VERBOSE) System.out.println("FC:"+ n.getString(0));
+
 					fcNameList.add(n.getString(0));
 				} else {
 					//Do something?
@@ -303,7 +330,7 @@ public class EWalk //extends Visitor
 				}
 				
 				//update the type of the variable
-				if (VERBOSE) System.out.println("Updating Method Information("+name +"," +newtype);
+				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
 
 				method.update_type(name,currentPackage, newtype);
 				if (isString) {

@@ -47,7 +47,9 @@ public class CppPrinter extends Visitor
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
 	{
-		
+		if(n!=null){
+		if(DEBUG)System.out.println(n.toString());
+		}
 //		setupLog("CppPrinter");
 		printer = new StringBuilder(); //intialize Stringbuilder
 		
