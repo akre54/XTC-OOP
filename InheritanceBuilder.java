@@ -119,7 +119,8 @@ public class InheritanceBuilder{
 			"\ttypedef __rt::Ptr<__"+ClassName+"> "+ClassName+";\n\n"+/**/
 		
 			"\tstruct __"+ClassName+"{ \n"+/**/
-			"\t   __"+ClassName+"_VT* __vptr;\n");
+			"\t   __"+ClassName+"_VT* __vptr;\n"+
+						 "\ttypedef __rt::Ptr<__Array<"+ClassName+"> > ArrayOf"+ClassName+";");
 						 
 				/* FEILDS ---> ex: int x;  */
 		        write_all_feilds(t); h_classdef.write("\n\n");
