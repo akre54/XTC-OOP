@@ -37,7 +37,7 @@ public class Declaration{
 		this.modifiers.addAll(modifiers);
 		this.overloadNum = overloadNum;
 		this.bnode =bnode;
-		System.out.println();
+		System.out.println(bnode);
 	}
 	
 	/**
