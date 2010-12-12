@@ -6,7 +6,6 @@
 
 package xtc.oop;
 
-import java.util.ArrayList;
 import java.io.File;
 
 public class InheritanceBuilder{
@@ -15,17 +14,17 @@ public class InheritanceBuilder{
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
         DependencyFinder dependencies;
-        ArrayList<ClassStruct> classes;
+	
 	private File jfile;
 
 	
-	InheritanceBuilder(DependencyFinder dependencies, ArrayList<ClassStruct> classes){
+	InheritanceBuilder(DependencyFinder dependencies){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
 		 */
                 this.dependencies = dependencies;
-                this.classes = classes;
+			
 		jfile = new File(dependencies.getFilePath());
 		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
 		h_classdef.write("/* Object-Oriented Programming\n"+
@@ -49,7 +48,7 @@ public class InheritanceBuilder{
 						  "*/\n\n"+
 						 
 						 "#pragma once\n\n"+
-						 
+					//get rid of these calls and have them added to dependentFiles for base file	 
 						 "#include \"java_lang.h\"\n"+
 
 						 "using java::lang::Object;\n"+
@@ -60,13 +59,15 @@ public class InheritanceBuilder{
 						 "using java::lang::String;\n"+
 						 "using java::lang::ArrayOfInt;\n"+
 						 "using java::lang::ArrayOfObject;\n"+
-						 "using java::lang::ArrayOfClass;\n"+
-
-						 
-						 "namespace xtc {\n"+
-						 "\tnamespace oop{\n\n"+
-						 "\ttypedef std::string String;\n"
-						 );
+						 "using java::lang::ArrayOfClass;\n");	
+						// #includes all files its dependent on
+						for (String importDeclaration : dependencies.getCppDependencies(DependencyOrigin.IMPORT) ) {
+							h_classdef.write(importDeclaration+"\n");
+							h_classdef.write(dependencies.getNamespace(dependencies.getFileClasses(),dependencies.getFilePath())+"\n");
+						}
+						for(String p : dependencies.getPackageToNamespace()){
+							h_classdef.write("namespace "+p+" {\n");
+                                                }
 							 
 		
 		/*
@@ -95,20 +96,13 @@ public class InheritanceBuilder{
 							"*/\n\n"+
 							
 							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
-					// #includes all files its dependent on
-						for (String importDeclaration : dependencies.getCppDependencies(DependencyOrigin.IMPORT) ) {
-                                                        cpp_methoddef.write(importDeclaration);
-						}
-							cpp_methoddef.write("#include <sstream>\n\n"+
-											//"using xtc::oop::"+cpp_methoddef.cFile.getName()+";\n"+
-							
-							"namespace xtc {\n"+
-							"\tnamespace oop{\n\n"
-							);
-		
-		
-	}
-						
+				
+							cpp_methoddef.write("#include <sstream>\n\n");
+							for(String p: dependencies.getPackageToNamespace()){
+								cpp_methoddef.write("namespace "+p+" {\n");
+							}
+
+	}//end of constructor
 	/*
 	 * writes to the h_classdef file GNode n's class declaration and Vtable
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
@@ -162,10 +156,6 @@ public class InheritanceBuilder{
 			"\t};\n\n"/* -----------end of stuct __ClassName_VT in .h file -------------------*/
 						 
 		);// end of writing
-		
-		
-		// define method in methoddef.cpp
-		addMethodDec(t);
 					
 	}//end of addClassdef
 	
@@ -389,7 +379,7 @@ public class InheritanceBuilder{
 	 *    CALLS TO CPPMETHOD to build the body
 	 *	 then ends method "}"
 	 */
-	private void addMethodDec(InheritanceTree t){
+	public void addMethodDec(InheritanceTree t){
 		
 		//writes the __class() method
 		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
@@ -434,16 +424,20 @@ public class InheritanceBuilder{
 		// invokes Vtable constructor
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
                             "\t//===========================================================================\n\n");
+		//now write the .h file
+		addClassdef(t);
 	}
 	/*
 	 *closes both files
 	 *
 	 */
 	public void close(){
-		h_classdef.write("\t}//ends oop namespace\n}//ends xtc namespace");
-		h_classdef.close();
-		cpp_methoddef.write("\t}//ends oop namespace\n}//ends xtc namespace");
+		for(String p: dependencies.getPackageToNamespace()){
+			h_classdef.write("}\n");
+			cpp_methoddef.write("}\n");
+		}
 		cpp_methoddef.close();
+		h_classdef.close();
 	}
 	//--------------end of methods -------------------------
 	

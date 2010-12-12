@@ -31,7 +31,7 @@ class CppCreator {
 		}
     }
 
-    public CppCreator (File jFile, String name) {
+   public CppCreator (File jFile, String name) {
 		cFile = createCustom (jFile, name);
 		try {
 			outputWriter = new FileWriter(cFile);
