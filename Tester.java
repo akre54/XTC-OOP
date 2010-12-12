@@ -25,6 +25,9 @@ public class Tester
 	/**Calling This constructor will prompt you for all the test cases*/	
 	public Tester()
 	{
+		runTester();
+	}
+	public void runTester(){
 		//print out the array of test Cases
 		System.out.println("Here are the Current Test Levels \n");
 		for(int r=0;r<test.length;r++)
@@ -185,10 +188,12 @@ public class Tester
 		System.out.println("Choose an Option:");
 		System.out.println("0 - Exit");
 		System.out.println("1 - Compile and Run Cpp");
+		/*System.out.println("2 - Run Cpp");*/
 		System.out.println("2 - Open Cpp and Java File");
 		System.out.println("3 - Open Cpp File");
 		System.out.println("4 - Open Java File");
 		System.out.println("5 - Print AST");
+		System.out.println("6 - Translate New File");
 
 		//  open up standard input
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -227,6 +232,10 @@ public class Tester
 			{
 				printAST(folder, fileName);
 			}
+			else if (choice == 6)
+			{
+				runTester();
+			}
 		}
 		catch (NumberFormatException nfe)
 		{
@@ -259,17 +268,20 @@ public class Tester
 	{
 		String cppName= fileName+"_methoddef.cpp";
 		System.out.println("Compiling C++...");
-		String cmd = "g++ "+folder+"" +cppName;
+		//main.cpp *_methoddef.cpp  java_lang.cpp
+		String cmd = "g++ main.cpp "+folder+"" +cppName + " java_lang.cpp";
 		runCommand(cmd);
-		runCpp(folder);
+		runCpp(fileName,folder);
 	}
 	/**Runs cpp files*/
-	public void runCpp(String folder)
+	public void runCpp(String fileName,String folder)
 	{
 		String cmd = "cd " + folder;
+		System.out.print(cmd);
 		runCommand(cmd);
-		String cmd2 = "./a.out";
+		String cmd2 = "ls";
 		String cppPrint=runCommand(cmd2);
+		viewMethodDefOrRunCpp(folder, fileName);
 
 	}
 	/**compares the results of the java and Cpp files and prints out messages*/

@@ -180,12 +180,12 @@ public class EWalk //extends Visitor
 				String[] methodArray= new String[2];
 				String methodName = n.getString(2);
 				//run checks for system.out.println and break from get method info
-				if(methodName.equals("System->out->println"))  
+				if(methodName.contains("System->out->println"))  
 				{
 					//isPrintln=true;
 					return methodArray;
 				}
-				else if(methodName.equals("System->out->print")) {
+				else if(methodName.contains("System->out->print")) {
 					//isPrint=true;
 					return methodArray;
 				}
@@ -448,13 +448,18 @@ public class EWalk //extends Visitor
 					methodArray=setMethodInfo(n);
 					return methodArray[0];
 				}
-				else{ //return the name of the primaryIdentifier
+				else if(n.getName().equals("PrimaryIdentifier")){ //return the name of the primaryIdentifier
 					//call the method in the inheritence tree to get the type of the primaryIden
 					
+					System.out.println(n.getString(0));
 					ArrayList<String> packageNType= method.search_for_type(n.getString(0));
 					String type = packageNType.remove(packageNType.size());
 					return type;
 				}
+				else {//expression inside a method call
+					return "NONE";
+				}
+
 				/**can put support for handling methods inside an argument here (use search for methods
 				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
 			}
