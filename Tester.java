@@ -152,11 +152,12 @@ public class Tester
 	}
 	public void runTranslation(String folder, String filename)
 	{
-		String cmd="Java xtc.oop.Translator -translate "+folder +" "+filename;
+		System.out.println("Running Translation...");
+		String cmd="Java xtc.oop.Translator -translate "+folder +""+filename;
 		runCommand(cmd);
 		
 	}
-	/**Calls Terminal Command to compile Java Code based on given file name*/
+	/**Calls Terminal Command to compile Java Code based on given file name and then calls compileJava*/
 	public void compileJava(String folder,String fileName)
 	{
 		System.out.println("Compiling Java...");
@@ -164,22 +165,128 @@ public class Tester
 		runCommand(cmd);
 		runJava(folder, fileName);
 	}
-	/**Runs Compiled Java*/
+	/**Runs Compiled Java Then Class runTranslation, compile cpp, runTranslationviewMethodDef or RunCpp*/
 	public void runJava(String folder, String fileName)
 	{
 		//remove .java
 		System.out.println("Running Java...");
 		String className= removeJava(fileName);
-		String cmd = "java -cp "+folder+" " +className;
+		String cmd = "Java -cp "+folder+" " +className;
+		System.out.println(cmd);
+		//Java -cp TestCases/1/Array
+
+		String javaPrint=runCommand(cmd);
+		runTranslation(folder, fileName);
+		viewMethodDefOrRunCpp(folder, className);
+	}
+	/**Allows a User to choose an option after cpp has been transalted*/
+	public void viewMethodDefOrRunCpp(String folder, String fileName)
+	{
+		System.out.println("Choose an Option:");
+		System.out.println("0 - Exit");
+		System.out.println("1 - Compile and Run Cpp");
+		System.out.println("2 - Open Cpp and Java File");
+		System.out.println("3 - Open Cpp File");
+		System.out.println("4 - Open Java File");
+		System.out.println("5 - Print AST");
+
+		//  open up standard input
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String choiceAsString  = null;
+		//  read the file number from the command-line
+		try {
+			choiceAsString = br.readLine();
+		} catch (IOException ioe) {
+			System.out.println("IO error!");
+			System.exit(1);
+		}
+		//try to convert to number if fails or zero exit
+		try
+		{
+			// the String to int conversion
+			int choice = Integer.parseInt(choiceAsString.trim());
+			//check to see if its Zero
+			if(choice==0)
+			{
+				System.out.println("Operation Cancelled");
+			}
+			else if (choice == 1){ // call the compile cpp
+				compileCpp(folder, fileName);
+			}
+			else if(choice == 2){ //open cpp and Java File
+				openFile(folder, fileName,folder+fileName+".java");
+				openFile(folder, fileName,folder+fileName+"_methoddef.cpp");
+			}
+			else if (choice ==3){
+				openFile(folder, fileName,folder+fileName+"_methoddef.cpp");
+			}
+			else if (choice ==4){
+				openFile(folder, fileName,folder+fileName+".java");
+			}
+			else if (choice ==5)
+			{
+				printAST(folder, fileName);
+			}
+		}
+		catch (NumberFormatException nfe)
+		{
+			System.out.println("ERROR: " + nfe.getMessage());
+			System.exit(1);
+		}
+	}
+	/**Calls Translator to print the Java AST*/
+	public void printAST(String folder, String fileName)
+	{
+		String cmd ="Java xtc.oop.Translator -printJavaAST " +folder+fileName + ".java";
 		runCommand(cmd);
+		viewMethodDefOrRunCpp(folder,fileName);
+	}
+	/**Opens given File*/
+	public void openFile(String folder, String fileName,String file)
+	{
+		String cmd = "open "+file;
+		runCommand(cmd);
+		viewMethodDefOrRunCpp(folder,fileName);
+
 	}
 	public String removeJava(String fileName)
 	{
 		StringTokenizer st = new StringTokenizer(fileName, ".");
 		return st.nextToken();
 	}
-	public void runCommand(String command)
+	/**Calls Terminal Command to Compile c++ Generated Code Calls runCpp*/
+	public void compileCpp(String folder, String fileName )
 	{
+		String cppName= fileName+"_methoddef.cpp";
+		System.out.println("Compiling C++...");
+		String cmd = "g++ "+folder+"" +cppName;
+		runCommand(cmd);
+		runCpp(folder);
+	}
+	/**Runs cpp files*/
+	public void runCpp(String folder)
+	{
+		String cmd = "cd " + folder;
+		runCommand(cmd);
+		String cmd2 = "./a.out";
+		String cppPrint=runCommand(cmd2);
+
+	}
+	/**compares the results of the java and Cpp files and prints out messages*/
+	public void compareResults()
+	{
+		//print java string
+		//print cpp string
+		//append the results to a continuing log, TimeStamp : file.java Output, file.cpp Output
+		//compare the two result strings
+		//prints out message based on results
+	}
+	public void openMethodDef()
+	{
+	}
+	public String runCommand(String command)
+	{
+		String data="";
 		try
         {            
             Runtime rt = Runtime.getRuntime();
@@ -194,7 +301,7 @@ public class Tester
 			InputStream istrm = proc.getInputStream();
 			InputStreamReader istrmrdr = new InputStreamReader(istrm);
 			BufferedReader buffrdr = new BufferedReader(istrmrdr);
-			String data;
+			
 			while ((data = buffrdr.readLine()) != null) {
 				System.out.println(data);
 			}
@@ -203,23 +310,12 @@ public class Tester
 		{
             t.printStackTrace();
 		}
+		return data;
 	}
-	/**Calls Terminal Command to Compile c++ Generated Code, Prints it to the terminal*/
-	public void compileCpp(String fileName)
+	
+	public static void main (String[] args)
 	{
-	}
-	/**Runs cpp files*/
-	public void runCpp(String fileName)
-	{
-	}
-	/**compares the results of the java and Cpp files and prints out messages*/
-	public void compareResults()
-	{
-		//print java string
-		//print cpp string
-		//append the results to a continuing log, TimeStamp : file.java Output, file.cpp Output
-		//compare the two result strings
-		//prints out message based on results
+		Tester test = new Tester();
 	}
 }
 
