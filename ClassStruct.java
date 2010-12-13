@@ -46,7 +46,7 @@ public class ClassStruct {
 
 /* Origin of a dependency, used for tracking call heirarchy */
 enum DependencyOrigin {
-    IMPORT, PACKAGE, CURRENTDIRECTORY
+    IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY
 }
 
 class FileDependency {
@@ -74,6 +74,11 @@ class FileDependency {
     }
     public String hFileName() {
         return javaFileName().replace(".java","_dataLayout.h");
+    }
+    public String qualifiedName(ArrayList<ClassStruct> c) {
+        String namespace = DependencyFinder.getNamespace(c, fullPath);
+        String basename = javaFileName().replace(".java","");
+        return namespace + "::" + basename;
     }
 }
 

@@ -59,12 +59,17 @@ public class InheritanceBuilder{
 						 "using java::lang::String;\n"+
 						 "using java::lang::ArrayOfInt;\n"+
 						 "using java::lang::ArrayOfObject;\n"+
-						 "using java::lang::ArrayOfClass;\n");	
-						// #includes all files its dependent on
-						for (String importDeclaration : dependencies.getCppDependencies(DependencyOrigin.IMPORT) ) {
-							h_classdef.write(importDeclaration+"\n");
-							h_classdef.write(dependencies.getNamespace(dependencies.getFileClasses(),dependencies.getFilePath())+"\n");
+						 "using java::lang::ArrayOfClass;\n");
+
+						// #includes all files its dependent on, then using declares them
+						for (String importDeclaration : dependencies.getCppIncludeDecs(DependencyOrigin.IMPORT) ) {
+                                                        h_classdef.write(importDeclaration+"\n");
 						}
+                                                for (String usingDeclaration : dependencies.getCppUsingDeclarations()) {
+                                                    h_classdef.write(usingDeclaration+"\n");
+                                                    //h_classdef.write(DependencyFinder.getNamespace(dependencies.getFileClasses(), dependencies.getFilePath())+"\n");
+                                                }
+
 						for(String p : dependencies.getPackageToNamespace()){
 							h_classdef.write("namespace "+p+" {\n");
                                                 }

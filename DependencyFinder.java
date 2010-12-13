@@ -35,13 +35,10 @@ public class DependencyFinder {
 
     public DependencyFinder(Node n, String filePath) {
 
-        currentParentDirectory = (new File(filePath)).getParent(); // all dependencies are relative to the translated file
+        currentParentDirectory = (new File ((new File(filePath)).getParent())).getParent(); // all dependencies are relative to the translated file
         currentFilePath = filePath;
         currentPackage = "";
         currentSuperClass = "";
-
-        // good idea / bad idea?
-        gatherDirectoryFiles(currentParentDirectory, DependencyOrigin.CURRENTDIRECTORY); // since current directory is treated almost like a package
 
         new Visitor() {
 
@@ -50,12 +47,6 @@ public class DependencyFinder {
                 // list all files in the directory, and add them to our paths list
 
                 Node n = g.getNode(1);
-
-                /* support for wildcards... later
-                               if ( n.getString(n.size() -1 ).equals("*") )
-                               n.remove(n.size());
-                             */
-
 
                 StringBuilder pathbuilder = new StringBuilder();
 
@@ -69,10 +60,16 @@ public class DependencyFinder {
                     pathbuilder.append(breadcrumb);
                 }
 
-                String pathname = pathbuilder.toString();
-                currentPackage = pathname.replace("/",".");
-
-                gatherDirectoryFiles(pathname, DependencyOrigin.PACKAGE);
+                String path  = pathbuilder.toString();
+                currentPackage = path.replace("/",".");
+					 
+					 // add explicit imports first, then package, then current directory
+					 gatherDirectoryFiles(path, DependencyOrigin.CURRENTPACKAGE);
+					 
+					 /*  Needed??
+					 // add all members of current directory. Will not add files already added (e.g. explicitly declared package)
+				    gatherDirectoryFiles(currentPackage, DependencyOrigin.CURRENTDIRECTORY); // since current directory is treated almost like a package
+				    */
             }
 
             public void visitImportDeclaration(GNode g) {
@@ -85,17 +82,6 @@ public class DependencyFinder {
 
                 StringBuilder pathbuilder = new StringBuilder(); // build filename from recursing tree through its children
 
-                /*
-                            // if using the wildcard operator, visit the folder instead
-                            try {
-                                    if (n.getString(n.getNode(1).size() -1 ).equals("*"))
-                                            gatherDirectoryFiles(pathBuilder.toString());
-                            return;
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                             */
-
                 for (int i = 0; i < n.size(); i++) {
                     String breadcrumb = n.getString(i);
 
@@ -106,9 +92,16 @@ public class DependencyFinder {
 
                     pathbuilder.append(breadcrumb);
 
-                    if (i == (n.size() - 1)) // || n.getNode(1).getString(n.getNode(1).size() -1).equals("java") ) EVENTUALLY NEEDS .java filename SUPPORT
-                    {
-                        pathbuilder.append(".java");
+                    if (i == (n.size() - 1)) {
+						  
+						  		// if using the wildcard operator, visit the folder instead
+          		         // e.g. import A.B.*;
+	                     if (null != g.get(2) && g.getString(2).equals("*")) {
+                        	gatherDirectoryFiles(pathbuilder.toString(), DependencyOrigin.IMPORTEDPACKAGE);
+									return;
+                    		}
+								
+                       	pathbuilder.append(".java");
                     }
                 }
 
@@ -149,7 +142,8 @@ public class DependencyFinder {
             dir = new File(currentParentDirectory, dirPath);
         } catch (NullPointerException e) {
             System.out.println(dirPath + " could not be found. Exists?");
-            Object.class.getProtectionDomain().getCodeSource().getLocation(); // failsafe
+            String failsafe = Object.class.getProtectionDomain().getCodeSource().getLocation().toString();
+				dir = new File(failsafe);
         }
 
         if (dir.exists()) {
@@ -185,15 +179,31 @@ public class DependencyFinder {
 
 
       /**
-           * @return all paths to each dependent file of the current file
+           * @return all paths to each explicitly called dependent file of the current file
            */
-        public ArrayList<String> getFileDependencyPaths() {
-            ArrayList<String> paths = new ArrayList<String>();
+        public ArrayList<FileDependency> getFileImportDepPaths() {
+            ArrayList<FileDependency> paths = new ArrayList<FileDependency>();
 
             for (FileDependency d : fileDependencies) {
-                paths.add(d.fullPath);
+                if (d.origin == DependencyOrigin.IMPORT || d.origin == DependencyOrigin.IMPORTEDPACKAGE) {
+                    paths.add(d);
+                }
             }
 
+            return paths;
+        }
+
+        /**
+           * @return all paths to each package-defined dependent file of the current file
+           */
+        public ArrayList<FileDependency> getFilePkgDepPaths() {
+            ArrayList<FileDependency> paths = new ArrayList<FileDependency>();
+
+            for (FileDependency d : fileDependencies) {
+                if (d.origin == DependencyOrigin.CURRENTPACKAGE || d.origin == DependencyOrigin.CURRENTDIRECTORY) {
+                    paths.add(d);
+                }
+            }
             return paths;
         }
 
@@ -201,52 +211,62 @@ public class DependencyFinder {
             return currentPackage;
         }
 
-        /* returns list of cpp-formatted dependencies, including
-               * proper syntax for easy printing */
-        public ArrayList<String> getCppDependencies() {
+        /** Get dependices sorted by specific origin (i.e. get just package
+                * imports or just includes) */
+        public ArrayList<String> getCppIncludeDecs(DependencyOrigin origin) {
 
             ArrayList<String> files = new ArrayList<String>();
-
             for (FileDependency d : fileDependencies) {
-                switch (d.origin) {
-                    case IMPORT:
-                        files.add("#include " + d.cppFileName());
-								break;
-                    case PACKAGE:
-                        files.add("namespace " + currentPackage);
-								break;
-                    /* case CURRENTDIRECTORY:
-                                        files.add(d.cppFileName()); // needed? If no package specified, default to same "" package
-													 break; */
+                if (d.origin == origin) {
+                    switch (origin) {
+                        case IMPORT:
+                            files.add("#include \"" + d.hFileName() + "\"");
+                            break;
+                        /*case IMPORTEDPACKAGE:
+	                          files.add("using " + currentPackage.replaceAll("\\.", "::") + ";");
+	                          break; */
+                        case CURRENTPACKAGE:
+                            files.add("namespace " + currentPackage.replaceAll("\\.", "::") + ";");
+                            break;
+								/* case CURRENTDIRECTORY: 
+									????
+									break;
+								*/
+                    }
                 }
             }
 
             return files;
         }
 
-        /* Get dependices sorted by specific origin (i.e. get just package
-               * imports or just includes) */
-        public ArrayList<String> getCppDependencies(DependencyOrigin origin) {
+        /** Get using declarations for each explicitly imported dependency
+                  * e.g. through import A.B.Foo;            */
+        public ArrayList<String> getCppUsingDeclarations() {
 
             ArrayList<String> files = new ArrayList<String>();
-            
             for (FileDependency d : fileDependencies) {
-                switch (origin) {
-                    case IMPORT:
-                        files.add("#include \"" + d.hFileName() + "\"");
-								break;
-                    case PACKAGE:
-                        files.add("namespace " + "package name"); // FIX THIS
-								break;
+                if (d.origin == DependencyOrigin.IMPORT) {
+                    files.add("using \"" + d.qualifiedName(fileClasses) + "\"");
                 }
             }
 
             return files;
         }
 
-        /** use static method to return all imports */
-        public ArrayList<String> getImports(ArrayList<ClassStruct> classes) {
-            return DependencyFinder.getImports(classes, currentFilePath);
+        /** Get using declarations for each explicitly imported package dependency  *
+                *  e.g. through import A.B.*;       */
+        public ArrayList<String> getCppUsingDirectives() {
+
+            ArrayList<String> files = new ArrayList<String>();
+            for (FileDependency d : fileDependencies) {
+                String namespace = getNamespace(fileClasses, d.fullPath);
+                if (d.origin == DependencyOrigin.IMPORTEDPACKAGE && 
+                        !files.contains(namespace)) { // don't add duplicates
+                    files.add(namespace);
+                }
+            }
+
+            return files;
         }
 
         public String getFilePath() {
@@ -290,7 +310,7 @@ public class DependencyFinder {
 
             return imports;
         }
-
+        
         /**
                * @return package name as using directory
                * i.e. package xtc.oop.B; becomes using namespace xtc::oop::B;
@@ -298,7 +318,7 @@ public class DependencyFinder {
         public static String getNamespace(ArrayList<ClassStruct> classes, String filename) {
             for (ClassStruct c : classes) {
                 if (c.filePath.equals(filename)) {
-                    return "using namespace " + c.packageName.replaceAll(".", "::") + ";";
+                    return "using namespace " + c.packageName.replaceAll("\\.", "::") + ";";
                 }
             }
             assert false; // should never reach here
@@ -310,7 +330,7 @@ public class DependencyFinder {
 
             for (ClassStruct c : classes) {
                 if (c.filePath.equals(filename)) {
-                    usings.add( c.packageName.replaceAll(".", "::")
+                    usings.add( c.packageName.replaceAll("\\.", "::")
                             + "::" + c.className + ";" );
                 }
             }
