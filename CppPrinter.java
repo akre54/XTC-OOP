@@ -77,7 +77,10 @@ public class CppPrinter extends Visitor
 		//visit the next batch of code
 		visitChildren(n, 1,n.size(),"");
 	}
-	
+	public void visitLogicalNegationExpression(GNode n)
+	{
+		print("!");
+	}
 	/**visit cast expression on primitive types and print the c++ equivalent */
 	public void visitBasicCastExpression(GNode n)
 	{

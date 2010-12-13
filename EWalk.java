@@ -19,6 +19,7 @@ public class EWalk //extends Visitor
 	private boolean isMethodChaining;//check if methodChaining is enacted (Starts if a CallExpression is the first child of another CallExpression)
 	private String savedReturnType; //saves the return type of a method for method chaining (starting at the bottom CallExpression
 		/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
+	String[] PrimTypes = {"String", "boolean", "double", "float", "long", "int", "short"};
 	public EWalk (final InheritanceTree treeClass, final Declaration treeMethod, GNode n) {
 		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
@@ -104,6 +105,7 @@ public class EWalk //extends Visitor
 					   isSuper=true;
 					}
 					if(VERBOSE) System.out.println("NAME:" +firstc.getName());
+					
 					dispatch(firstc); //visit the node
 
 				}
@@ -180,15 +182,15 @@ public class EWalk //extends Visitor
 				String[] methodArray= new String[2];
 				String methodName = n.getString(2);
 				//run checks for system.out.println and break from get method info
-				if(methodName.equals("System->out->println"))  
+				if(methodName.contains("std::cout<<"))  
 				{
 					//isPrintln=true;
 					return methodArray;
 				}
-				else if(methodName.equals("System->out->print")) {
+				/*else if(methodName.contains("System->out->print")) {
 					//isPrint=true;
 					return methodArray;
-				}
+				}*/
 
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//run a check for System.out.print and println
@@ -448,15 +450,63 @@ public class EWalk //extends Visitor
 					methodArray=setMethodInfo(n);
 					return methodArray[0];
 				}
-				else{ //return the name of the primaryIdentifier
+				else if(n.getName().equals("PrimaryIdentifier")){ //return the name of the primaryIdentifier
 					//call the method in the inheritence tree to get the type of the primaryIden
 					
+					System.out.println(n.getString(0));
 					ArrayList<String> packageNType= method.search_for_type(n.getString(0));
-					String type = packageNType.remove(packageNType.size());
+					String type = packageNType.remove(packageNType.size()-1);
 					return type;
 				}
+				else {//expression inside a method call
+					return getExpressionType(n);
+				}
+
 				/**can put support for handling methods inside an argument here (use search for methods
 				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
+			}
+			/**Helper method returns the type of expressions*/
+			public String getExpressionType(Node n)
+			{
+				int sizeOf = n.size();
+				//create an array the size of n's children +1
+				String[] exTypes = new String[sizeOf+1];
+				boolean[] typeOn = new boolean[7];
+				//visit each of the expression nodes chidren and get their type (if Node)
+				for( int i = 0; i<sizeOf; i++)
+				{
+					//check to make sure child is a node
+					Object child = n.get(i);
+					if(child !=null)
+					{
+						if(child instanceof Node ) //if its a node call get type
+						{
+							String type = getType((Node)child); //get the type of the value in the expression
+							
+							if(type!=null)//make sure type isn't null
+							{
+								exTypes[i]=type;
+								for(int k =0; k<PrimTypes.length;k++)
+								{
+									if(type.equals(PrimTypes[k]))//check to see if type is set on
+									{
+										typeOn[k]=true;
+									}
+								}
+							
+							}	
+						}
+					}
+				}//end of for loop
+				//after visiting each child and getting the type find 
+				//the largest precent type set and return that type
+				for(int l= 0; l<=PrimTypes.length; l++)
+				{
+						if (typeOn[l]) {//if that type is on return it
+							return PrimTypes[l];
+						}
+				}
+				return "ERROR";
 			}
 			public void visitQualifiedIdentifier (GNode n) {
 				if (!isString) {

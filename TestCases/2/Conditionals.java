@@ -9,50 +9,14 @@ public class Conditionals
 {
 	public static void main (String[] args)
 	{
-		//IF/ELSE
-		//Basic If 
 		
-		//IF, Else 
-		
-		
-		//IF, ElseIf Else
-		
-		
-		
-		//SWITCH
-		//Basic Switch
-		
-		//Switch2
-		
-		//switch3
-		
-		
-		
-		//Conditional Expression
-		
-		//Relational Expressions
-		//<
-		//>
-		//>=
-		//<=
-		//==
-		
-		
-		/**TESTS LOOPS */
-		//For Loop
-		//Basic For Increment 
-		
-		//Basic For Decrement
-		
-		
-		
-		//While Loop
-		//Basic While Loop
-		
-		//Do/While Loop
-		//Basic Do While Loop
-		
-	
-		
+
+
+	 //Conditional Expression
+	int a=3;
+	int b=20;
+	int max;
+	max = (a > b) ? a : b;
+	System.out.println("Max Should Be b(20)... It is:" +  max);
 	}
 }
