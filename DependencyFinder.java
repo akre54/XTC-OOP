@@ -148,7 +148,7 @@ public class DependencyFinder {
 
         if (dir.exists()) {
             for (String fileName : dir.list()) {
-                if (fileName.endsWith(".java")) {
+                if (!fileName.equals(currentFilePath) && fileName.endsWith(".java")) {
                     addPath(dirPath + '/' + fileName, origin);
                 }
             }
@@ -177,6 +177,46 @@ public class DependencyFinder {
            fileClasses.add(c);
        }
 
+
+        /**
+           * @return all called dependent files of the current file including package and import
+           */
+        public ArrayList<FileDependency> getFileDependencies() {
+            ArrayList<FileDependency> paths = new ArrayList<FileDependency>();
+
+            for (FileDependency d : fileDependencies) {
+                // the FileDependency .equals() method only compares by file paths, which allows us to use the .contains() method of ArrayList
+                // we can then compare the dependency precedence to make sure we have dependencies correctly ordered and no duplicates
+                if (!paths.contains(d) ) {
+                    paths.add(d);
+                } else {
+                    switch (d.origin) {
+                        case IMPORT:
+                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORT) < 0) {
+                                paths.remove(d);
+                                paths.add(d);
+                            }
+                            break;
+                        case IMPORTEDPACKAGE:
+                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORTEDPACKAGE) < 0) {
+                                paths.remove(d);
+                                paths.add(d);
+                            }
+                            break;
+                        case CURRENTPACKAGE:
+                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORTEDPACKAGE) < 0) {
+                                paths.remove(d);
+                                paths.add(d);
+                            }
+                            break;
+                        case CURRENTDIRECTORY:
+                            break; // don't add it if we've explicitly added it already
+                    }
+                }
+            }
+
+            return paths;
+        }
 
       /**
            * @return all paths to each explicitly called dependent file of the current file
@@ -246,7 +286,7 @@ public class DependencyFinder {
             ArrayList<String> files = new ArrayList<String>();
             for (FileDependency d : fileDependencies) {
                 if (d.origin == DependencyOrigin.IMPORT) {
-                    files.add("using \"" + d.qualifiedName(fileClasses) + "\"");
+                    files.add("using " + d.qualifiedName(fileClasses) + "");
                 }
             }
 
@@ -288,12 +328,14 @@ public class DependencyFinder {
         }
 
         /** allows us to use Set .contains() method, compare by file path only */
-        public boolean equals (DependencyFinder other) {
-            return this.currentFilePath.equals(other.currentFilePath);
-        }
-
-        public boolean equals (String otherPath) {
-            return this.currentFilePath.equals(otherPath);
+        @Override
+        public boolean equals (Object o) {
+            if (o instanceof String)
+                return this.currentFilePath.equals(o);
+            else {
+                DependencyFinder other = (DependencyFinder)o;
+                return this.currentFilePath.equals(other.currentFilePath);
+            }
         }
 
         public static ArrayList<String> getImports(ArrayList<ClassStruct> classes, String filename) {
@@ -318,7 +360,7 @@ public class DependencyFinder {
         public static String getNamespace(ArrayList<ClassStruct> classes, String filename) {
             for (ClassStruct c : classes) {
                 if (c.filePath.equals(filename)) {
-                    return "using namespace " + c.packageName.replaceAll("\\.", "::") + ";";
+                    return c.packageName.replaceAll("\\.", "::");
                 }
             }
             assert false; // should never reach here

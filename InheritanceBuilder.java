@@ -49,9 +49,14 @@ public class InheritanceBuilder{
 						 
 						 "#pragma once\n\n"+
 					//get rid of these calls and have them added to dependentFiles for base file	 
-						 "#include \"java_lang.h\"\n"+
+						 "#include \"java_lang.h\"\n");
 
-						 "using java::lang::Object;\n"+
+                                                // #includes all files its dependent on, then using declares them
+						for (String importDeclaration : dependencies.getCppIncludeDecs(DependencyOrigin.IMPORT) ) {
+                                                        h_classdef.write(importDeclaration+"\n");
+						}
+
+						 h_classdef.write("using java::lang::Object;\n"+
 						 "using java::lang::__Object;\n"+
 						 "using java::lang::Class;\n"+
 
@@ -60,11 +65,6 @@ public class InheritanceBuilder{
 						 "using java::lang::ArrayOfInt;\n"+
 						 "using java::lang::ArrayOfObject;\n"+
 						 "using java::lang::ArrayOfClass;\n");
-
-						// #includes all files its dependent on, then using declares them
-						for (String importDeclaration : dependencies.getCppIncludeDecs(DependencyOrigin.IMPORT) ) {
-                                                        h_classdef.write(importDeclaration+"\n");
-						}
                                                 for (String usingDeclaration : dependencies.getCppUsingDeclarations()) {
                                                     h_classdef.write(usingDeclaration+"\n");
                                                     //h_classdef.write(DependencyFinder.getNamespace(dependencies.getFileClasses(), dependencies.getFilePath())+"\n");

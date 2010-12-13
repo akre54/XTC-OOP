@@ -29,8 +29,10 @@ public class ClassStruct {
         this.n = n;
     }
 
-    /*      comparison by name and package      */
-    public boolean equals (ClassStruct c) {
+    /**  comparison by name and package     */
+    @Override
+    public boolean equals (Object o) {
+        ClassStruct c = (ClassStruct)o;
         return (this.className.equals(c.className)) && (this.packageName.equals(c.packageName)) ;
     }
     
@@ -59,9 +61,21 @@ class FileDependency {
         this.origin = origin;
     }
 
-    public boolean equals(FileDependency other) {
-        return this.fullPath.equals((other.fullPath));
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof FileDependency) {
+            FileDependency other = (FileDependency)o;
+            return this.fullPath.equals((other.fullPath));
+        }
+        return false;
     }
+
+    /*
+        @Override
+        public int hashCode() {
+            return new java.util.Random().nextInt();
+        }
+        */
 
     public String javaFileName() {
         return (new File(fullPath)).getName();
