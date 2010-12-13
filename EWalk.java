@@ -455,7 +455,7 @@ public class EWalk //extends Visitor
 					
 					System.out.println(n.getString(0));
 					ArrayList<String> packageNType= method.search_for_type(n.getString(0));
-					String type = packageNType.remove(packageNType.size());
+					String type = packageNType.remove(packageNType.size()-1);
 					return type;
 				}
 				else {//expression inside a method call
