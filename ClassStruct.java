@@ -32,8 +32,16 @@ public class ClassStruct {
     /**  comparison by name and package     */
     @Override
     public boolean equals (Object o) {
-        ClassStruct c = (ClassStruct)o;
-        return (this.className.equals(c.className)) && (this.packageName.equals(c.packageName)) ;
+        if (o instanceof ClassStruct) {
+            ClassStruct c = (ClassStruct)o;
+            return (this.className.equals(c.className)) && (this.packageName.equals(c.packageName)) ;
+        } else
+            throw new RuntimeException("bad cast in ClassStruct equals");
+    }
+
+    @Override
+    public int hashCode() {
+        return (className + packageName).hashCode();
     }
     
     public boolean fromSameFile (ClassStruct c) {
@@ -70,12 +78,11 @@ class FileDependency {
         return false;
     }
 
-    /*
-        @Override
-        public int hashCode() {
-            return new java.util.Random().nextInt();
-        }
-        */
+
+    @Override
+    public int hashCode() {
+        return fullPath.hashCode();
+    }
 
     public String javaFileName() {
         return (new File(fullPath)).getName();
