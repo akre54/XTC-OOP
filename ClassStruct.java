@@ -8,6 +8,7 @@ package xtc.oop;
 
 import java.io.File;
 import java.util.ArrayList;
+import xtc.tree.Node;
 import xtc.tree.GNode;
 
 public class ClassStruct {
@@ -17,16 +18,18 @@ public class ClassStruct {
     String className;
     String superClass;
     ArrayList<FileDependency> fileDependencies;
-    GNode n; // of Class
+    GNode classNode;
+    Node fileNode;
 
     public ClassStruct(String filePath, String packageName, String className,
-            String superClass, ArrayList<FileDependency> fileDependencies, GNode n) {
+            String superClass, ArrayList<FileDependency> fileDependencies, GNode classNode, Node fileNode) {
         this.filePath = filePath;
         this.packageName = packageName;
         this.className = className;
         this.superClass = superClass;
         this.fileDependencies = fileDependencies;
-        this.n = n;
+        this.classNode = classNode;
+        this.fileNode = fileNode;
     }
 
     /**  comparison by name and package     */
@@ -56,7 +59,7 @@ public class ClassStruct {
 
 /* Origin of a dependency, used for tracking call heirarchy */
 enum DependencyOrigin {
-    IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY
+    IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY, ROOTFILE
 }
 
 class FileDependency {

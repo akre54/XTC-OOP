@@ -27,6 +27,7 @@ public class DependencyFinder {
     private ArrayList<FileDependency> fileDependencies = new ArrayList<FileDependency>();
     private ArrayList<ClassStruct> fileClasses = new ArrayList<ClassStruct>();
     private String currentPackage, currentSuperClass, currentFilePath, currentParentDirectory;
+    private Node fileNode;
 
     // ignores all dependencies from following top-level superpackages:
     private final java.util.List<String> excludedPackages = java.util.Arrays.asList(new String[]
@@ -37,6 +38,7 @@ public class DependencyFinder {
 
         currentParentDirectory = (new File ((new File(filePath)).getParent())).getParent(); // all dependencies are relative to the translated file
         currentFilePath = filePath;
+        fileNode = n;
         currentPackage = "";
         currentSuperClass = "";
 
@@ -173,7 +175,7 @@ public class DependencyFinder {
        void addClass (String className, GNode n) {
 
            ClassStruct c = new ClassStruct(currentFilePath, currentPackage,
-                            className, currentSuperClass, fileDependencies, n);
+                            className, currentSuperClass, fileDependencies, n, fileNode);
            fileClasses.add(c);
        }
 
@@ -211,6 +213,8 @@ public class DependencyFinder {
                             break;
                         case CURRENTDIRECTORY:
                             break; // don't add it if we've explicitly added it already
+                        case ROOTFILE:
+                            throw new RuntimeException("at the root file, shouldn't be here??");
                         default:
                             throw new RuntimeException("in default. Should not happen!");
                     }
@@ -360,7 +364,6 @@ public class DependencyFinder {
                             imports.add(f.fullPath);
                 }
             }
-
             return imports;
         }
         
