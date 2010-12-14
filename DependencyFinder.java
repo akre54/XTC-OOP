@@ -27,6 +27,7 @@ public class DependencyFinder {
     private ArrayList<FileDependency> fileDependencies = new ArrayList<FileDependency>();
     private ArrayList<ClassStruct> fileClasses = new ArrayList<ClassStruct>();
     private String currentPackage, currentSuperClass, currentFilePath, currentParentDirectory;
+    private Node fileNode;
 
     // ignores all dependencies from following top-level superpackages:
     private final java.util.List<String> excludedPackages = java.util.Arrays.asList(new String[]
@@ -37,6 +38,7 @@ public class DependencyFinder {
 
         currentParentDirectory = (new File ((new File(filePath)).getParent())).getParent(); // all dependencies are relative to the translated file
         currentFilePath = filePath;
+        fileNode = n;
         currentPackage = "";
         currentSuperClass = "";
 
@@ -63,13 +65,7 @@ public class DependencyFinder {
                 String path  = pathbuilder.toString();
                 currentPackage = path.replace("/",".");
 					 
-					 // add explicit imports first, then package, then current directory
-					 gatherDirectoryFiles(path, DependencyOrigin.CURRENTPACKAGE);
-					 
-					 /*  Needed??
-					 // add all members of current directory. Will not add files already added (e.g. explicitly declared package)
-				    gatherDirectoryFiles(currentPackage, DependencyOrigin.CURRENTDIRECTORY); // since current directory is treated almost like a package
-				    */
+                gatherDirectoryFiles(path, DependencyOrigin.CURRENTPACKAGE);
             }
 
             public void visitImportDeclaration(GNode g) {
@@ -94,12 +90,12 @@ public class DependencyFinder {
 
                     if (i == (n.size() - 1)) {
 						  
-						  		// if using the wildcard operator, visit the folder instead
-          		         // e.g. import A.B.*;
-	                     if (null != g.get(2) && g.getString(2).equals("*")) {
-                        	gatherDirectoryFiles(pathbuilder.toString(), DependencyOrigin.IMPORTEDPACKAGE);
-									return;
-                    		}
+			// if using the wildcard operator, visit the folder instead
+                        // e.g. import A.B.*;
+                        if (null != g.get(2) && g.getString(2).equals("*")) {
+                            gatherDirectoryFiles(pathbuilder.toString(), DependencyOrigin.IMPORTEDPACKAGE);
+                            return;
+                        }
 								
                        	pathbuilder.append(".java");
                     }
@@ -132,6 +128,10 @@ public class DependencyFinder {
                 }
             } //end of visit method
         }.dispatch(n);
+
+        // empty package string is treated as its own package, searches the current directory
+        //if (currentPackage.equals(""))
+            //gatherDirectoryFiles("", DependencyOrigin.CURRENTDIRECTORY);
     }
 
     /* Adds all files in directory to filePaths  */
@@ -148,7 +148,7 @@ public class DependencyFinder {
 
         if (dir.exists()) {
             for (String fileName : dir.list()) {
-                if (!fileName.equals(currentFilePath) && fileName.endsWith(".java")) {
+                if (fileName.endsWith(".java")) {
                     addPath(dirPath + '/' + fileName, origin);
                 }
             }
@@ -163,7 +163,8 @@ public class DependencyFinder {
               path = (new File(currentParentDirectory, path)).getCanonicalPath();
            } catch (IOException e) { }
 
-           fileDependencies.add(new FileDependency(path, origin));
+           if (!path.equals(currentFilePath)) // don't add self to dependencies
+               fileDependencies.add(new FileDependency(path, origin));
        }
 
     /**
@@ -173,7 +174,7 @@ public class DependencyFinder {
        void addClass (String className, GNode n) {
 
            ClassStruct c = new ClassStruct(currentFilePath, currentPackage,
-                            className, currentSuperClass, fileDependencies, n);
+                            className, currentSuperClass, fileDependencies, n, fileNode);
            fileClasses.add(c);
        }
 
@@ -192,25 +193,29 @@ public class DependencyFinder {
                 } else {
                     switch (d.origin) {
                         case IMPORT:
-                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORT) < 0) {
+                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORT) > 0) {
                                 paths.remove(d);
                                 paths.add(d);
                             }
                             break;
                         case IMPORTEDPACKAGE:
-                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORTEDPACKAGE) < 0) {
+                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORTEDPACKAGE) > 0) {
                                 paths.remove(d);
                                 paths.add(d);
                             }
                             break;
                         case CURRENTPACKAGE:
-                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORTEDPACKAGE) < 0) {
+                            if (paths.get(paths.indexOf(d)).origin.compareTo(DependencyOrigin.IMPORTEDPACKAGE) > 0) {
                                 paths.remove(d);
                                 paths.add(d);
                             }
                             break;
                         case CURRENTDIRECTORY:
                             break; // don't add it if we've explicitly added it already
+                        case ROOTFILE:
+                            throw new RuntimeException("at the root file, shouldn't be here??");
+                        default:
+                            throw new RuntimeException("in default. Should not happen!");
                     }
                 }
             }
@@ -332,12 +337,19 @@ public class DependencyFinder {
         /** allows us to use Set .contains() method, compare by file path only */
         @Override
         public boolean equals (Object o) {
-            if (o instanceof String)
-                return this.currentFilePath.equals(o);
-            else {
+            if (o instanceof DependencyFinder) {
                 DependencyFinder other = (DependencyFinder)o;
-                return this.currentFilePath.equals(other.currentFilePath);
+                return currentFilePath.equals(other.currentFilePath);
             }
+            else {
+                Thread.dumpStack();
+                throw new RuntimeException();
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return currentFilePath.hashCode();
         }
 
         public static ArrayList<String> getImports(ArrayList<ClassStruct> classes, String filename) {
@@ -351,7 +363,6 @@ public class DependencyFinder {
                             imports.add(f.fullPath);
                 }
             }
-
             return imports;
         }
         

@@ -108,9 +108,9 @@ public class InheritanceBuilder{
 							"* USA.\n"+
 							"*/\n\n"+
 							
-							"#include \""+h_classdef.cFile.getName()+"\"\n\n");
+							"#include \""+h_classdef.cFile.getName()+"\"\n\n"+
 				
-							cpp_methoddef.write("#include <sstream>\n\n");
+							"#include <sstream>\n\n");
 							for(String p: dependencies.getPackageToNamespace()){
 								cpp_methoddef.write("namespace "+p+" {\n");
 							}

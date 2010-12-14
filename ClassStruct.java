@@ -8,6 +8,7 @@ package xtc.oop;
 
 import java.io.File;
 import java.util.ArrayList;
+import xtc.tree.Node;
 import xtc.tree.GNode;
 
 public class ClassStruct {
@@ -17,23 +18,33 @@ public class ClassStruct {
     String className;
     String superClass;
     ArrayList<FileDependency> fileDependencies;
-    GNode n; // of Class
+    GNode classNode;
+    Node fileNode;
 
     public ClassStruct(String filePath, String packageName, String className,
-            String superClass, ArrayList<FileDependency> fileDependencies, GNode n) {
+            String superClass, ArrayList<FileDependency> fileDependencies, GNode classNode, Node fileNode) {
         this.filePath = filePath;
         this.packageName = packageName;
         this.className = className;
         this.superClass = superClass;
         this.fileDependencies = fileDependencies;
-        this.n = n;
+        this.classNode = classNode;
+        this.fileNode = fileNode;
     }
 
     /**  comparison by name and package     */
     @Override
     public boolean equals (Object o) {
-        ClassStruct c = (ClassStruct)o;
-        return (this.className.equals(c.className)) && (this.packageName.equals(c.packageName)) ;
+        if (o instanceof ClassStruct) {
+            ClassStruct c = (ClassStruct)o;
+            return (this.className.equals(c.className)) && (this.packageName.equals(c.packageName)) ;
+        } else
+            throw new RuntimeException("bad cast in ClassStruct equals");
+    }
+
+    @Override
+    public int hashCode() {
+        return (className + packageName).hashCode();
     }
     
     public boolean fromSameFile (ClassStruct c) {
@@ -42,13 +53,13 @@ public class ClassStruct {
 
     /**  @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo" */
     public ArrayList<String> getPackage() {
-        return new ArrayList<String>(java.util.Arrays.asList(packageName.split(".")));
+        return new ArrayList<String>(java.util.Arrays.asList(packageName.split("\\.")));
     }
 }
 
 /* Origin of a dependency, used for tracking call heirarchy */
 enum DependencyOrigin {
-    IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY
+    ROOTFILE, IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY
 }
 
 class FileDependency {
@@ -70,12 +81,11 @@ class FileDependency {
         return false;
     }
 
-    /*
-        @Override
-        public int hashCode() {
-            return new java.util.Random().nextInt();
-        }
-        */
+
+    @Override
+    public int hashCode() {
+        return fullPath.hashCode();
+    }
 
     public String javaFileName() {
         return (new File(fullPath)).getName();
