@@ -37,7 +37,7 @@ public class Declaration{
 		this.modifiers.addAll(modifiers);
 		this.overloadNum = overloadNum;
 		this.bnode =bnode;
-		System.out.println(bnode);
+		
 	}
 	
 	/**
@@ -120,7 +120,7 @@ class Fparam {
         Fparam(String type, String var_name) {
             this.type = type;
             this.var_name = var_name;
-            this.modifiers = new ArrayList<String>();
+            this.modifiers = new ArrayList<String>(0);
         }
 	Fparam(ArrayList<String> mods, String type, String var_name) {
             this(type, var_name);
