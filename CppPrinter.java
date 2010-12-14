@@ -44,6 +44,7 @@ public class CppPrinter extends Visitor
 	private boolean DEBUG = false;
 	/*A global boolean that keeps track of the current modifier status*/
 	private boolean isPrivate; 	
+	private boolean isReturn; //checks to see if there is a StringLiteral inside a return statement
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
 	{
@@ -67,6 +68,15 @@ public class CppPrinter extends Visitor
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
 	}
+	/**Only prints out a special case if isTReturn Flag is set to true otherwise does normal behavor*/
+	public void visitStringLiteral(GNode n)
+	{
+		if(isReturn) //check to see if we are current in a return subtree
+			print("new __String("+n.getString(0)+")"); //print out the proper code
+		else//otherwise just visit the tree as normal
+			visit(n);
+	}
+	
 	/**visit cast expression and print the c++ version of the java AST values*/
 	public void visitCastExpression(GNode n)
 	{
@@ -274,12 +284,16 @@ public class CppPrinter extends Visitor
 		visitChildren(n, 0, n.size(), "");
 		print(";\n}\n");
 	}
-	/**print the c++ return statement */
+	/**print the c++ return statement
+	 add a flag*/
 	public void visitReturnStatement(GNode n)
 	{
 		print("return ");
+		//set return flag true
+		isReturn=true;
 		visitChildren(n, 0, n.size(), "");
 		print("; \n");
+		isReturn=false;
 	}
 	/**Visit Expression append a ;*/
 	public void visitExpressionStatement(GNode n)
