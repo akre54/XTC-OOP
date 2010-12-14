@@ -20,6 +20,7 @@ public class ClassStruct {
     ArrayList<FileDependency> fileDependencies;
     GNode classNode;
     Node fileNode;
+    String rootPackage;
 
     public ClassStruct(String filePath, String packageName, String className,
             String superClass, ArrayList<FileDependency> fileDependencies, GNode classNode, Node fileNode) {
@@ -96,12 +97,20 @@ class FileDependency {
     public String cppFileName(ArrayList<ClassStruct> c) {
         String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
         String basename = javaFileName().replace(".java",".cpp");
-        return basename + "/" + directory;
+
+        if (directory.equals(""))
+            return basename;
+        else
+            return directory + "/" + basename;
     }
     public String hFileName(ArrayList<ClassStruct> c) {
         String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
         String basename = javaFileName().replace(".java","_dataLayout.h");
-        return basename + "/" + directory;
+        
+        if (directory.equals(""))
+            return basename;
+        else
+            return directory + "/" + basename;
     }
     public String qualifiedName(ArrayList<ClassStruct> c) {
         String namespace = DependencyFinder.getNamespace(c, fullPath);

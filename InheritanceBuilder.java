@@ -59,7 +59,8 @@ public class InheritanceBuilder{
                     h_classdef.write(importDeclaration+"\n");
             }
 
-             h_classdef.write("using java::lang::Object;\n"+
+             h_classdef.write(
+				 "using java::lang::Object;\n"+
              "using java::lang::__Object;\n"+
              "using java::lang::Class;\n"+
              "using java::lang::__Class;\n"+
@@ -91,7 +92,8 @@ public class InheritanceBuilder{
 		 *copies start of translation.cc into cc_classdef
 		 */
 		cpp_methoddef =(new CppCreator(jfile,"_methoddef","cpp"));
-		cpp_methoddef.write("/* Object-Oriented Programming\n"+
+		cpp_methoddef.write(
+							"/* Object-Oriented Programming\n"+
 							"* Copyright (C) 2010 Robert Grimm\n"+
 							"*\n"+
 							"*Edited by Liz Pelka\n"+

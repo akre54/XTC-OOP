@@ -34,10 +34,10 @@ public class DependencyFinder {
                     {"java","javax"});
 
 
-    public DependencyFinder(Node n, String filePath) {
+    public DependencyFinder(Node n, String filename) {
 
-        currentParentDirectory = (new File ((new File(filePath)).getParent())).getParent(); // all dependencies are relative to the translated file
-        currentFilePath = filePath;
+        currentFilePath = filename;
+        currentParentDirectory = (new File ((new File(currentFilePath)).getParent())).getParent(); // all dependencies are relative to the translated file
         fileNode = n;
         currentPackage = "";
         currentSuperClass = "";
@@ -174,7 +174,7 @@ public class DependencyFinder {
        void addClass (String className, GNode n) {
 
            ClassStruct c = new ClassStruct(currentFilePath, currentPackage,
-                            className, currentSuperClass, fileDependencies, n, fileNode);
+                   className, currentSuperClass, fileDependencies, n, fileNode);
            fileClasses.add(c);
        }
 
@@ -292,7 +292,7 @@ public class DependencyFinder {
             ArrayList<String> files = new ArrayList<String>();
             for (FileDependency d : fileDependencies) {
                 if (d.origin == DependencyOrigin.IMPORT) {
-                    files.add("using " + d.qualifiedName(allClasses) + "");
+                    files.add("using " + d.qualifiedName(allClasses) + ";");
                 }
             }
 
@@ -379,13 +379,18 @@ public class DependencyFinder {
         }
 
         /**
-               * @return package name as relative directory
-               * i.e. package xtc.oop.B; becomes xtc/oop/B;
+               * @return package name as relative directory location
+               * i.e. package xtc.oop.B; becomes xtc/oop/B;,
+               * or if e.g. xtc is rootPackage, becomes oop/B
                */
         public static String getNamespaceDirectory(ArrayList<ClassStruct> classes, String filename) {
             for (ClassStruct c : classes) {
                 if (c.filePath.equals(filename)) {
-                    return c.packageName.replaceAll("\\.", "/");
+                    String r = c.packageName.replaceAll("\\.", "/");
+                    r = r.replace(c.rootPackage, "");
+                    if (r.startsWith("/"))
+                        r = r.substring(1,r.length());
+                    return r;
                 }
             }
             throw new RuntimeException("no namespace found for " + filename);
