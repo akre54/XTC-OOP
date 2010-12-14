@@ -93,11 +93,15 @@ class FileDependency {
 
     /* @return just name of file (ie ImportFile from ImportFile.java,
         * used for cpp import headers */
-    public String cppFileName() {
-        return javaFileName().replace(".java",".cpp");
+    public String cppFileName(ArrayList<ClassStruct> c) {
+        String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
+        String basename = javaFileName().replace(".java",".cpp");
+        return basename + "/" + directory;
     }
-    public String hFileName() {
-        return javaFileName().replace(".java","_dataLayout.h");
+    public String hFileName(ArrayList<ClassStruct> c) {
+        String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
+        String basename = javaFileName().replace(".java","_dataLayout.h");
+        return basename + "/" + directory;
     }
     public String qualifiedName(ArrayList<ClassStruct> c) {
         String namespace = DependencyFinder.getNamespace(c, fullPath);

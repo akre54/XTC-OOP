@@ -258,21 +258,22 @@ public class DependencyFinder {
 
         /** Get dependices sorted by specific origin (i.e. get just package
                 * imports or just includes) */
-        public ArrayList<String> getCppIncludeDecs(DependencyOrigin origin) {
+        public ArrayList<String> getCppIncludeDecs(ArrayList<ClassStruct> allClasses, DependencyOrigin origin) {
 
             ArrayList<String> files = new ArrayList<String>();
             for (FileDependency d : fileDependencies) {
                 if (d.origin == origin) {
                     switch (origin) {
                         case IMPORT:
-                            files.add("#include \"" + d.hFileName() + "\"");
+                            files.add("#include \"" + d.hFileName(allClasses) + "\"");
                             break;
                         /*case IMPORTEDPACKAGE:
 	                          files.add("using " + currentPackage.replaceAll("\\.", "::") + ";");
-	                          break; */
+	                          break; 
                         case CURRENTPACKAGE:
                             files.add("namespace " + currentPackage.replaceAll("\\.", "::") + ";");
                             break;
+                         */
 								/* case CURRENTDIRECTORY: 
 									????
 									break;
@@ -286,12 +287,12 @@ public class DependencyFinder {
 
         /** Get using declarations for each explicitly imported dependency
                   * e.g. through import A.B.Foo;            */
-        public ArrayList<String> getCppUsingDeclarations() {
+        public ArrayList<String> getCppUsingDeclarations(ArrayList<ClassStruct> allClasses) {
 
             ArrayList<String> files = new ArrayList<String>();
             for (FileDependency d : fileDependencies) {
                 if (d.origin == DependencyOrigin.IMPORT) {
-                    files.add("using " + d.qualifiedName(fileClasses) + "");
+                    files.add("using " + d.qualifiedName(allClasses) + "");
                 }
             }
 
@@ -364,8 +365,8 @@ public class DependencyFinder {
             return imports;
         }
         
-        /**
-               * @return package name as using directory
+       /**
+               * @return package name as using directive
                * i.e. package xtc.oop.B; becomes using namespace xtc::oop::B;
                */
         public static String getNamespace(ArrayList<ClassStruct> classes, String filename) {
@@ -374,8 +375,20 @@ public class DependencyFinder {
                     return c.packageName.replaceAll("\\.", "::");
                 }
             }
-            assert false; // should never reach here
-            return "";
+            throw new RuntimeException("no namespace found for " + filename);
+        }
+
+        /**
+               * @return package name as relative directory
+               * i.e. package xtc.oop.B; becomes xtc/oop/B;
+               */
+        public static String getNamespaceDirectory(ArrayList<ClassStruct> classes, String filename) {
+            for (ClassStruct c : classes) {
+                if (c.filePath.equals(filename)) {
+                    return c.packageName.replaceAll("\\.", "/");
+                }
+            }
+            throw new RuntimeException("no namespace found for " + filename);
         }
 
         public static ArrayList<String> getUsingDeclarations(ArrayList<ClassStruct> classes, String filename) {

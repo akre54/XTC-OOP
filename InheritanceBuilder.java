@@ -7,6 +7,7 @@
 package xtc.oop;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class InheritanceBuilder{
 	public final boolean DEBUG=false;
@@ -14,16 +15,18 @@ public class InheritanceBuilder{
 	CppCreator h_classdef;
 	CppCreator cpp_methoddef;
         DependencyFinder dependencies;
+        ArrayList<ClassStruct> allClasses;
 	
 	private File jfile;
 
 	
-	InheritanceBuilder(DependencyFinder dependencies){
+	InheritanceBuilder(DependencyFinder dependencies, ArrayList<ClassStruct> allClasses){
 		/*
 		 *creates new cc file h_classdef
 		 *copies start of translation.h into h_classdef
 		 */
                 this.dependencies = dependencies;
+                this.allClasses = allClasses;
 			
 		jfile = new File(dependencies.getFilePath());
 		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
@@ -52,7 +55,7 @@ public class InheritanceBuilder{
 						 "#include \"java_lang.h\"\n");
 
                                                 // #includes all files its dependent on, then using declares them
-						for (String importDeclaration : dependencies.getCppIncludeDecs(DependencyOrigin.IMPORT) ) {
+						for (String importDeclaration : dependencies.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
                                                         h_classdef.write(importDeclaration+"\n");
 						}
 
@@ -62,10 +65,12 @@ public class InheritanceBuilder{
 
 						 "using java::lang::__Class;\n"+
 						 "using java::lang::String;\n"+
+                                                 "using java::lang::__String;\n" +
+                                                 "using java::lang::__Array;\n" +
 						 "using java::lang::ArrayOfInt;\n"+
 						 "using java::lang::ArrayOfObject;\n"+
 						 "using java::lang::ArrayOfClass;\n");
-                                                for (String usingDeclaration : dependencies.getCppUsingDeclarations()) {
+                                                for (String usingDeclaration : dependencies.getCppUsingDeclarations(allClasses)) {
                                                     h_classdef.write(usingDeclaration+"\n");
                                                     //h_classdef.write(DependencyFinder.getNamespace(dependencies.getFileClasses(), dependencies.getFilePath())+"\n");
                                                 }
