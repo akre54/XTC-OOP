@@ -225,32 +225,36 @@ public class Translator extends Tool {
                         LinkedList<ClassStruct> editablelist;
                         int index;
                         for (FileDependency d: allDependencies.keySet()){
-                                DependencyFinder dep = new DependencyFinder(getNodeFromFilename(d.fullPath), d.fullPath);
-                                editablelist = new LinkedList<ClassStruct>(dep.getFileClasses());
-                                ArrayList<ClassStruct> allClasses = new ArrayList<ClassStruct>(classes.keySet());
-                                inherit = new InheritanceBuilder(dep, allClasses);
-                                while(editablelist.size()!=0){
-                                        for (ClassStruct c : editablelist) {
-                                                superiswritten =true;
-                                                if( c.superClass.equals("")){//*** extends object
-                                                        inherit.addClassdef(Object.search(c.getPackage(),c.className));
-                                                        editablelist.remove(c);
-                                                }
-                                                else{
-                                                    for (ClassStruct check: editablelist){
-                                                        if(c.superClass.equals(check.className))
-                                                            superiswritten = false;
-                                                    }
-                                                    if (superiswritten){//**extends an already written class
-                                                        inherit.addClassdef(Object.search(c.getPackage(),c.className));
-                                                        editablelist.remove(c);
-                                                    }
-                                                }
-                                        }
-                            }
-                            try{inherit.close();}
-                            catch(Exception e){}
-			}
+							DependencyFinder dep = new DependencyFinder(getNodeFromFilename(d.fullPath), d.fullPath);
+							editablelist = new LinkedList<ClassStruct>(dep.getFileClasses());
+							//inheritancebuilder takes the Files dependencyfinder and arraylist of the ClassStructs
+							inherit = new InheritanceBuilder(dep, new ArrayList<ClassStruct>(classes.keySet()));
+							int num_classes = editablelist.size();
+							while(num_classes!=0){
+									for (int i=0;i< num_classes;i++){
+										ClassStruct c = editablelist.get(i);
+										superiswritten =true;
+										if( c.superClass.equals("")){//*** extends object
+												inherit.addClassdef(Object.search(c.getPackage(),c.className));
+												editablelist.remove(c);
+										}//end of if check
+										else{
+											for (ClassStruct check: editablelist){
+												if(c.superClass.equals(check.className))
+													superiswritten = false;
+											}
+											if (superiswritten){//**extends an already written class
+												inherit.addClassdef(Object.search(c.getPackage(),c.className));
+												editablelist.remove(c);
+											}
+										}//end of else check
+										num_classes = editablelist.size();
+									}//end of for loop
+									
+								}//end of while
+								try{inherit.close();}
+								catch(Exception e){}
+						}
 						
                    
 			if (VERBOSE) //prints the ast after every translation
