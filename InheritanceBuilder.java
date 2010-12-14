@@ -31,53 +31,59 @@ public class InheritanceBuilder{
 		jfile = new File(dependencies.getFilePath());
 		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
 		h_classdef.write("/* Object-Oriented Programming\n"+
-						  "* Copyright (C) 2010 Robert Grimm\n"+
-						  "*\n"+
-						  "*Edited by Liz Pelka\n"+
-						  "*\n"+
-						  "* This program is free software; you can redistribute it and/or\n"+
-						  "* modify it under the terms of the GNU General Public License\n"+
-						  "* version 2 as published by the Free Software Foundation.\n"+
-						  "*\n"+
-						  "* This program is distributed in the hope that it will be useful,\n"+
-						  "* but WITHOUT ANY WARRANTY; without even the implied warranty of\n"+
-						  "* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"+
-						  "* GNU General Public License for more details.\n"+
-						  "*\n"+
-						  "* You should have received a copy of the GNU General Public License\n"+
-						  "* along with this program; if not, write to the Free Software\n"+
-						  "* Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,\n"+
-						  "* USA.\n"+
-						  "*/\n\n"+
-						 
-						 "#pragma once\n\n"+
-					//get rid of these calls and have them added to dependentFiles for base file	 
-						 "#include \"java_lang.h\"\n");
+              "* Copyright (C) 2010 Robert Grimm\n"+
+              "*\n"+
+              "*Edited by Liz Pelka\n"+
+              "*\n"+
+              "* This program is free software; you can redistribute it and/or\n"+
+              "* modify it under the terms of the GNU General Public License\n"+
+              "* version 2 as published by the Free Software Foundation.\n"+
+              "*\n"+
+              "* This program is distributed in the hope that it will be useful,\n"+
+              "* but WITHOUT ANY WARRANTY; without even the implied warranty of\n"+
+              "* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"+
+              "* GNU General Public License for more details.\n"+
+              "*\n"+
+              "* You should have received a copy of the GNU General Public License\n"+
+              "* along with this program; if not, write to the Free Software\n"+
+              "* Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,\n"+
+              "* USA.\n"+
+              "*/\n\n"+
 
-                                                // #includes all files its dependent on, then using declares them
-						for (String importDeclaration : dependencies.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
-                                                        h_classdef.write(importDeclaration+"\n");
-						}
+             "#pragma once\n\n"+
+            //get rid of these calls and have them added to dependentFiles for base file
+             "#include \"java_lang.h\"\n");
 
-						 h_classdef.write("using java::lang::Object;\n"+
-						 "using java::lang::__Object;\n"+
-						 "using java::lang::Class;\n"+
+            // #includes all files its dependent on, then using declares them
+            for (String importDeclaration : dependencies.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
+                    h_classdef.write(importDeclaration+"\n");
+            }
 
-						 "using java::lang::__Class;\n"+
-						 "using java::lang::String;\n"+
-                                                 "using java::lang::__String;\n" +
-                                                 "using java::lang::__Array;\n" +
-						 "using java::lang::ArrayOfInt;\n"+
-						 "using java::lang::ArrayOfObject;\n"+
-						 "using java::lang::ArrayOfClass;\n");
-                                                for (String usingDeclaration : dependencies.getCppUsingDeclarations(allClasses)) {
-                                                    h_classdef.write(usingDeclaration+"\n");
-                                                    //h_classdef.write(DependencyFinder.getNamespace(dependencies.getFileClasses(), dependencies.getFilePath())+"\n");
-                                                }
+             h_classdef.write("using java::lang::Object;\n"+
+             "using java::lang::__Object;\n"+
+             "using java::lang::Class;\n"+
+             "using java::lang::__Class;\n"+
+             "using java::lang::String;\n"+
+             "using java::lang::__String;\n"+
+             "using java::lang::__Array;\n"+
+             "using java::lang::ArrayOfInt;\n"+
+             "using java::lang::ArrayOfObject;\n"+
+             "using java::lang::ArrayOfClass;\n");
+            for (String usingDeclaration : dependencies.getCppUsingDeclarations(allClasses)) {
+                h_classdef.write(usingDeclaration+"\n");
+                //h_classdef.write(DependencyFinder.getNamespace(dependencies.getFileClasses(), dependencies.getFilePath())+"\n");
+            }
 
-						for(String p : dependencies.getPackageToNamespace()){
-							h_classdef.write("namespace "+p+" {\n");
-                                                }
+            for(String p : dependencies.getPackageToNamespace()){
+                    h_classdef.write("namespace "+p+" {\n");
+            }
+
+             for (ClassStruct c : dependencies.getFileClasses()) {
+                h_classdef.write("\n\tstruct __" + c.className + "; \n"
+                        +/**/ "\tstruct __" + c.className + "_VT;\n"
+                        +/**/ "\ttypedef __rt::Ptr<__" + c.className + "> " + c.className + ";\n"
+                        + "\ttypedef __rt::Ptr<__Array<" + c.className + "> > ArrayOf" + c.className + ";\n\n");
+            }
 							 
 		
 		/*
@@ -119,18 +125,18 @@ public class InheritanceBuilder{
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
 	 */
 	public void addClassdef(InheritanceTree t){
-		
+		StringBuilder s=new StringBuilder();
 		String ClassName = t.className;
-		
+		h_classdef.write("//data layout for ");
+		for(String p: dependencies.getPackageToNamespace()){
+			h_classdef.write(p+".");
+			s.append(p+".");
+		}
+		String pack=s.toString();
+		h_classdef.write(ClassName);
 		h_classdef.write(
-			"\tstruct __"+ClassName+"; \n"+/**/
-			"\tstruct __"+ClassName+"_VT;\n\n"+/**/
-						 
-			"\ttypedef __rt::Ptr<__"+ClassName+"> "+ClassName+";\n\n"+/**/
-		
-			"\tstruct __"+ClassName+"{ \n"+/**/
-			"\t   __"+ClassName+"_VT* __vptr;\n"+
-						 "\ttypedef __rt::Ptr<__Array<"+ClassName+"> > ArrayOf"+ClassName+";");
+			"\n\tstruct __"+ClassName+"{ \n"+/**/
+			"\t\t__"+ClassName+"_VT* __vptr;\n");
 						 
 				/* FEILDS ---> ex: int x;  */
 		        write_all_feilds(t); h_classdef.write("\n\n");
@@ -143,11 +149,12 @@ public class InheritanceBuilder{
 				//h_classdef.write("\t   static Class __class();\n\n");
 		
 		        /*  ALL INSTANCE METHODS    */
-				write_all_methods(t);  h_classdef.write("\n\n"+
-						 
+				write_all_methods(t);
+
+                                h_classdef.write("\n\n"+
 				/*create instance of VTABLE*/
-				"\n\t   static __"+ClassName+"_VT __vtable;\n"+/**/
-			"\t};\n\n\n"+                      
+				"\n\t\tstatic __"+ClassName+"_VT __vtable;\n"+/**/
+			"\t};\n\n//vtable layout for "+pack+ClassName+"\n"+                      
 		/*-------------------------end of struct __ClassName in .h file-------------------------*/	
 						 
 		/* ---------------------start of stuct __ClassName_VT in .h file -------------------*/
@@ -158,7 +165,7 @@ public class InheritanceBuilder{
 				write_all_method_ptrs(t); h_classdef.write("\n\n"+/**/
 						
 				/*  VT CONSTRUCTOR*/		 
-				"\t   __"+ClassName+"_VT():\n");
+				"\t\t__"+ClassName+"_VT():\n");
 						 
 				/* INITIALIZE METHOD PTRS ---> methodname"(&__"+ClassName+"::"+methodname+"),\n" */
 				write_assign_method_ptrs(t); h_classdef.write( /**/
@@ -168,6 +175,9 @@ public class InheritanceBuilder{
 			"\t};\n\n"/* -----------end of stuct __ClassName_VT in .h file -------------------*/
 						 
 		);// end of writing
+		
+		//now create .cpp file
+		addMethodDec(t);
 					
 	}//end of addClassdef
 	
@@ -179,9 +189,9 @@ public class InheritanceBuilder{
             //loops through fields and prints out in proper syantax
             for (InstanceField f : t.fields) {
                 for(String modifier : f.modifiers) {
-                    h_classdef.write("\t   "+modifier+": ");
+                   // h_classdef.write("\t   "+modifier+": ");
                 }
-                h_classdef.write(f.type+" "+f.var_name+";\n");
+                h_classdef.write("\t\t"+f.type+" "+f.var_name+";\n");
             }
 	}
 	
@@ -194,11 +204,11 @@ public class InheritanceBuilder{
 	private void write_all_constructors(InheritanceTree t){
 		
             for (Declaration constr : t.constructors) {
-                h_classdef.write("\t   ");
+                h_classdef.write("\t\t");
 
                 //loop through constructor modifiers
                 for (String modifier : constr.modifiers){
-                    h_classdef.write(modifier+": ");
+                    //h_classdef.write(modifier+": ");
                 }
                 //write className
                 h_classdef.write("__"+t.className);
@@ -226,10 +236,9 @@ public class InheritanceBuilder{
                 for (InstanceField f : t.fields) {
                     h_classdef.write(","+f.var_name+"("+f.value+")");
                 }
-                h_classdef.write("{\n\t\t");
+                h_classdef.write("{\n\t\t\t");//3 tabs for Ewalk
 
-                //**  cppBlock is called on constructor's block node  **//
-				System.out.println("Given Node:" + constr.bnode);
+                //**  EWalk is called on constructor's block node  **//
                 EWalk changes = new EWalk(t,constr,constr.bnode);
                 CppPrinter print = new CppPrinter(constr.bnode);
                 h_classdef.write(print.getString().toString());//write body of the constructor
@@ -250,7 +259,7 @@ public class InheritanceBuilder{
             for (Declaration method : t.local) {
                 if (method.name.equals("main")) {
                     buildMain(method);
-                    h_classdef.write("\t   static int32_t "+method.name);
+                    h_classdef.write("\t\tstatic int32_t "+method.name);
                     if(method.overloadNum!=0)
                             h_classdef.write("_"+method.overloadNum);
                     h_classdef.write("(int32_t, char**);\n");
@@ -258,9 +267,9 @@ public class InheritanceBuilder{
                 else {
                     //h_classdef.write("\t   ");
                     for (String modifier : method.modifiers) {
-                       h_classdef.write("\t"+modifier+": \n");
+                       //h_classdef.write("\t"+modifier+": \n");
                     }
-                    h_classdef.write("\t   static "+method.returntype+" "+method.name);
+                    h_classdef.write("\t\tstatic "+method.returntype+" "+method.name);
                     if(method.overloadNum!=0)
                             h_classdef.write("_"+method.overloadNum);
                     h_classdef.write("(");
@@ -293,14 +302,20 @@ public class InheritanceBuilder{
 		
 		n.returntype = "int32_t";
 		String arrayName = n.params.get(0).var_name;
-		n.params.get(0).type = "int32_t";
-		n.params.get(0).var_name = "argc";
+		n.params.set(0,new Fparam("int32_t","argc"));
 		n.params.add(new Fparam("char**",arrayName));
 		
 		//create the main.cpp
 		mainWriter.write("#include <iostream>\n\n"+
-						 "#include \""+h_classdef.cFile.getName()+"\"\n\n"+
-						 "using namespace xtc::oop;\n\n\n"
+						 "#include \""+h_classdef.cFile.getName()+"\"\n\n");
+                                                 ArrayList<String> namespace = dependencies.getPackageToNamespace();
+						 for(String p : namespace){
+							 int size = namespace.size();
+							 if (p.equals(namespace.get(0))) mainWriter.write("using namespace "+p);
+							 else mainWriter.write("::"+p);
+							 if (p.equals(namespace.get(size-1))) mainWriter.write(";");
+						 }
+						 mainWriter.write("\n\n\n"
 						 +"int32_t main(int32_t argc, char *argv[]){\n\n\t"
 						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n\t"
 						 +"NAMEmain->main");
@@ -322,16 +337,22 @@ public class InheritanceBuilder{
 		
 		//ptr for __class()
 		h_classdef.write("\t\tClass __isa;\n");
+		//ptr for __delete()
+		h_classdef.write("\t\tvoid (*__delete)(__"+t.className+"*);\n");
 		//loops through vtable and prints out in proper syntax
-		for (Declaration method : t.Vt_ptrs) {
-			
+		int size = t.Vt_ptrs.size();
+		for (int i=2;i<size;i++) {
+			Declaration method = t.Vt_ptrs.get(i);
 			h_classdef.write("\t\t"+method.returntype+" (*"+method.name);
 			if(method.overloadNum!=0)
 				h_classdef.write("_"+method.overloadNum);
-			h_classdef.write(")("+t.className);
-			
-			for (Fparam param : method.params) {
-                            h_classdef.write(", "+param.type);
+			h_classdef.write(")(");
+			int fpsize = method.params.size();
+			for (int j=0;j<fpsize;j++) {
+				String type = method.params.get(j).type;
+				
+				if (j==0) h_classdef.write(t.className);
+				else h_classdef.write(", "+type);
 			}
 			h_classdef.write(");\n");
 			
@@ -349,14 +370,16 @@ public class InheritanceBuilder{
 	 */	
 	private void write_assign_method_ptrs(InheritanceTree t){
 		//ptr for __class()
-		h_classdef.write("\t\t   "+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
+		h_classdef.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
 		
 		//loops through vtable and prints out in proper syntax
-		for (Declaration method : t.Vt_ptrs) {
+		int size = t.Vt_ptrs.size();
+		for (int i=1;i<size;i++) {
+			Declaration method = t.Vt_ptrs.get(i);
                     //syntax for an overridden method
                     if ((method.ownerClass).equals(t.className)) {
 
-                        h_classdef.write(",\n\t\t   "+method.name);
+                        h_classdef.write(",\n\t\t\t"+method.name);
                         if(method.overloadNum!=0)
                                 h_classdef.write("_"+method.overloadNum);
                         h_classdef.write("(&__"+t.className+"::"+method.name);
@@ -366,13 +389,16 @@ public class InheritanceBuilder{
                     }
                     //syntax for a method that needs a this class casting
                     else{
-                        h_classdef.write(",\n\t\t   "+method.name);
+                        h_classdef.write(",\n\t\t\t"+method.name);
                         if (method.overloadNum!=0)
                             h_classdef.write("_"+method.overloadNum);
-                        h_classdef.write("(("+method.returntype+"(*)("+t.className);
+                        h_classdef.write("(("+method.returntype+"(*)(");
 
-                        for (Fparam param : method.params) {
-                            h_classdef.write(", "+param.type);
+						int fpsize = method.params.size();
+                        for (int j=0;j<fpsize;j++) {
+							String type = method.params.get(j).type;
+							if (j==0) h_classdef.write(t.className);
+                            else h_classdef.write(", "+type);
                         }
                         h_classdef.write("))&__"+method.ownerClass+"::"+method.name);
                         if (method.overloadNum!=0)
@@ -415,7 +441,7 @@ public class InheritanceBuilder{
                     if(method.overloadNum!=0)
                             cpp_methoddef.write("_"+method.overloadNum);
                     cpp_methoddef.write("(");
-
+					
                     for(int i=0;i<method.params.size();i++){
                         Fparam param = method.params.get(i);
 
@@ -437,8 +463,6 @@ public class InheritanceBuilder{
 		// invokes Vtable constructor
 		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
                             "\t//===========================================================================\n\n");
-		//now write the .h file
-		addClassdef(t);
 	}
 	/*
 	 *closes both files

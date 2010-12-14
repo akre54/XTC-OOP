@@ -77,6 +77,8 @@ public class InheritanceTree{
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
 
+		
+		
 	}
 	
 	/**
@@ -86,29 +88,36 @@ public class InheritanceTree{
 	InheritanceTree(InheritanceTree supr,String string_or_class){
 		this.root = supr.root;
 		this.packages = supr.packages;
-		superclass = supr;
-		className = string_or_class;
+		this.superclass = supr;
+		this.className = string_or_class;
 		
 		//copies the superclass's Vtable into virtual Vtable
-		Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
+		this.Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
+		
 		
 		//change __isa field to point to this className's feild
-		Vt_ptrs.get(0).ownerClass = className;
-		
+		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+		Vt_ptrs.set(0,new Declaration("Class", "__isa",
+									  className,p));
+					
 		//change __delete field to point to this classNames's feild
-		Vt_ptrs.get(1).ownerClass = className;
-		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
+		p.add(new Fparam(new ArrayList<String>(),"__"+className+"*","__this"));
+		Vt_ptrs.set(1,new Declaration("void", "__delete",
+                                    className, p));
 		
 		//change toString to point to className's toString method
-		Vt_ptrs.get(5).ownerClass = className;
-		Vt_ptrs.get(5).params.get(0).type = className;
+		p.clear();
+		p.add(new Fparam(new ArrayList<String>(),className,"__this"));
+		Vt_ptrs.set(5,new Declaration("String","toString",
+                                    className,p));
+		
 
 		
 		if(string_or_class.equals("Class")){
 		
 		
 			//adds virtual Class methods ptrs to virtual Vtable
-			ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+			p.clear();
 			p.add(new Fparam(new ArrayList<String>(),"Class","__this"));
 			Vt_ptrs.add(new Declaration("String","getName",
 									 "Class",p));
@@ -141,15 +150,19 @@ public class InheritanceTree{
 		}
 		else{
 			//change hashCode to point to className's hashCode
-			Vt_ptrs.get(2).ownerClass = className;
-			Vt_ptrs.get(2).params.get(0).type = className;
-			
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),className,"__this"));
+			Vt_ptrs.set(2,new Declaration("int32_t", "hashCode",
+										className, p));
 			//change equals to point to className's equals
-			Vt_ptrs.get(3).ownerClass = className;
-			Vt_ptrs.get(3).params.get(0).type = className;
+			p.clear();
+			p.add(new Fparam(new ArrayList<String>(),className,"__this"));
+			p.add(new Fparam(new ArrayList<String>(),"Object","other"));
+			Vt_ptrs.set(3,new Declaration("bool", "equals",
+										className, p));
 			
 			//add virtual String methods ptrs to virtual Vtable
-			ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+			p.clear();
 			p.add(new Fparam(new ArrayList<String>(),"String","__this"));
 			Vt_ptrs.add(new Declaration("int32_t","length",
 										"String",p));
@@ -166,7 +179,8 @@ public class InheritanceTree{
 		
 		//add this tree to the superclasses' subclasses
 		supr.subclasses.add(this);
-			
+		
+		
 	}
 	/**
 	 * The constructor for all InheritanceTree's that do not represent Object or Class.
@@ -176,27 +190,28 @@ public class InheritanceTree{
 	InheritanceTree(ArrayList<String> packages,GNode n, InheritanceTree supr){
 		this.root = supr.root;
 		this.packages= packages;
-		superclass = supr;
-		className = n.getString(1);
+		this.superclass = supr;
+		this.className = n.getString(1);
 		
 		//field arraylist defined with all field declarations
-		fields = addfielddeclarations(n);
+		this.fields = new ArrayList<InstanceField>(supr.fields);
+		this.fields = addfielddeclarations(n);
 		
-		constructors = new ArrayList<Declaration>(0);
-		local = new ArrayList<Declaration>(0);
+		this.constructors = new ArrayList<Declaration>(0);
+		this.local = new ArrayList<Declaration>(0);
 
 		//copies the superclass's Vtable into virtual arraylist
-		Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
+		this.Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
 
-
-		//change __isa methods to point to this class
-		Vt_ptrs.get(0).ownerClass = className;
-
-
-		//change __delete field to point to this class's feild
-		Vt_ptrs.get(1).ownerClass = className;
-		Vt_ptrs.get(1).params.get(0).type ="__"+className+"*";
-
+		//change __isa field to point to this className's feild
+		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
+		Vt_ptrs.set(0,new Declaration("Class", "__isa",
+									  className,p));
+		
+		//change __delete field to point to this classNames's feild
+		p.add(new Fparam(new ArrayList<String>(),"__"+className+"*","__this"));
+		Vt_ptrs.set(1,new Declaration("void", "__delete",
+									  className, p));
 
 		//add __class to local methods
 		local.add(new Declaration("Class","__class",className,								 
@@ -204,8 +219,8 @@ public class InheritanceTree{
 
 
 		//add __delete to local methods
-		Fparam d= new Fparam(new ArrayList<String>(0),className,"__this");
-		Vt_ptrs.get(1).params.set(0,d);
+		//Fparam d= new Fparam(new ArrayList<String>(0),className,"__this");
+		//Vt_ptrs.get(1).params.set(0,d);
 		local.add(Vt_ptrs.get(1));
 		
 		//constructors defined
@@ -226,6 +241,8 @@ public class InheritanceTree{
 		//add this tree to the superclasses' subclasses
 		supr.subclasses.add(this);
 
+		
+		
 	}
 	/**
 	 *looks in Vt_ptrs and local for methods with same name but diff params
@@ -234,24 +251,21 @@ public class InheritanceTree{
 	 * returns max [overloadNum,boolean add_to_virtual]
 	 */
 	private int[] overloaded_ridden_check(String method, ArrayList<Fparam> params, boolean is_virtual,GNode body) {
-	
-		
 		int max = -1;
 		for (Declaration i : Vt_ptrs) {
         
 			//same name test
 			if (method.equals(i.name)) {
 				//diff params test
-				if (params.size() == i.params.size()){
-					if ((!typetest(params, i.params))&&(is_virtual)){
-						i.ownerClass = this.className;
-						i.bnode = body;
+				if ((params.size() == i.params.size())&&(typetest(params, i.params))&&(is_virtual)){
+					this.Vt_ptrs.set(6,new Declaration(i.overloadNum,i.modifiers,i.isVirtual,i.returntype,i.name,
+															this.className,params,body,new ArrayList<LocalVariable>(0)));
 						//signify to NOT ADD TO VIRTUAL
 						//bc its overridden
 						return new int[]{i.overloadNum-1,0};
-					}
 				}
 				else max = Math.max(i.overloadNum, max);
+				
 			}	
 		}
 		for (Declaration j : local) {
@@ -438,12 +452,13 @@ public class InheritanceTree{
 		final ArrayList<InstanceField> f = new ArrayList<InstanceField>(0);
 		
 		//---adds all non-private/static fields from superclass to this class
-		for(int i=0;i<superclass.fields.size();i++){
-			for(int j=0;j<superclass.fields.get(i).modifiers.size();j++){
-				String mod = superclass.fields.get(i).modifiers.get(j);
-				
+		
+		for(InstanceField i: superclass.fields){
+			if(i.modifiers.size()==0)f.add(i);//inherit the field 
+			for(String mod: i.modifiers){
 				if((mod.equals("private"))||(mod.equals("static"))){}//do nothing
-				else f.add(superclass.fields.get(i));//inherit the field 
+				else f.add(i);//inherit the field 
+				
 			}
 		}
 		

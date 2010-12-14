@@ -329,8 +329,8 @@ public class DependencyFinder {
         /**
                 * @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo"
                 */
-        public ArrayList<String> getPackageToNamespace() {		
-           return new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
+        public ArrayList<String> getPackageToNamespace() {	
+            return new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
         }
 
         /** allows us to use Set .contains() method, compare by file path only */
