@@ -65,7 +65,6 @@ public class DependencyFinder {
                 String path  = pathbuilder.toString();
                 currentPackage = path.replace("/",".");
 					 
-		// add explicit imports first, then package, then current directory
                 gatherDirectoryFiles(path, DependencyOrigin.CURRENTPACKAGE);
             }
 
@@ -338,13 +337,11 @@ public class DependencyFinder {
         public boolean equals (Object o) {
             if (o instanceof DependencyFinder) {
                 DependencyFinder other = (DependencyFinder)o;
-                System.out.println("Calling equals on " + currentFilePath + " and " + other.currentFilePath);
-                System.out.println(currentFilePath.equals(other.currentFilePath));
                 return currentFilePath.equals(other.currentFilePath);
             }
             else {
                 Thread.dumpStack();
-                throw new RuntimeException("crapping out in DependencyFinder equals");
+                throw new RuntimeException();
             }
         }
 

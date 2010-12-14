@@ -53,13 +53,13 @@ public class ClassStruct {
 
     /**  @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo" */
     public ArrayList<String> getPackage() {
-        return new ArrayList<String>(java.util.Arrays.asList(packageName.split(".")));
+        return new ArrayList<String>(java.util.Arrays.asList(packageName.split("\\.")));
     }
 }
 
 /* Origin of a dependency, used for tracking call heirarchy */
 enum DependencyOrigin {
-    IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY, ROOTFILE
+    ROOTFILE, IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY
 }
 
 class FileDependency {
