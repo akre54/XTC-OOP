@@ -311,7 +311,7 @@ public class InheritanceBuilder{
 		mainWriter.write("#include <iostream>\n\n"+
 						 "#include \""+h_classdef.cFile.getName()+"\"\n\n");
                                                  ArrayList<String> namespace = dependencies.getPackageToNamespace();
-						 for(String p : namespace){
+						 for (String p : namespace) {
 							 int size = namespace.size();
 							 if (p.equals(namespace.get(0))) mainWriter.write("using namespace "+p);
 							 else mainWriter.write("::"+p);
