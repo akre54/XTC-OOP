@@ -215,7 +215,7 @@ public class Translator extends Tool {
                                 }
                             }
 				
-				if (leftTotranslate == numFalse())System.out.println("infiniteloop");//**infiniteloop test
+				if (leftTotranslate == numFalse()) System.out.println("infiniteloop");//**infiniteloop test
 				leftTotranslate = classes.size();//**update for infiniteloop
 			}
 					 
@@ -230,8 +230,7 @@ public class Translator extends Tool {
                                 ArrayList<ClassStruct> allClasses = new ArrayList<ClassStruct>(classes.keySet());
                                 inherit = new InheritanceBuilder(dep, allClasses);
                                 while(editablelist.size()!=0){
-                                        for ( index =0;index<editablelist.size();index++){
-                                                ClassStruct c = editablelist.get(index);
+                                        for (ClassStruct c : editablelist) {
                                                 superiswritten =true;
                                                 if( c.superClass.equals("")){//*** extends object
                                                         inherit.addClassdef(Object.search(c.getPackage(),c.className));
@@ -239,13 +238,14 @@ public class Translator extends Tool {
                                                 }
                                                 else{
                                                     for (ClassStruct check: editablelist){
-                                                        if(c.superClass.equals(check.className)) superiswritten =false;
+                                                        if(c.superClass.equals(check.className))
+                                                            superiswritten = false;
                                                     }
                                                     if (superiswritten){//**extends an already written class
                                                         inherit.addClassdef(Object.search(c.getPackage(),c.className));
                                                         editablelist.remove(c);
                                                     }
-                                                    }
+                                                }
                                         }
                             }
                             try{inherit.close();}
