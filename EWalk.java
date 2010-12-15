@@ -17,7 +17,8 @@ public class EWalk //extends Visitor
 	private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
 	private boolean isMethodChaining;//check if methodChaining is enacted (Starts if a CallExpression is the first child of another CallExpression)
 	private String savedReturnType; //saves the return type of a method for method chaining (starting at the bottom CallExpression
-	/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
+		/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
+	String[] PrimTypes = {"String", "boolean", "double", "float", "long", "int", "short"};
 	public EWalk (final InheritanceTree treeClass, final Declaration treeMethod, GNode n) {
 		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
@@ -100,8 +101,9 @@ public class EWalk //extends Visitor
 						//if its super set the is super flag true
 						isSuper=true;
 					}
-					if(VERBOSE) System.out.println("NAME: " +firstc.getName());
-					dispatch(firstc); //visit the node which probably contains selectionExp/Primary ID
+					if(VERBOSE) System.out.println("NAME:" +firstc.getName());
+					
+					dispatch(firstc); //visit the node
 
 				}
 				
@@ -115,9 +117,10 @@ public class EWalk //extends Visitor
 				if(newMethod!=null)
 					n.set(2,newMethod);
 				visit(n);
-				//if(VERBOSE) System.out.println("fully qualified name: "+fcName);
-   				//Object garbage = n.remove(0); //having trouble removing nodes!!!
-					   
+				//reset print values here
+				isPrint=false;
+				isPrintln=false;
+				
 								
 				
 			}
@@ -176,16 +179,16 @@ public class EWalk //extends Visitor
 				String[] methodArray= new String[2];
 				String methodName = n.getString(2);
 				//run checks for system.out.println and break from get method info
-				if(VERBOSE)System.out.println("methodName is: "+methodName);
-				if(methodName.equals("System->out->println"))  
-					{
-						//isPrintln=true;
-						return methodArray;
-					}
-				else if(methodName.equals("System->out->print")) {
-					//isPrint=true;
+				if(VERBOSE){System.out.print("isPrint???: " +isPrint);}
+				if(isPrint)  
+				{
+					//isPrintln=true;
 					return methodArray;
 				}
+				/*else if(methodName.contains("System->out->print")) {
+					//isPrint=true;
+					return methodArray;
+				}*/
 
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//run a check for System.out.print and println
@@ -228,16 +231,16 @@ public class EWalk //extends Visitor
 				//String className = fcNameList.get(size-2);//SOURCE OF ARRAY OUT OF BOUNDS
 				fcNameList.remove(size-1);
 				//fcNameList.remove(size-2);//SOURCE OF ARRAY OUT OF BOUNDS
-				if(VERBOSE){System.out.println("FULLNAME" +fcName);}
-				if (fcName.toString().contains("System.out.print")) {
+				if(VERBOSE){System.out.println("FULLNAME To String" +fcName.toString());}
+				if (fcName.toString().contains("System->out->print")) {
 					isPrint = true;
-					if (fcName.toString().contains("System->out->__vptr->println")) {
+					if (fcName.toString().contains("System->out->println")) {
 						isPrintln = true;
 					}
 					fcName = new StringBuffer(); //clear the fcName
 					fcName.append("std::cout<<");
 					if(VERBOSE) {
-						System.out.print("Translating special case:\t\tSystem.out.print");
+						System.out.println("Translating special case:\t\tSystem.out.print");
 						if (isPrintln) System.out.print("ln");
 						System.out.println("");
 					}
@@ -264,7 +267,7 @@ public class EWalk //extends Visitor
 				}
 				visit(n.getNode(3));
 				visit(n.getNode(3));
-				isPrint=isPrintln=false;
+				
 				return fcNameList;
 				
 			}
@@ -444,21 +447,74 @@ public class EWalk //extends Visitor
 						return "char";
 					}
 				else if (n.getName().equals("CallExpression"))
-					{
-						//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
-						String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
-						methodArray=setMethodInfo(n);
-						return methodArray[0];
-					}
-				else{ //return the name of the primaryIdentifier
+				{
+					//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
+					String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
+					methodArray=setMethodInfo(n);
+					return methodArray[0];
+				}
+				else if(n.getName().equals("PrimaryIdentifier")){ //return the name of the primaryIdentifier
 					//call the method in the inheritence tree to get the type of the primaryIden
 					
-					ArrayList<String> packageNType= method.search_for_type(n.getString(0));
-					String type = packageNType.remove(packageNType.size());
+					if(VERBOSE)System.out.println("Current Node"+n.getString(0));
+					if(VERBOSE) System.out.println("CurrentNode"+n.toString());
+					String type = " ";
+					if(VERBOSE) System.out.println("in Prim:"+ isPrint);
+					if(!isPrint){
+						ArrayList<String> packageNType= method.search_for_type(n.getString(0));
+						type = packageNType.remove(packageNType.size()-1);
+					}
 					return type;
 				}
+				else {//expression inside a method call
+					return getExpressionType(n);
+				}
+
 				/**can put support for handling methods inside an argument here (use search for methods
 				   to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
+			}
+			/**Helper method returns the type of expressions*/
+			public String getExpressionType(Node n)
+			{
+				int sizeOf = n.size();
+				//create an array the size of n's children +1
+				String[] exTypes = new String[sizeOf+1];
+				boolean[] typeOn = new boolean[7];
+				//visit each of the expression nodes chidren and get their type (if Node)
+				for( int i = 0; i<sizeOf; i++)
+				{
+					//check to make sure child is a node
+					Object child = n.get(i);
+					if(child !=null)
+					{
+						if(child instanceof Node ) //if its a node call get type
+						{
+							String type = getType((Node)child); //get the type of the value in the expression
+							
+							if(type!=null)//make sure type isn't null
+							{
+								exTypes[i]=type;
+								for(int k =0; k<PrimTypes.length;k++)
+								{
+									if(type.equals(PrimTypes[k]))//check to see if type is set on
+									{
+										typeOn[k]=true;
+									}
+								}
+							
+							}	
+						}
+					}
+				}//end of for loop
+				//after visiting each child and getting the type find 
+				//the largest precent type set and return that type
+				for(int l= 0; l<=PrimTypes.length; l++)
+				{
+						if (typeOn[l]) {//if that type is on return it
+							return PrimTypes[l];
+						}
+				}
+				return "ERROR";
 			}
 			public void visitQualifiedIdentifier (GNode n) {
 				if (!isString) {
@@ -518,6 +574,10 @@ public class EWalk //extends Visitor
 				} if (type.equals("boolean")) {
 					n.set(0,"bool");
 					if (VERBOSE) System.out.println("changing boolean to bool");
+				}
+				if (type.equals("byte")) {
+					n.set(0,"char");
+					if (VERBOSE) System.out.println("changing byte to Char");
 				}
 				visit(n);
 			}

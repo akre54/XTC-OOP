@@ -10,6 +10,8 @@ import java.util.*;
   Currently has no error checking... Ignores anything that is not a java file*/
 public class Tester
 {
+	String javaPrint;
+	String cppPrint;
 	private final String folderName= "TestCases"; //the default location for all the test cases
 	private String[][] test={
 	{"0","Type Zero To Exit"},
@@ -25,6 +27,9 @@ public class Tester
 	/**Calling This constructor will prompt you for all the test cases*/	
 	public Tester()
 	{
+		runTester();
+	}
+	public void runTester(){
 		//print out the array of test Cases
 		System.out.println("Here are the Current Test Levels \n");
 		for(int r=0;r<test.length;r++)
@@ -90,10 +95,10 @@ public class Tester
 		
 		//User Messages
 		System.out.println("Choose a File To Translate:");
-		System.out.println("0 - Exit");
+		System.out.println("\t0 - Exit");
 		for(int i=0;i<filenames.length;i++)
 		{
-			System.out.println(""+(i+1)+" - "+filenames[i]);
+			System.out.println("\t"+(i+1)+" - "+filenames[i]);
 			
 		}
 		//  open up standard input
@@ -172,23 +177,25 @@ public class Tester
 		System.out.println("Running Java...");
 		String className= removeJava(fileName);
 		String cmd = "Java -cp "+folder+" " +className;
-		System.out.println(cmd);
+		//System.out.println(cmd);
 		//Java -cp TestCases/1/Array
 
-		String javaPrint=runCommand(cmd);
+		runCommand(cmd);
 		runTranslation(folder, fileName);
 		viewMethodDefOrRunCpp(folder, className);
 	}
 	/**Allows a User to choose an option after cpp has been transalted*/
 	public void viewMethodDefOrRunCpp(String folder, String fileName)
 	{
-		System.out.println("Choose an Option:");
-		System.out.println("0 - Exit");
-		System.out.println("1 - Compile and Run Cpp");
-		System.out.println("2 - Open Cpp and Java File");
-		System.out.println("3 - Open Cpp File");
-		System.out.println("4 - Open Java File");
-		System.out.println("5 - Print AST");
+		System.out.println("\tChoose an Option:");
+		System.out.println("\t0 - Exit");
+		System.out.println("\t1 - Compile and Run Cpp");
+		/*System.out.println("2 - Run Cpp");*/
+		System.out.println("\t2 - Open Cpp and Java File");
+		System.out.println("\t3 - Open Cpp File");
+		System.out.println("\t4 - Open Java File");
+		System.out.println("\t5 - Print AST");
+		System.out.println("\t6 - Translate New File");
 
 		//  open up standard input
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -207,11 +214,13 @@ public class Tester
 			int choice = Integer.parseInt(choiceAsString.trim());
 			//check to see if its Zero
 			if(choice==0)
-			{
+			{ 
 				System.out.println("Operation Cancelled");
 			}
-			else if (choice == 1){ // call the compile cpp
+			else if (choice == 1){ // call compile cpp
 				compileCpp(folder, fileName);
+				//System.out.println("Java Result: \n" + javaPrint);
+				//System.out.println("Cpp Reseult: \n" + cppPrint);
 			}
 			else if(choice == 2){ //open cpp and Java File
 				openFile(folder, fileName,folder+fileName+".java");
@@ -226,6 +235,10 @@ public class Tester
 			else if (choice ==5)
 			{
 				printAST(folder, fileName);
+			}
+			else if (choice == 6)
+			{
+				runTester();
 			}
 		}
 		catch (NumberFormatException nfe)
@@ -259,17 +272,20 @@ public class Tester
 	{
 		String cppName= fileName+"_methoddef.cpp";
 		System.out.println("Compiling C++...");
-		String cmd = "g++ "+folder+"" +cppName;
+		//main.cpp *_methoddef.cpp  java_lang.cpp
+		String cmd = "g++ "+folder+"main.cpp "+folder+"" +cppName +" " +folder+"java_lang.cpp";
 		runCommand(cmd);
-		runCpp(folder);
+		runCpp(fileName,folder);
 	}
 	/**Runs cpp files*/
-	public void runCpp(String folder)
+	public void runCpp(String fileName,String folder)
 	{
-		String cmd = "cd " + folder;
-		runCommand(cmd);
-		String cmd2 = "./a.out";
-		String cppPrint=runCommand(cmd2);
+		//String cmd = "cd " + removeJava(folder);
+		//System.out.print(cmd);
+		//runCommand(cmd);
+		String cmd2 = folder +" a.out";
+		cppPrint=runCommand(cmd2);
+		viewMethodDefOrRunCpp(folder, fileName);
 
 	}
 	/**compares the results of the java and Cpp files and prints out messages*/
@@ -304,6 +320,7 @@ public class Tester
 			
 			while ((data = buffrdr.readLine()) != null) {
 				System.out.println(data);
+				javaPrint+=data;
 			}
 			
 		} catch (Throwable t)

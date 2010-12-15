@@ -44,6 +44,7 @@ public class CppPrinter extends Visitor
 	private boolean DEBUG = false;
 	/*A global boolean that keeps track of the current modifier status*/
 	private boolean isPrivate; 	
+	private boolean isReturn; //checks to see if there is a StringLiteral inside a return statement
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
 	{
@@ -67,6 +68,15 @@ public class CppPrinter extends Visitor
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
 	}
+	/**Only prints out a special case if isTReturn Flag is set to true otherwise does normal behavor*/
+	public void visitStringLiteral(GNode n)
+	{
+		if(isReturn) //check to see if we are current in a return subtree
+			print("new __String("+n.getString(0)+")"); //print out the proper code
+		else//otherwise just visit the tree as normal
+			visit(n);
+	}
+	
 	/**visit cast expression and print the c++ version of the java AST values*/
 	public void visitCastExpression(GNode n)
 	{
@@ -77,7 +87,10 @@ public class CppPrinter extends Visitor
 		//visit the next batch of code
 		visitChildren(n, 1,n.size(),"");
 	}
-	
+	public void visitLogicalNegationExpression(GNode n)
+	{
+		print("!");
+	}
 	/**visit cast expression on primitive types and print the c++ equivalent */
 	public void visitBasicCastExpression(GNode n)
 	{
@@ -271,12 +284,16 @@ public class CppPrinter extends Visitor
 		visitChildren(n, 0, n.size(), "");
 		print(";\n}\n");
 	}
-	/**print the c++ return statement */
+	/**print the c++ return statement
+	 add a flag*/
 	public void visitReturnStatement(GNode n)
 	{
 		print("return ");
+		//set return flag true
+		isReturn=true;
 		visitChildren(n, 0, n.size(), "");
 		print("; \n");
+		isReturn=false;
 	}
 	/**Visit Expression append a ;*/
 	public void visitExpressionStatement(GNode n)
@@ -422,6 +439,7 @@ public class CppPrinter extends Visitor
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
 	{
+		boolean isPrint=false;
 		//check the first child to see if its a primaryIdentifier 
 		Object o= n.get(0);
 		if (o!=null)
@@ -440,13 +458,41 @@ public class CppPrinter extends Visitor
 				}
 			}
 		}
-		//visit all the children minus the arguments
-		visitChildren(n, 1, 3, "");
-		
-		//visit the arguments
-		print("(");
-		visitChildren(n, 3, n.size(), "");
-		print(")");
+		//put in the special case for Pat's Cout
+		Object third= n.get(2);
+		if(third !=null)
+		{
+			if(third instanceof String)
+			{
+				//Node nThird = (Node)third;
+				String thirds =n.getString(2);
+				//Add special case for System.out.print
+				if(third.equals("std::cout<<"))
+				{
+					isPrint=true;
+					//print 2
+					print(thirds);
+					//print Arguments
+					visitChildren(n,3,n.size(),"<<");
+					//print 1
+					print(n.getString(1));
+				}
+				
+			}
+			else if (third instanceof Node)
+			{
+				dispatch((Node)third);
+			}
+		}
+		if(!isPrint)
+		{
+			//visit all the children minus the arguments
+			visitChildren(n, 1, 3, "");
+			//visit the arguments
+			print("(");
+			visitChildren(n, 3, n.size(), "");
+			print(")");
+		}
 	}
 	/**visit qualifiedIdentifier i.e. custom Objects
 	 It is assumed that all the "SMART" work has already been handled in EWalk
