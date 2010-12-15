@@ -342,6 +342,7 @@ public class EWalk //extends Visitor
 					//visit(n);
 					isString = false;
 				}
+				visit(n);
 				if (isArray) {
 					if(VERBOSE) System.out.println("Entering array");
 					ArrayMaker goArray = new ArrayMaker (n);

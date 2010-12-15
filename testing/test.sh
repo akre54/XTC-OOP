@@ -8,9 +8,6 @@ cd $(pwd -P) # expand path to absolute path
 . ../../../../setup.sh
 clear
 echo "Java to C++ Translation"
-cd ..
-make
-cd testing/
 D="1";
 while [ $D ]; do
 echo "Enter the filename (____.java , default is demo)"
@@ -23,6 +20,14 @@ fi
 echo "Enter the testing directory (return blank to quit):"
 read D
 if [ $D ]; then
+	echo compiling...
+	cd ..
+	make
+	if [ $? -ne '0' ] # if did not make well exit!
+	then
+	   	exit $?
+	fi
+	cd testing/
 	echo Cleaning directory $D/
 	cd $D
 	echo
