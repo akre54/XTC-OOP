@@ -439,6 +439,7 @@ public class CppPrinter extends Visitor
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
 	{
+		boolean isPrint=false;
 		//check the first child to see if its a primaryIdentifier 
 		Object o= n.get(0);
 		if (o!=null)
@@ -457,13 +458,41 @@ public class CppPrinter extends Visitor
 				}
 			}
 		}
-		//visit all the children minus the arguments
-		visitChildren(n, 1, 3, "");
-		
-		//visit the arguments
-		print("(");
-		visitChildren(n, 3, n.size(), "");
-		print(")");
+		//put in the special case for Pat's Cout
+		Object third= n.get(2);
+		if(third !=null)
+		{
+			if(third instanceof String)
+			{
+				//Node nThird = (Node)third;
+				String thirds =n.getString(2);
+				//Add special case for System.out.print
+				if(third.equals("std::cout<<"))
+				{
+					isPrint=true;
+					//print 2
+					print(thirds);
+					//print Arguments
+					visitChildren(n,3,n.size(),"<<");
+					//print 1
+					print(n.getString(1));
+				}
+				
+			}
+			else if (third instanceof Node)
+			{
+				dispatch((Node)third);
+			}
+		}
+		if(!isPrint)
+		{
+			//visit all the children minus the arguments
+			visitChildren(n, 1, 3, "");
+			//visit the arguments
+			print("(");
+			visitChildren(n, 3, n.size(), "");
+			print(")");
+		}
 	}
 	/**visit qualifiedIdentifier i.e. custom Objects
 	 It is assumed that all the "SMART" work has already been handled in EWalk
