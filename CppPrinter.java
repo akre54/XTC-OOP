@@ -314,7 +314,7 @@ public class CppPrinter extends Visitor
 	/**visit the case clause usually inside a switch statement*/
 	public void visitCaseClause(GNode n)
 	{
-		print("case");
+		print("case ");
 		visitChildren(n, 0, 1, "");
 		print(":");
 		visitChildren(n, 1, n.size(), "");

@@ -267,6 +267,7 @@ public class EWalk //extends Visitor
 					if(VERBOSE) System.out.println("Setting 1n[0] to:\t\t\t"+fcName);
 					
 					n.set(0,null);
+					n.set(1,"");
 					n.set(2,fcName.toString());
 					if(VERBOSE) System.out.println("N1 STRING" +n.toString());
 				}
@@ -300,7 +301,11 @@ public class EWalk //extends Visitor
 			/**Visists additve expression and replaces + with <<*/
 			public void visitAdditiveExpression (GNode n) {
 				if(isPrint) {
-					if(isPrintString) n.set(1,"<<");
+					String type = getType(n);
+                    if(type.equals("String"))//gets the type for a AdditiveExpression (if its a string use the concat <<)
+					   {
+						if(isPrintString) n.set(1,"<<");
+						}
 				}
 				visit(n);
 			}
@@ -583,7 +588,7 @@ public class EWalk //extends Visitor
 				}
 				if (type.equals("byte")) {
 					n.set(0,"char");
-					if (VERBOSE) System.out.println("changing byte to Char");
+					if (VERBOSE) System.out.println("changing byte to char");
 				}
 				visit(n);
 			}
