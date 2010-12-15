@@ -260,6 +260,44 @@ namespace java {
       // primitive ints.
       static Class __primitiveClass();
     };
+	  //****************** my edits *******************
+	 
+	  // The completely incomplete data layout for java.lang.Integer.
+	struct __Double {
+	  
+		static Class __primitiveClass();
+	};
+	// The completely incomplete data layout for java.lang.Bool.
+	struct __Boolean {
+		
+		static Class __primitiveClass();
+	};
+	// The completely incomplete data layout for java.lang.Double.
+	struct __Float {
+		  
+		static Class __primitiveClass();
+	};
+	  
+	// The completely incomplete data layout for java.lang.Char.
+	struct __Char {
+		  
+		static Class __primitiveClass();
+	};
+	  
+	// The completely incomplete data layout for java.lang.Long.
+	struct __Long {
+		  
+		static Class __primitiveClass();
+	};
+	  
+	// The completely incomplete data layout for java.lang.Short.
+	struct __Short {
+		  
+		static Class __primitiveClass();
+	};
+	  
+
+	//****************** end my edits ***************
 
     // ======================================================================
 
@@ -304,6 +342,17 @@ namespace java {
     typedef __rt::Ptr<__Array<int32_t> > ArrayOfInt;
     typedef __rt::Ptr<__Array<Object> > ArrayOfObject;
     typedef __rt::Ptr<__Array<Class> > ArrayOfClass;
+	//*********my edits*************
+	typedef __rt::Ptr<__Array<String> > ArrayOfString;
+	typedef __rt::Ptr<__Array<double> > ArrayOfDouble;
+	typedef __rt::Ptr<__Array<bool> > ArrayOfBoolean;
+	typedef __rt::Ptr<__Array<float> > ArrayOfFloat;
+	typedef __rt::Ptr<__Array<char> > ArrayOfChar;
+	typedef __rt::Ptr<__Array<long> > ArrayOfLong;
+	typedef __rt::Ptr<__Array<short> > ArrayOfShort;
+
+
+	  
 
     // The data layout for arrays.
     template <typename T>

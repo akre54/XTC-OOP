@@ -208,7 +208,61 @@ namespace java {
 
     // =======================================================================
 
-    // Template specialization for arrays of ints.
+	// Internal accessor for double's class.
+	Class __Double::__primitiveClass() {
+		static Class k = new __Class(__rt::stringify("double"),
+									   __rt::null(), __rt::null(), true);
+		return k;
+	}
+	  
+	// =======================================================================
+	  // Internal accessor for boolean's class.
+	  Class __Boolean::__primitiveClass() {
+		  static Class k = new __Class(__rt::stringify("boolean"),
+									   __rt::null(), __rt::null(), true);
+		  return k;
+	  }
+	  
+	  // =======================================================================
+
+	  // Internal accessor for float's class.
+	  Class __Float::__primitiveClass() {
+		  static Class k = new __Class(__rt::stringify("float"),
+									   __rt::null(), __rt::null(), true);
+		  return k;
+	  }
+	  
+	  // =======================================================================
+	  
+	  // Internal accessor for char's class.
+	  Class __Char::__primitiveClass() {
+		  static Class k = new __Class(__rt::stringify("char"),
+									   __rt::null(), __rt::null(), true);
+		  return k;
+	  }
+	  
+	  // =======================================================================
+	  
+	  // Internal accessor for long's class.
+	  Class __Long::__primitiveClass() {
+		  static Class k = new __Class(__rt::stringify("long"),
+									   __rt::null(), __rt::null(), true);
+		  return k;
+	  }
+	  
+	  // =======================================================================
+	  
+	  // Internal accessor for short's class.
+	  Class __Short::__primitiveClass() {
+		  static Class k = new __Class(__rt::stringify("short"),
+									   __rt::null(), __rt::null(), true);
+		  return k;
+	  }
+	  
+	  // =======================================================================
+	  
+	  
+	// Template specialization for arrays of ints.
     template<>
     __Array<int32_t>::__Array(const int32_t length)
       : __vptr(&__vtable), length(length), __data(new int32_t[length]) {
@@ -222,6 +276,101 @@ namespace java {
                                    __Integer::__primitiveClass());
       return k;
     }
+//******* my edits *************
+	  // Template specialization for arrays of double.
+	  template<>
+	  __Array<double>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new double[length]) {
+		  std::memset(__data, 0, length * sizeof(double));
+	  }
+	  
+	  template<>
+	  Class __Array<double>::__class() {
+		  static Class k = new __Class(__rt::stringify("[D"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  // Template specialization for arrays of bool.
+	  template<>
+	  __Array<bool>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new bool[length]) {
+		  std::memset(__data, 0, length * sizeof(bool));
+	  }
+	  
+	  template<>
+	  Class __Array<bool>::__class() {
+		  static Class k = new __Class(__rt::stringify("[Z"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  // Template specialization for arrays of float.
+	  template<>
+	  __Array<float>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new float[length]) {
+		  std::memset(__data, 0, length * sizeof(float));
+	  }
+	  
+	  template<>
+	  Class __Array<float>::__class() {
+		  static Class k = new __Class(__rt::stringify("[F"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  // Template specialization for arrays of char.
+	  template<>
+	  __Array<char>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new char[length]) {
+		  std::memset(__data, 0, length * sizeof(char));
+	  }
+	  
+	  template<>
+	  Class __Array<char>::__class() {
+		  static Class k = new __Class(__rt::stringify("[C"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  // Template specialization for arrays of long.
+	  template<>
+	  __Array<long>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new long[length]) {
+		  std::memset(__data, 0, length * sizeof(long));
+	  }
+	  
+	  template<>
+	  Class __Array<long>::__class() {
+		  static Class k = new __Class(__rt::stringify("[J"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  // Template specialization for arrays of short.
+	  template<>
+	  __Array<short>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new short[length]) {
+		  std::memset(__data, 0, length * sizeof(short));
+	  }
+	  
+	  template<>
+	  Class __Array<short>::__class() {
+		  static Class k = new __Class(__rt::stringify("[S"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  // Template specialization for arrays of String.
+	  template<>
+	  Class __Array<String>::__class() {
+		  static Class k = new __Class(__rt::stringify("[Ljava.lang.String"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  
+//****** end my Edits **********
 
     // Template specialization for arrays of objects.
     template<>
