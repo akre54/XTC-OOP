@@ -25,11 +25,6 @@
 namespace java {
   namespace lang {
 
-    // The destructor for java.lang.Object.
-    void __Object::__delete(__Object* __this) {
-      delete __this;
-    }
-
     // java.lang.Object.hashCode()
     int32_t __Object::hashCode(Object __this) {
       return (int32_t)(intptr_t)__this.raw();
@@ -68,11 +63,6 @@ namespace java {
     __Object_VT __Object::__vtable;
 
     // =======================================================================
-
-    // The destructor for java.lang.String.
-    void __String::__delete(__String* __this) {
-      delete __this;
-    }
 
     // java.lang.String.hashCode()
     int32_t __String::hashCode(String __this) {
@@ -133,11 +123,6 @@ namespace java {
     __String_VT __String::__vtable;
 
     // =======================================================================
-
-    // The destructor for java.lang.Class.
-    void __Class::__delete(__Class* __this) {
-      delete __this;
-    }
 
     // java.lang.Class.toString()
     String __Class::toString(Class __this) {
@@ -207,15 +192,18 @@ namespace java {
     }
 
     // =======================================================================
-
-	// Internal accessor for double's class.
-	Class __Double::__primitiveClass() {
-		static Class k = new __Class(__rt::stringify("double"),
-									   __rt::null(), __rt::null(), true);
-		return k;
-	}
+//********************** my edits **************************
 	  
-	// =======================================================================
+	  // =======================================================================
+	  
+	  // Internal accessor for double's class.
+	  Class __Double::__primitiveClass() {
+		  static Class k = new __Class(__rt::stringify("double"),
+									   __rt::null(), __rt::null(), true);
+		  return k;
+	  }
+	  
+	  // =======================================================================
 	  // Internal accessor for boolean's class.
 	  Class __Boolean::__primitiveClass() {
 		  static Class k = new __Class(__rt::stringify("boolean"),
@@ -224,7 +212,7 @@ namespace java {
 	  }
 	  
 	  // =======================================================================
-
+	  
 	  // Internal accessor for float's class.
 	  Class __Float::__primitiveClass() {
 		  static Class k = new __Class(__rt::stringify("float"),
@@ -235,7 +223,7 @@ namespace java {
 	  // =======================================================================
 	  
 	  // Internal accessor for char's class.
-	  Class __Char::__primitiveClass() {
+	  Class __Character::__primitiveClass() {
 		  static Class k = new __Class(__rt::stringify("char"),
 									   __rt::null(), __rt::null(), true);
 		  return k;
@@ -262,7 +250,7 @@ namespace java {
 	  // =======================================================================
 	  
 	  
-	// Template specialization for arrays of ints.
+    // Template specialization for arrays of ints.
     template<>
     __Array<int32_t>::__Array(const int32_t length)
       : __vptr(&__vtable), length(length), __data(new int32_t[length]) {
@@ -276,7 +264,7 @@ namespace java {
                                    __Integer::__primitiveClass());
       return k;
     }
-//******* my edits *************
+//******************* my edits ***************************
 	  // Template specialization for arrays of double.
 	  template<>
 	  __Array<double>::__Array(const int32_t length)
@@ -370,8 +358,8 @@ namespace java {
 		  return k;
 	  }
 	  
-//****** end my Edits **********
-
+//********************** end my Edits ******************************
+	  
     // Template specialization for arrays of objects.
     template<>
     Class __Array<Object>::__class() {

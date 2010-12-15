@@ -255,6 +255,13 @@ public class DependencyFinder {
         public String getPackageName() {
             return currentPackage;
         }
+	
+	/**
+	 * @return package in cpp syntax
+	 */
+	public String getCppPackageName(){
+		return currentPackage.replace(".","::");
+	}
 
         /** Get dependices sorted by specific origin (i.e. get just package
                 * imports or just includes) */

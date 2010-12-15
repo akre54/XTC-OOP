@@ -12,25 +12,25 @@ import java.util.ArrayList;
 public class InheritanceBuilder{
 	public final boolean DEBUG=false;
 	
-	CppCreator h_classdef;
-	CppCreator cpp_methoddef;
-        DependencyFinder dependencies;
-        ArrayList<ClassStruct> allClasses;
+	CppCreator h;
+	CppCreator cpp;
+	DependencyFinder fileinfo;
+	ArrayList<ClassStruct> allClasses;
 	
 	private File jfile;
 
 	
-	InheritanceBuilder(DependencyFinder dependencies, ArrayList<ClassStruct> allClasses){
+	InheritanceBuilder(DependencyFinder fileinfo, ArrayList<ClassStruct> allClasses){
 		/*
-		 *creates new cc file h_classdef
-		 *copies start of translation.h into h_classdef
+		 *creates new cc file h
+		 *copies start of translation.h into h
 		 */
-                this.dependencies = dependencies;
+                this.fileinfo = fileinfo;
                 this.allClasses = allClasses;
 			
-		jfile = new File(dependencies.getFilePath());
-		h_classdef = (new CppCreator(jfile,"_dataLayout","h"));
-		h_classdef.write("/* Object-Oriented Programming\n"+
+		jfile = new File(fileinfo.getFilePath());
+		h = (new CppCreator(jfile,"_dataLayout","h"));
+		h.write("/* Object-Oriented Programming\n"+
               "* Copyright (C) 2010 Robert Grimm\n"+
               "*\n"+
               "*Edited by Liz Pelka\n"+
@@ -55,11 +55,11 @@ public class InheritanceBuilder{
              "#include \"java_lang.h\"\n");
 
             // #includes all files its dependent on, then using declares them
-            for (String importDeclaration : dependencies.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
-                    h_classdef.write(importDeclaration+"\n");
+            for (String importDeclaration : fileinfo.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
+                    h.write(importDeclaration+"\n");
             }
 
-             h_classdef.write(
+             h.write(
 				 "using java::lang::Object;\n"+
              "using java::lang::__Object;\n"+
              "using java::lang::Class;\n"+
@@ -70,29 +70,28 @@ public class InheritanceBuilder{
              "using java::lang::ArrayOfInt;\n"+
              "using java::lang::ArrayOfObject;\n"+
              "using java::lang::ArrayOfClass;\n");
-            for (String usingDeclaration : dependencies.getCppUsingDeclarations(allClasses)) {
-                h_classdef.write(usingDeclaration+"\n");
-                //h_classdef.write(DependencyFinder.getNamespace(dependencies.getFileClasses(), dependencies.getFilePath())+"\n");
+            for (String usingDeclaration : fileinfo.getCppUsingDeclarations(allClasses)) {
+                h.write(usingDeclaration+"\n");
+                //h.write(DependencyFinder.getNamespace(fileinfo.getFileClasses(), fileinfo.getFilePath())+"\n");
             }
 
-            for(String p : dependencies.getPackageToNamespace()){
-                    h_classdef.write("namespace "+p+" {\n");
+            for(String p : fileinfo.getPackageToNamespace()){
+                    h.write("namespace "+p+" {\n");
             }
 
-             for (ClassStruct c : dependencies.getFileClasses()) {
-                h_classdef.write("\n\tstruct __" + c.className + "; \n"
+             for (ClassStruct c : fileinfo.getFileClasses()) {
+                h.write("\n\tstruct __" + c.className + "; \n"
                         +/**/ "\tstruct __" + c.className + "_VT;\n"
                         +/**/ "\ttypedef __rt::Ptr<__" + c.className + "> " + c.className + ";\n"
                         + "\ttypedef __rt::Ptr<__Array<" + c.className + "> > ArrayOf" + c.className + ";\n\n");
             }
-							 
-		
+
 		/*
 		 *creates new cc file cc_methoddef
 		 *copies start of translation.cc into cc_classdef
 		 */
-		cpp_methoddef =(new CppCreator(jfile,"_methoddef","cpp"));
-		cpp_methoddef.write(
+		cpp =(new CppCreator(jfile,"_methoddef","cpp"));
+		cpp.write(
 							"/* Object-Oriented Programming\n"+
 							"* Copyright (C) 2010 Robert Grimm\n"+
 							"*\n"+
@@ -113,68 +112,58 @@ public class InheritanceBuilder{
 							"* USA.\n"+
 							"*/\n\n"+
 							
-							"#include \""+h_classdef.cFile.getName()+"\"\n\n"+
+							"#include \""+h.cFile.getName()+"\"\n\n"+
 				
 							"#include <sstream>\n\n");
-							for(String p: dependencies.getPackageToNamespace()){
-								cpp_methoddef.write("namespace "+p+" {\n");
+							for(String p: fileinfo.getPackageToNamespace()){
+								cpp.write("namespace "+p+" {\n");
 							}
-							cpp_methoddef.write("\n\n");
+							cpp.write("\n\n");
 
 	}//end of constructor
 	/*
-	 * writes to the h_classdef file GNode n's class declaration and Vtable
+	 * writes to the h file GNode n's class declaration and Vtable
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
 	 */
 	public void addClassdef(InheritanceTree t){
-		StringBuilder s=new StringBuilder();
+	
 		String ClassName = t.className;
-		h_classdef.write("//data layout for ");
-		for(String p: dependencies.getPackageToNamespace()){
-			h_classdef.write(p+".");
-			s.append(p+".");
-		}
-		String pack=s.toString();
-		h_classdef.write(ClassName);
-		h_classdef.write(
-			"\n\tstruct __"+ClassName+"{ \n"+/**/
-			"\t\t__"+ClassName+"_VT* __vptr;\n");
+		h.write(
+				"//data layout for "+fileinfo.getPackageName()+t.className);
+		h.write(/* CLASS STRUCT DECLARATION*/
+				"\n\tstruct __"+ClassName+"{ \n"+
+				"\t\t__"+ClassName+"_VT* __vptr;\n");//vtable ptr
 						 
 				/* FEILDS ---> ex: int x;  */
-		        write_all_feilds(t); h_classdef.write("\n\n");
+		        write_all_feilds(t); h.write("\n\n");
 				
 				/*CONSTRUCTOR(S)*/
 				write_all_constructors(t); 
-				
-						 
-				/* avoid static field initializer fiasco with  __class() */
-				//h_classdef.write("\t   static Class __class();\n\n");
 		
-		        /*  ALL INSTANCE METHODS    */
+		        /*  ALL INSTANCE METHODS */
 				write_all_methods(t);
 
-                                h_classdef.write("\n\n"+
+				h.write(
 				/*create instance of VTABLE*/
-				"\n\t\tstatic __"+ClassName+"_VT __vtable;\n"+/**/
-			"\t};\n\n//vtable layout for "+pack+ClassName+"\n"+                      
-		/*-------------------------end of struct __ClassName in .h file-------------------------*/	
-						 
+				"\n\t\tstatic __"+ClassName+"_VT __vtable;\n"+
+				"\t};"+
 		/* ---------------------start of stuct __ClassName_VT in .h file -------------------*/
-			
-			"\tstruct __"+ClassName+"_VT{\n");
+				"\n\n//vtable layout for "+fileinfo.getPackageName()+t.className+"\n"+                      
+						 
+				"\tstruct __"+ClassName+"_VT{\n");
 				
 				/* DECLARE METHOD PTRS ---> ",methodreturnType (*methodname)(methodparameters)",\n" */
-				write_all_method_ptrs(t); h_classdef.write("\n\n"+/**/
+				write_all_method_ptrs(t); h.write("\n\n"+/**/
 						
 				/*  VT CONSTRUCTOR*/		 
 				"\t\t__"+ClassName+"_VT():\n");
 						 
 				/* INITIALIZE METHOD PTRS ---> methodname"(&__"+ClassName+"::"+methodname+"),\n" */
-				write_assign_method_ptrs(t); h_classdef.write( /**/
+				write_assign_method_ptrs(t); h.write( /**/
 				"{}\n"+
 						 
-						 
-			"\t};\n\n"/* -----------end of stuct __ClassName_VT in .h file -------------------*/
+			"\t};\n\n"
+		/* -----------end of stuct __ClassName_VT in .h file -------------------*/
 						 
 		);// end of writing
 		
@@ -191,69 +180,78 @@ public class InheritanceBuilder{
             //loops through fields and prints out in proper syantax
             for (InstanceField f : t.fields) {
                 for(String modifier : f.modifiers) {
-                   // h_classdef.write("\t   "+modifier+": ");
+                   // h.write("\t   "+modifier+": ");
                 }
-                h_classdef.write("\t\t"+f.type+" "+f.var_name+";\n");
+                h.write("\t\t"+f.type+" "+f.var_name);
+				if(!f.value.equals(""))h.write("="+f.value);
+				h.write(";\n");
             }
 	}
 	
-	
 	/**
 	 * will write all the constructor's into the datalayout for this class.
-	 * 
+	 * adds no argument constructor to class's without at least one constructor (main file)
 	 *
 	 */	
 	private void write_all_constructors(InheritanceTree t){
+		//class with main method needs constructor
+		if(t.constructors.size()==0){
+			h.write("\t\t__"+t.className+"():__vptr(&__vtable)");
+			// intialize all the instance fields
+			for (InstanceField f : t.fields) {
+				h.write(","+f.var_name+"("+f.var_name+")");
+			}
+			h.write("{};\n\n");
 		
+		}
+		else{
             for (Declaration constr : t.constructors) {
-                h_classdef.write("\t\t");
+                h.write("\t\t");
 
                 //loop through constructor modifiers
                 for (String modifier : constr.modifiers){
-                    //h_classdef.write(modifier+": ");
+                    //h.write(modifier+": ");
                 }
                 //write className
-                h_classdef.write("__"+t.className);
+                h.write("__"+t.className);
                 if(constr.overloadNum!=0)
-                        h_classdef.write("_"+constr.overloadNum);
-                h_classdef.write("(");
+                        h.write("_"+constr.overloadNum);
+                h.write("(");
 
                 //loop through formal parameter
                 for (int i=0;i<constr.params.size();i++) {
                     Fparam fp = constr.params.get(i);
 
-                    if (i>0) h_classdef.write(","); //comma
+                    if (i>0) h.write(","); //comma
 
                     //loop through formal parameter's modifiers
                     for (String modifier : fp.modifiers) {
-                        h_classdef.write(modifier+" ");
+                        h.write(modifier+" ");
                     }
                     //writes formal parameter's type and name
-                    h_classdef.write(fp.type+" "+fp.var_name);
+                    h.write(fp.type+" "+fp.var_name);
                 }
                 //intialize __vptr
-                h_classdef.write("):__vptr(&__vtable)");
+                h.write("):__vptr(&__vtable)");
 
                 // intialize all the instance fields
                 for (InstanceField f : t.fields) {
-                    h_classdef.write(","+f.var_name+"("+f.value+")");
+                    h.write(","+f.var_name+"("+f.var_name+")");
                 }
-                h_classdef.write("{\n\t\t\t");//3 tabs for Ewalk
+                h.write("{\n\t\t\t");//3 tabs for Ewalk
 
                 //**  EWalk is called on constructor's block node  **//
                 EWalk changes = new EWalk(t,constr,constr.bnode);
                 CppPrinter print = new CppPrinter(constr.bnode);
-                h_classdef.write(print.getString().toString());//write body of the constructor
-                h_classdef.write("\n\t   };\n\n");
+                h.write(print.getString().toString());//write body of the constructor
+                h.write("\n\t   };\n\n");
             }
-		
+		}
 	}
 	
-	
 	/**
-	 * will print string of all local method declarations in this class
+	 * will write all local method declarations in this class
 	 * syntax --->  "static "+ returntype +" "+methodName+" ("+className+","+..other paramaterTypes,..+");\n"
-	 *
 	 *
 	 */		
 	private void write_all_methods(InheritanceTree t){
@@ -261,30 +259,24 @@ public class InheritanceBuilder{
             for (Declaration method : t.local) {
                 if (method.name.equals("main")) {
                     buildMain(method);
-                    h_classdef.write("\t\tstatic int32_t "+method.name);
+                    h.write("\t\tstatic int32_t "+method.name);
                     if(method.overloadNum!=0)
-                            h_classdef.write("_"+method.overloadNum);
-                    h_classdef.write("(int32_t, char**);\n");
+                            h.write("_"+method.overloadNum);
+                    h.write("(int32_t, char**);\n");
                 }
                 else {
-                    //h_classdef.write("\t   ");
                     for (String modifier : method.modifiers) {
-                       //h_classdef.write("\t"+modifier+": \n");
+                       //h.write("\t"+modifier+": \n");
                     }
-                    h_classdef.write("\t\tstatic "+method.returntype+" "+method.name);
+                    h.write("\t\tstatic "+method.returntype+" "+method.name);
                     if(method.overloadNum!=0)
-                            h_classdef.write("_"+method.overloadNum);
-                    h_classdef.write("(");
-
+                            h.write("_"+method.overloadNum);
+                    h.write("(");
                     for (int j=0; j<method.params.size();j++) {
-
-                        if(j==0)// print first param without ","
-                                h_classdef.write(method.params.get(j).type);
-
-                        else h_classdef.write(","+method.params.get(j).type);
-
+                        if(j==0)h.write(method.params.get(j).type);//write without ","
+                        else h.write(","+method.params.get(j).type);
                     }
-                    h_classdef.write(");\n");
+                    h.write(");\n");
                 }
             }
 	}
@@ -309,8 +301,8 @@ public class InheritanceBuilder{
 		
 		//create the main.cpp
 		mainWriter.write("#include <iostream>\n\n"+
-						 "#include \""+h_classdef.cFile.getName()+"\"\n\n");
-                                                 ArrayList<String> namespace = dependencies.getPackageToNamespace();
+						 "#include \""+h.cFile.getName()+"\"\n\n");
+                                                 ArrayList<String> namespace = fileinfo.getPackageToNamespace();
 						 for (String p : namespace) {
 							 int size = namespace.size();
 							 if (p.equals(namespace.get(0))) mainWriter.write("using namespace "+p);
@@ -319,8 +311,8 @@ public class InheritanceBuilder{
 						 }
 						 mainWriter.write("\n\n\n"
 						 +"int32_t main(int32_t argc, char *argv[]){\n\n\t"
-						 +n.ownerClass+" NAMEmain = new __"+n.ownerClass+"();\n\t"
-						 +"NAMEmain->main");
+						 +n.ownerClass+" forward_main = new __"+n.ownerClass+"();\n\t"
+						 +"forward_main->main");
 						if(n.overloadNum!=0)
 							mainWriter.write("_"+n.overloadNum);
 						mainWriter.write("(argc,argv);\n\treturn 0;\n}");
@@ -338,29 +330,30 @@ public class InheritanceBuilder{
 	private void write_all_method_ptrs(InheritanceTree t){
 		
 		//ptr for __class()
-		h_classdef.write("\t\tClass __isa;\n");
+		h.write("\t\tClass __isa;\n");
+					
 		//ptr for __delete()
-		h_classdef.write("\t\tvoid (*__delete)(__"+t.className+"*);\n");
+		h.write("\t\tvoid (*__delete)(__"+t.className+"*);\n");
+					
 		//loops through vtable and prints out in proper syntax
 		int size = t.Vt_ptrs.size();
 		for (int i=2;i<size;i++) {
 			Declaration method = t.Vt_ptrs.get(i);
-			h_classdef.write("\t\t"+method.returntype+" (*"+method.name);
+			h.write("\t\t"+method.returntype+" (*"+method.name);
 			if(method.overloadNum!=0)
-				h_classdef.write("_"+method.overloadNum);
-			h_classdef.write(")(");
+				h.write("_"+method.overloadNum);
+			h.write(")(");
 			int fpsize = method.params.size();
 			for (int j=0;j<fpsize;j++) {
 				String type = method.params.get(j).type;
 				
-				if (j==0) h_classdef.write(t.className);
-				else h_classdef.write(", "+type);
+				if (j==0) h.write(t.className);
+				else h.write(", "+type);
 			}
-			h_classdef.write(");\n");
+			h.write(");\n");
 			
 		}
 	}
-	
 	
 	/*
 	 * prints out string of all initalized method ptrs from superclass's Vtable 
@@ -372,40 +365,43 @@ public class InheritanceBuilder{
 	 */	
 	private void write_assign_method_ptrs(InheritanceTree t){
 		//ptr for __class()
-		h_classdef.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class())");
+		h.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class()),");
+		
+		//ptr for __delete()
+		h.write("\t\t\t__delete(&__rt::__delete<__"+t.className+">)");
 		
 		//loops through vtable and prints out in proper syntax
 		int size = t.Vt_ptrs.size();
-		for (int i=1;i<size;i++) {
+		for (int i=2;i<size;i++) {
 			Declaration method = t.Vt_ptrs.get(i);
                     //syntax for an overridden method
                     if ((method.ownerClass).equals(t.className)) {
 
-                        h_classdef.write(",\n\t\t\t"+method.name);
+                        h.write(",\n\t\t\t"+method.name);
                         if(method.overloadNum!=0)
-                                h_classdef.write("_"+method.overloadNum);
-                        h_classdef.write("(&__"+t.className+"::"+method.name);
+                                h.write("_"+method.overloadNum);
+                        h.write("(&__"+t.className+"::"+method.name);
                         if(method.overloadNum!=0)
-                                h_classdef.write("_"+method.overloadNum);
-                        h_classdef.write(")");
+                                h.write("_"+method.overloadNum);
+                        h.write(")");
                     }
                     //syntax for a method that needs a this class casting
                     else{
-                        h_classdef.write(",\n\t\t\t"+method.name);
+                        h.write(",\n\t\t\t"+method.name);
                         if (method.overloadNum!=0)
-                            h_classdef.write("_"+method.overloadNum);
-                        h_classdef.write("(("+method.returntype+"(*)(");
+                            h.write("_"+method.overloadNum);
+                        h.write("(("+method.returntype+"(*)(");
 
 						int fpsize = method.params.size();
                         for (int j=0;j<fpsize;j++) {
 							String type = method.params.get(j).type;
-							if (j==0) h_classdef.write(t.className);
-                            else h_classdef.write(", "+type);
+							if (j==0) h.write(t.className);
+                            else h.write(", "+type);
                         }
-                        h_classdef.write("))&__"+method.ownerClass+"::"+method.name);
+                        h.write("))&__"+method.ownerClass+"::"+method.name);
                         if (method.overloadNum!=0)
-                            h_classdef.write("_"+method.overloadNum);
-                        h_classdef.write(")");
+                            h.write("_"+method.overloadNum);
+                        h.write(")");
                     }
 			
 		}
@@ -422,77 +418,84 @@ public class InheritanceBuilder{
 	public void addMethodDec(InheritanceTree t){
 		
 		//writes the __class() method
-		cpp_methoddef.write("\t"+t.local.get(0).returntype+" __"+t.className+
+		cpp.write("\t"+t.local.get(0).returntype+" __"+t.className+
 							"::"+t.local.get(0).name+"(){"+
-							"\n\t\tstatic Class k = new __Class(__rt::stringify(\"xtc.oop."+t.className+"\"),__rt::null());"+
+							"\n\t\tstatic Class k = new __Class(__rt::stringify(\""+fileinfo.getPackageName()+t.className+"\"),__rt::null());"+
 							"\n\t\treturn k;\n\t"+
 							"}\n");
-		//writes the __delete() method
-		cpp_methoddef.write("\t"+t.local.get(1).returntype+" __"+t.className+
-							"::"+t.local.get(1).name+"(__"+t.className+"* __this){\n\t\t"+
-							"delete __this;\n\t"+
-							"}\n");
+	
 		
 	//--- adds all methods to METHODDEF	
 		int size = t.local.size();
-		for (int j =2;j<size;j++) {
+		for (int j =1;j<size;j++) {
 			Declaration method= t.local.get(j);
                     //method syntax
-                    cpp_methoddef.write("\t"+method.returntype+" __"+t.className+
+                    cpp.write("\t"+method.returntype+" __"+t.className+
                                                             "::"+method.name);
                     if(method.overloadNum!=0)
-                            cpp_methoddef.write("_"+method.overloadNum);
-                    cpp_methoddef.write("(");
+                            cpp.write("_"+method.overloadNum);
+                    cpp.write("(");
 					
                     for(int i=0;i<method.params.size();i++){
                         Fparam param = method.params.get(i);
 
                         //first param without ","
-                        if(i==0)cpp_methoddef.write(param.type+" "+param.var_name);
-                        else cpp_methoddef.write(","+param.type+" "+param.var_name);
+                        if(i==0)cpp.write(param.type+" "+param.var_name);
+                        else cpp.write(","+param.type+" "+param.var_name);
                     }
                     //calls to CppMethod to create the body of the method
-                    cpp_methoddef.write("){\n");
+                    cpp.write("){\n");
 
                     //**  cppBlock is called on method's block node  **//
                     //cppMethod mblock = new cppMethod(t.local.get(index).mnode);
                     EWalk changes = new EWalk(t,method,method.bnode);
                     CppPrinter mblock=new CppPrinter(method.bnode);
-                    cpp_methoddef.write(mblock.getString().toString());//write body of the method
-                    cpp_methoddef.write("\n\t}\n\n");
+                    cpp.write(mblock.getString().toString());//write body of the method
+                    cpp.write("\n\t}\n\n");
 
 		}
 		// invokes Vtable constructor
-		cpp_methoddef.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n"+
-                            "\t//===========================================================================\n\n");
+		cpp.write("\t__"+t.className+"_VT __"+t.className+"::__vtable;\n\n");
+		
+		//close current package
+		for(String p: fileinfo.getPackageToNamespace()){
+			cpp.write("}\n");
+		}
+		//open up java::lang to write template for Array<__className>
+		cpp.write("namespace java {\n\tnamespace lang {");
+		//writes the template<> ... __Array<classname>::__class() method
+		cpp.write("template<>\n"+
+							"\tClass __Array<"+t.getFQName()+t.className+">::__class() {\n"+
+							"\t\tstatic Class k = new __Class(__rt::stringify(\"[L"+fileinfo.getPackageName()+"."+t.className+"\"),\n"+
+							"\t\t\t\t\t\t\t\t__Array<"+t.superclass.getFQName()+t.superclass.className+">::__class(),\n"+
+							"\t\t\t\t\t\t\t\t"+t.getFQName()+"__"+t.className+"::__class());\n"+
+							"\t\treturn k;\n"+
+							"\t}\n\n"+
+							"\t//===========================================================================\n\n");
+		//close java::lang
+		cpp.write("\t}\n}");
+		
+		//reopen current package
+		for(String p: fileinfo.getPackageToNamespace()){
+			cpp.write("namespace "+p+" {\n");
+		}
+							
 	}
 	/*
 	 *closes both files
 	 *
 	 */
 	public void close(){
-		for(String p: dependencies.getPackageToNamespace()){
-			h_classdef.write("}\n");
-			cpp_methoddef.write("}\n");
+		for(String p: fileinfo.getPackageToNamespace()){
+			h.write("}\n");
+			cpp.write("}\n");
 		}
-		cpp_methoddef.close();
-		h_classdef.close();
+		cpp.close();
+		h.close();
 	}
 	//--------------end of methods -------------------------
 	
 	
 }// end of InheritanceBuilder
-
-/************ note on Vistors ***************
-
--include only the visit "whatever" methods for 
- nodes that will supply information 
--overused nodes like modifier can have boolean ranges
- for the specific action dependent on parent nodes
--these parent nodes' visit methods should be included
- as well with up and down switches on the boolean ranges
- 
-*******************************************/
-
 
 

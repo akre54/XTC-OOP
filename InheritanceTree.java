@@ -24,7 +24,6 @@ public class InheritanceTree{
 	public ArrayList<InheritanceTree> subclasses;
 	public ArrayList<String> packages;
 
-
 	/**
 	 * The constructor for creating the Object class Inheritance tree.
 	 * @param none
@@ -217,11 +216,6 @@ public class InheritanceTree{
 		local.add(new Declaration("Class","__class",className,								 
 								  new ArrayList<Fparam>(0)));
 
-
-		//add __delete to local methods
-		//Fparam d= new Fparam(new ArrayList<String>(0),className,"__this");
-		//Vt_ptrs.get(1).params.set(0,d);
-		local.add(Vt_ptrs.get(1));
 		
 		//constructors defined
 		//local methods defined
@@ -737,6 +731,16 @@ public class InheritanceTree{
 		result+= d.name;
 		if(d.overloadNum==0)return result;
 		else return result+"_"+d.overloadNum;
+	}/**
+	  * helper returns fully qualified name -classname for inheritancbuilder use
+	  */
+	public String getFQName(){
+		String s="";
+		if (packages.get(0).equals("")) return s;
+		for(String dir: packages){
+			s=s+dir+"::";
+		}
+		return s;
 	}
 
 }
