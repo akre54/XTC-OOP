@@ -87,35 +87,5 @@ class FileDependency {
     public int hashCode() {
         return fullPath.hashCode();
     }
-
-    public String javaFileName() {
-        return (new File(fullPath)).getName();
-    }
-
-    /* @return just name of file (ie ImportFile from ImportFile.java,
-        * used for cpp import headers */
-    public String cppFileName(ArrayList<ClassStruct> c) {
-        String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
-        String basename = javaFileName().replace(".java",".cpp");
-
-        if (directory.equals(""))
-            return basename;
-        else
-            return directory + "/" + basename;
-    }
-    public String hFileName(ArrayList<ClassStruct> c) {
-        String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
-        String basename = javaFileName().replace(".java","_dataLayout.h");
-        
-        if (directory.equals(""))
-            return basename;
-        else
-            return directory + "/" + basename;
-    }
-    public String qualifiedName(ArrayList<ClassStruct> c) {
-        String namespace = DependencyFinder.getNamespace(c, fullPath);
-        String basename = javaFileName().replace(".java","");
-        return namespace + "::" + basename;
-    }
 }
 

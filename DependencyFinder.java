@@ -259,8 +259,8 @@ public class DependencyFinder {
 	/**
 	 * @return package in cpp syntax
 	 */
-	public String getCppPackageName(){
-		return currentPackage.replace(".","::");
+	public String getNamespace(){
+		return currentPackage.replace("\\.","::");
 	}
 
         /** Get dependices sorted by specific origin (i.e. get just package
@@ -272,7 +272,7 @@ public class DependencyFinder {
                 if (d.origin == origin) {
                     switch (origin) {
                         case IMPORT:
-                            files.add("#include \"" + d.hFileName(allClasses) + "\"");
+                            files.add("#include \"" + hFileName(allClasses, d.fullPath) + "\"");
                             break;
                         /*case IMPORTEDPACKAGE:
 	                          files.add("using " + currentPackage.replaceAll("\\.", "::") + ";");
@@ -299,7 +299,7 @@ public class DependencyFinder {
             ArrayList<String> files = new ArrayList<String>();
             for (FileDependency d : fileDependencies) {
                 if (d.origin == DependencyOrigin.IMPORT) {
-                    files.add("using " + d.qualifiedName(allClasses) + ";");
+                    files.add("using " + qualifiedName(allClasses, d.fullPath) + ";");
                 }
             }
 
@@ -360,6 +360,36 @@ public class DependencyFinder {
         public int hashCode() {
             return currentFilePath.hashCode();
         }
+
+            public static String javaFileName(String fullPath) {
+                return (new File(fullPath)).getName();
+            }
+
+            /* @return just name of file (ie ImportFile from ImportFile.java,
+                * used for cpp import headers */
+            public String cppFileName(ArrayList<ClassStruct> c, String fullPath) {
+                String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
+                String basename = javaFileName(fullPath).replace(".java",".cpp");
+
+                if (directory.equals(""))
+                    return basename;
+                else
+                    return directory + "/" + basename;
+            }
+            public static String hFileName(ArrayList<ClassStruct> c, String fullPath) {
+                String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
+                String basename = javaFileName(fullPath).replace(".java","_dataLayout.h");
+
+                if (directory.equals(""))
+                    return basename;
+                else
+                    return directory + "/" + basename;
+            }
+            public static String qualifiedName(ArrayList<ClassStruct> c, String fullPath) {
+                String namespace = DependencyFinder.getNamespace(c, fullPath);
+                String basename = javaFileName(fullPath).replace(".java","");
+                return namespace + "::" + basename;
+            }
 
         public static ArrayList<String> getImports(ArrayList<ClassStruct> classes, String filename) {
             ArrayList<String> imports = new ArrayList<String>();
