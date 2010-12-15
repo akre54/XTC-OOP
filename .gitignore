@@ -1,3 +1,5 @@
+.gitignore
+
 ## java specific
 *.class
 
@@ -23,3 +25,5 @@ Test.java
 !testing/
 !java_lang.cpp
 !java_lang.h
+testing/*/java_lang.h
+testing/*/java_lang.cpp
