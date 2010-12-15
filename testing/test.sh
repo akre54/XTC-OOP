@@ -4,6 +4,7 @@
 # tool to compare the output of both files
 #
 # for OOP fall 10 by The Group
+cd $(pwd -P) # expand path to absolute path 
 . ../../../../setup.sh
 clear
 echo "Java to C++ Translation"
@@ -43,3 +44,4 @@ else
 	D="";
 fi
 done
+
