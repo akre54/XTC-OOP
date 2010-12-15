@@ -34,7 +34,7 @@ if [ $D ]; then
 	cp ../java_lang.cpp ./
 	cp ../java_lang.h ./
 	cp ../ptr.h ./
-	make -f ../Makefile PRE=$P TFLAGS='-verbose -printJavaAST'
+	make -f ../Makefile PRE=$P TFLAGS='-verbose -printAST'
 	echo
 	echo "Comparing output files:"
 	echo

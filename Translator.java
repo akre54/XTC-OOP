@@ -84,6 +84,8 @@ public class Translator extends Tool {
 		// Declare command line arguments.
 		runtime.
 			bool("printJavaAST", "printJavaAST", false,
+				 "Print the Java AST.").
+			bool("printAST", "printAST" , false,
 				 "Print the Java AST at the end of a translation.").
 			bool("countMethods", "optionCountMethods", false,
 				 "Print the number of method declarations.").
@@ -257,12 +259,17 @@ public class Translator extends Tool {
 						}
 						
                    
-						if (runtime.test("printJavaAST")) {
+						if (runtime.test("printAST")) {
 							runtime.console().format(node).pln().flush();
 						}
 		}//end of runtime.test("Translate") test
 //-----------------------------------------------------------------------
                 /* find dependencies of a single file, recursively calling until whole dependency topology is filled */
+
+		if (runtime.test("printJavaAST")) {
+			runtime.console().format(node).pln().flush();
+		}
+
 		if (runtime.test("finddependencies")) {
                     String fullPathName = "";
                     try { fullPathName = inputFile.getCanonicalPath(); }
