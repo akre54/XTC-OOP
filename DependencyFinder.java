@@ -352,7 +352,7 @@ public class DependencyFinder {
             }
             else {
                 Thread.dumpStack();
-                throw new RuntimeException();
+                throw new RuntimeException("Trying to compare DependencyFinder with wrong object type");
             }
         }
 
@@ -365,10 +365,10 @@ public class DependencyFinder {
                 return (new File(fullPath)).getName();
             }
 
-            /* @return just name of file (ie ImportFile from ImportFile.java,
-                * used for cpp import headers */
+            /** @return just name of file (ie ImportFile from ImportFile.java,
+                          * used for cpp import headers */
             public String cppFileName(ArrayList<ClassStruct> c, String fullPath) {
-                String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
+                String directory = getNamespaceDirectory(c, fullPath);
                 String basename = javaFileName(fullPath).replace(".java",".cpp");
 
                 if (directory.equals(""))
@@ -377,7 +377,7 @@ public class DependencyFinder {
                     return directory + "/" + basename;
             }
             public static String hFileName(ArrayList<ClassStruct> c, String fullPath) {
-                String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
+                String directory = getNamespaceDirectory(c, fullPath);
                 String basename = javaFileName(fullPath).replace(".java","_dataLayout.h");
 
                 if (directory.equals(""))
@@ -386,7 +386,7 @@ public class DependencyFinder {
                     return directory + "/" + basename;
             }
             public static String qualifiedName(ArrayList<ClassStruct> c, String fullPath) {
-                String namespace = DependencyFinder.getNamespace(c, fullPath);
+                String namespace = getNamespace(c, fullPath);
                 String basename = javaFileName(fullPath).replace(".java","");
                 return namespace + "::" + basename;
             }
