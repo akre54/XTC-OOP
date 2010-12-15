@@ -84,7 +84,7 @@ public class Translator extends Tool {
 		// Declare command line arguments.
 		runtime.
 			bool("printJavaAST", "printJavaAST", false,
-				 "Print the Java AST.").
+				 "Print the Java AST at the end of a translation.").
 			bool("countMethods", "optionCountMethods", false,
 				 "Print the number of method declarations.").
 			bool("translate", "translate", false,
@@ -257,10 +257,9 @@ public class Translator extends Tool {
 						}
 						
                    
-			if (VERBOSE) //prints the ast after every translation
-			{
-				runtime.console().format(node).pln().flush();
-			}
+						if (runtime.test("printJavaAST")) {
+							runtime.console().format(node).pln().flush();
+						}
 		}//end of runtime.test("Translate") test
 //-----------------------------------------------------------------------
                 /* find dependencies of a single file, recursively calling until whole dependency topology is filled */
@@ -291,10 +290,6 @@ public class Translator extends Tool {
                             allDependencies.putAll(t.allDependencies);
                         }
                     }
-		}
-
-		if (runtime.test("printJavaAST")) {
-			runtime.console().format(node).pln().flush();
 		}
 	}//end of process method
 

@@ -8,7 +8,7 @@ TARGETS = main.cpp *_methoddef.cpp  java_lang.cpp
 CC = g++
 DEBUG = -g
 FLAGS = $(DEBUG)
-TFLAGS = -verbose
+TFLAGS = #-verbose -printJavaAST
 
 all : ex javac
 
