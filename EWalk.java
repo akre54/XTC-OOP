@@ -91,6 +91,11 @@ public class EWalk //extends Visitor
 			/**Visit a Call expression and call the necessary inheritence checks
 			 should have a check for superExpression*/
 			public void visitCallExpression (GNode n) {
+				//reset print values here
+				isPrint=false;
+				isPrintln=false;
+				fcName= new StringBuffer();
+				fcNameList=new ArrayList<String>();
 				if(VERBOSE) System.out.println("\nVisiting a Call Expression node:");
 				inCall = true; //start looking for fully qualified name
 				
@@ -184,7 +189,7 @@ public class EWalk //extends Visitor
 				String methodName = n.getString(2);
 				//run checks for system.out.println and break from get method info
 				if(VERBOSE){System.out.print("isPrint???: " +isPrint);}
-				if(isPrint)  
+				if(methodName.contains("std::cout<<"))  
 				{
 					//isPrintln=true;
 					return methodArray;
@@ -257,15 +262,15 @@ public class EWalk //extends Visitor
 					n.set(1,"<<std::endl");
 					if(VERBOSE) System.out.println("N STRING" +n.toString());
 				}
-				else {
-					if(VERBOSE) System.out.println("Setting n[0] to:\t\t\t"+fcName);
+				else if(isPrint) {
+					if(VERBOSE) System.out.println("Setting 1n[0] to:\t\t\t"+fcName);
 					
 					n.set(0,null);
 					n.set(2,fcName.toString());
-					if(VERBOSE) System.out.println("N STRING" +n.toString());
+					if(VERBOSE) System.out.println("N1 STRING" +n.toString());
 				}
 				visit(n.getNode(3));
-				visit(n.getNode(3));
+				//visit(n.getNode(3));
 				
 				return fcNameList;
 				
