@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import xtc.oop.ArrayMaker;
 
 /**
- * Does all the smart Translating, visits 
- * 
+ * Does all the smart Translating, visits every node inside a method's block
  */ 
 public class EWalk //extends Visitor
 {
@@ -24,18 +23,17 @@ public class EWalk //extends Visitor
 		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
 		method=treeMethod;
-		
-		eWalker(n);
+		eWalker(n); //walk before you run...
 		eRunner(n);
 	}
 	
 	/**Handles, System.out.print, 
-	 Arrays
-	 Super
-	 Casts
-	 Method Calling/Chaining
-	 */
-	 private void eWalker (final GNode n) { 
+	   Arrays
+	   Super
+	   Casts
+	   Method Calling/Chaining
+	*/
+	private void eWalker (final GNode n) { 
 		Node node = n;
 		new Visitor() {
 			boolean inCall = false,
@@ -78,18 +76,17 @@ public class EWalk //extends Visitor
 			public boolean isCallExpression(Node n)
 			{
 				if(n!=null)
-				{
-					if(VERBOSE) System.out.println("IS CALL?"+n.getName());
-					if(n.getName().equals("CallExpression"))
-				   {
-					return true;
-				   }
+					{
+						if(VERBOSE) System.out.println("IS CALL? "+n.getName());
+						if(n.getName().equals("CallExpression")) {
+							return true;
+						}
 				  
-				}
-				 return false;
+					}
+				return false;
 			}
 			/**Visit a Call expression and call the necessary inheritence checks
-			 should have a check for superExpression*/
+			   should have a check for superExpression*/
 			public void visitCallExpression (GNode n) {
 				//reset print values here
 				isPrint=false;
@@ -102,12 +99,12 @@ public class EWalk //extends Visitor
 				//get the first child
 				Object first = n.get(0);
 				//check to see if its null
-				if(first!=null){
+				if(first!=null) {
 					//if it isn't null check to see if its primary or super
 					Node firstc= (Node) first;
-					if(firstc.getName().equals("SuperExpression")){
+					if(firstc.getName().equals("SuperExpression")) {
 						//if its super set the is super flag true
-					   isSuper=true;
+						isSuper=true;
 					}
 					if(VERBOSE) System.out.println("NAME:" +firstc.getName());
 					
@@ -136,46 +133,45 @@ public class EWalk //extends Visitor
 			public boolean isPrimaryIdentifier(Node n)
 			{
 				if(n.getName().equals("PrimaryIdentifier"))
-				   {
-					  return true;
-				   }
-				   else
-				   {
-					   return false;
-				   }
+					{
+						return true;
+					}
+				else
+					{
+						return false;
+					}
 				   
 			}
 			/**does all of Call Expressions Heavy Lifting and returns the newmethod arraylist*/
 			public String[] setMethodInfo(Node n)
 			{
 				//gets the FCNameList Node and visits it using the getFCName method
-				ArrayList<String> fcNamelist =getFcName(n);
-				
+				ArrayList<String> fcNamelist = getFcName(n);
 				
 				String primaryIdentifier=" ";
-				Node firstChild= n.getNode(0);
+				Node firstChild=n.getNode(0);
 				if(isMethodChaining)
-				{
-					//store the method return type
-					primaryIdentifier=savedReturnType;
-				}
+					{
+						//store the method return type
+						primaryIdentifier=savedReturnType;
+					}
 				if(isCallExpression(firstChild))
 					{
 						isMethodChaining=true;
 						dispatch(firstChild);
 					}
-					else if(firstChild!=null)
+				else if(firstChild!=null)
 					{
 						//check to see if its primaryidentifier
 						if((isPrimaryIdentifier(firstChild)))
-						{
-							primaryIdentifier=firstChild.getString(0);
-						}
+							{
+								primaryIdentifier=firstChild.getString(0);
+							}
 						//else dispatch on the firstchild
 						else 
-						{
-							dispatch(firstChild);
-						}
+							{
+								dispatch(firstChild);
+							}
 					}
 				
 				//visit the arguments node
@@ -184,7 +180,7 @@ public class EWalk //extends Visitor
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				if(VERBOSE) System.out.println("New Array List Created...\n");
 				
-								//get the method name
+				//get the method name
 				String[] methodArray= new String[2];
 				String methodName = n.getString(2);
 				//run checks for system.out.println and break from get method info
@@ -209,17 +205,22 @@ public class EWalk //extends Visitor
 			/**Helper method returns the arguments in an array list*/
 			public ArrayList<String> getArgumentTypes(Node n)
 			{
+				System.out.println("1hi---------------------------------");
 				//get the type for every argument in the argument Node
 				ArrayList<String> argumentList = new ArrayList<String>();
+								System.out.println("1hi---------------------------------");
+
 				for(int i=0;i<n.size();i++)	{
 					argumentList.add(getType(n.getNode(i)));
 				} //what about a method call here?
-				
+								System.out.println("1hi---------------------------------");
+
 				/*if the argumentlist is empty return a arraylist of the string 0 */
 				if (argumentList.isEmpty()) {
-					 argumentList.add("0");
+					argumentList.add("0");
 				}
-				
+								System.out.println("1hi---------------------------------");
+
 				return argumentList;
 				
 			}
@@ -312,9 +313,9 @@ public class EWalk //extends Visitor
 				ArrayList<String> currentPackage = new ArrayList<String>();
 				Object o = n.get(1);
 				if(o!=null)
-				{
-					currentPackage=getPackage((Node)o);
-				}
+					{
+						currentPackage=getPackage((Node)o);
+					}
 				//remove the last Value (its the object name.)
 				String newtype = currentPackage.remove(currentPackage.size()-1);
 				
@@ -328,15 +329,15 @@ public class EWalk //extends Visitor
 				//get the name Locaed under declarator
 				Object declarators = n.get(2);
 				if(declarators!=null)
-				{
-					Node declarNode=(Node)declarators;
-					Object declarator=declarNode.get(0);
-					if(declarator!=null)
 					{
-						Node declaratorNode = (Node)declarator;
-						name = declaratorNode.getString(0);
+						Node declarNode=(Node)declarators;
+						Object declarator=declarNode.get(0);
+						if(declarator!=null)
+							{
+								Node declaratorNode = (Node)declarator;
+								name = declaratorNode.getString(0);
+							}
 					}
-				}
 				
 				//update the type of the variable
 				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
@@ -346,6 +347,7 @@ public class EWalk //extends Visitor
 					//visit(n);
 					isString = false;
 				}
+				visit(n);
 				if (isArray) {
 					if(VERBOSE) System.out.println("Entering array");
 					ArrayMaker goArray = new ArrayMaker (n);
@@ -361,10 +363,10 @@ public class EWalk //extends Visitor
 				//System.out.println("currentNode" +n.getName());
 				Node node = n.getNode(0);
 				//System.out.println("currentNode" +n.getName());
-					for(int i=0; i<node.size(); i++){
+				for(int i=0; i<node.size(); i++){
 					//for every child in QualifiedIdentifier append it to the array list
-						packages.add(node.getString(i));
-					}
+					packages.add(node.getString(i));
+				}
 					
 				
 				return packages;
@@ -385,8 +387,8 @@ public class EWalk //extends Visitor
 			}
 			
 			/**helper method that uses the inheritence tree search for method and 
-			 returns the givne string array that should contain the return type and methodname 
-			 puts in check for isSuper flag*/
+			   returns the givne string array that should contain the return type and methodname 
+			   puts in check for isSuper flag*/
 			public String[] getMethodInfo(Node n,String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
 				if(VERBOSE){System.out.println("Running"+ Identifier+"," + nameList +","+name+","+argumentList);}
@@ -395,27 +397,27 @@ public class EWalk //extends Visitor
 				
 				InheritanceTree b;
 				if(isInstance)
-				{
+					{
 					
-					ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
-					//remove the last value from the arrayList (thats always the class name
-					String className =(String)qualities.remove(1);
-					//get the inheritance name of 
-					b =tree.root.search(qualities,className); //search takes the current method name?
-					//when there are no arguments sends a NullPointerException
-					if(VERBOSE){System.out.println("On Instance"+ isInstance+"," + method +","+argumentList+","+name);}
-				}
-				else if (isSuper) 
-				{
-						if(VERBOSE){System.out.println("On Super"+ isInstance+"," + method +","+argumentList+","+name);}
-					//call the search for method on the superclass's tree
-					b=tree.superclass; //superclass is a public variable
-					
-					//if isSuper put the class name as a string on the first child
-					if(isSuper){
-						n.set(0,b.className);
+						ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
+						//remove the last value from the arrayList (thats always the class name
+						String className =(String)qualities.remove(1);
+						//get the inheritance name of 
+						b =tree.root.search(qualities,className); //search takes the current method name?
+						//when there are no arguments sends a NullPointerException
+						if(VERBOSE){System.out.println("On Instance"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
-				}
+				else if (isSuper) 
+					{
+						if(VERBOSE){System.out.println("On Super"+ isInstance+"," + method +","+argumentList+","+name);}
+						//call the search for method on the superclass's tree
+						b=tree.superclass; //superclass is a public variable
+					
+						//if isSuper put the class name as a string on the first child
+						if(isSuper){
+							n.set(0,b.className);
+						}
+					}
 				else{
 					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}
 					b=tree;
@@ -424,7 +426,7 @@ public class EWalk //extends Visitor
 				return b.search_for_method(isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
-			 is currently used when get the types for values in an argument*/
+			   is currently used when get the types for values in an argument*/
 			public String getType(Node n)
 			{
 				//check for primitative types
@@ -435,21 +437,21 @@ public class EWalk //extends Visitor
 					return "String";
 				}
 				else if(n.getName().equals("BooleanLiteral"))
-				{
-					return "boolean";
-				}
+					{
+						return "boolean";
+					}
 				else if(n.getName().equals("NullLiteral"))
-				{
-					return "null";
-				}
+					{
+						return "null";
+					}
 				else if(n.getName().equals("FloatingPointLiteral"))
-				{
-					return "float";
-				}
+					{
+						return "float";
+					}
 				else if(n.getName().equals("CharLiteral"))
-				{
-					return "char";
-				}
+					{
+						return "char";
+					}
 				else if (n.getName().equals("CallExpression"))
 				{
 					//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
@@ -475,7 +477,7 @@ public class EWalk //extends Visitor
 				}
 
 				/**can put support for handling methods inside an argument here (use search for methods
-				 to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
+				   to find out what the method will return? Are we storing the return type of a method in inheritence tree?*/
 			}
 			/**Helper method returns the type of expressions*/
 			public String getExpressionType(Node n)
@@ -538,8 +540,8 @@ public class EWalk //extends Visitor
 			}
 			
 			/**Gets the classes super class 
-			 finds the proper method in the inheritence tree of the superclass
-			 */
+			   finds the proper method in the inheritence tree of the superclass
+			*/
 			public void visitSuperExpression(GNode n)
 			{ 
 				InheritanceTree superclass = tree.superclass;
@@ -550,21 +552,20 @@ public class EWalk //extends Visitor
 			}
 			public void visit(Node n) {
 				if(n!=null){
-				for (Object o : n){ 
-					if (o instanceof Node){ 
-						dispatch((Node)o);
+					for (Object o : n){ 
+						if (o instanceof Node){ 
+							dispatch((Node)o);
 						
+						}
 					}
-				}
 				}//make sure n is not null
 			}
 		}.dispatch(node); 
 	}//end of eWalker Method
 	
-	/**Follows eWalker
-	 Handles
-	 Types
-	 Modifiers*/
+	/**Follows eWalker. Handles: Types, Modifiers
+
+	 */
 	public void eRunner(final GNode n)
 	{
 		Node node = n;
