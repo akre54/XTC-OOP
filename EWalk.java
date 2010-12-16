@@ -216,9 +216,9 @@ public class EWalk //extends Visitor
 								System.out.println("1hi---------------------------------");
 
 				/*if the argumentlist is empty return a arraylist of the string 0 */
-				if (argumentList.isEmpty()) {
-					argumentList.add("0");
-				}
+				//if (argumentList.isEmpty()) {
+					//argumentList.add("");
+				//}
 								System.out.println("1hi---------------------------------");
 
 				return argumentList;
@@ -410,11 +410,11 @@ public class EWalk //extends Visitor
 						//get the inheritance name of 
 						b =tree.root.search(qualities,className); //search takes the current method name?
 						//when there are no arguments sends a NullPointerException
-						if(VERBOSE){System.out.println("On Instance"+ isInstance+"," + method +","+argumentList+","+name);}
+						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isSuper) 
 					{
-						if(VERBOSE){System.out.println("On Super"+ isInstance+"," + method +","+argumentList+","+name);}
+						if(VERBOSE){System.out.println("On Super:"+ isInstance+"," + method +","+argumentList+","+name);}
 						//call the search for method on the superclass's tree
 						b=tree.superclass; //superclass is a public variable
 					
