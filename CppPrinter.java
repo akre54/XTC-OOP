@@ -46,6 +46,9 @@ public class CppPrinter extends Visitor
 	private boolean isPrivate; 	
 	private boolean isArguments; //checks to see if we're currently in an argument subtree
 	private boolean isReturn; //checks to see if there is a StringLiteral inside a return statement
+	private boolean isInstance;
+	private boolean isPrint;
+	private String primIdentifier;
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
 	{
@@ -56,7 +59,8 @@ public class CppPrinter extends Visitor
 		}
 //		setupLog("CppPrinter");
 		printer = new StringBuilder(); //intialize Stringbuilder
-		
+		isInstance=false;
+		primIdentifier ="";
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
 	}
@@ -69,6 +73,8 @@ public class CppPrinter extends Visitor
 //		logger.fine("Writing to the Log");
 		printer = new StringBuilder(); //intialize Stringbuilder
 		isPrivate =false; //sets false by default since structs are public by default
+		isInstance=false;
+		primIdentifier="";
 		isArguments=false;
 
 		visit(n); //visit the given node (starts all the visiting)
@@ -76,7 +82,7 @@ public class CppPrinter extends Visitor
 	/**Only prints out a special case if isTReturn Flag is set to true otherwise does normal behavor*/
 	public void visitStringLiteral(GNode n)
 	{
-		if(isReturn || isArguments) //check to see if we are current in a return subtree
+		if(isReturn || !isPrint) //check to see if we are current in a return subtree
 			print("new __String("+n.getString(0)+")"); //print out the proper code
 		else//otherwise just visit the tree as normal
 			visit(n);
@@ -350,10 +356,7 @@ public class CppPrinter extends Visitor
 					dispatch(cond);
 				}
 			}
-			
-			
 		}
-		
 	}	
 	////////////////Loops////////////////////////
 	/**visiting the Do While statement in the AST*/
@@ -448,7 +451,7 @@ public class CppPrinter extends Visitor
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
 	{
-		boolean isPrint=false;
+		isPrint=false;
 		//check the first child to see if its a primaryIdentifier 
 		Object o= n.get(0);
 		if (o!=null)
@@ -460,7 +463,9 @@ public class CppPrinter extends Visitor
 				if (oNode.getName().equals("PrimaryIdentifier") ){
 					
 					print("__rt::checkNotNull("+oNode.getString(0)+");\n");
-					print(oNode.getString(0));
+					primIdentifier= oNode.getString(0);
+					print(primIdentifier);
+					isInstance=true;
 				}
 				//else its not a PrimaryIdentifier Node dispatch on it as normal
 				else{
@@ -517,10 +522,24 @@ public class CppPrinter extends Visitor
 		}
 	}
 	/**********************Other***************************/
-	/**Visists the argument Node and prints the children with a comma (,) i.e. (a, b,c)*/
+	/**Visists the argument Node and prints the children with a comma (,) i.e. (a, b,c) also
+	 runs a check for the isInstance variable and prints that if true*/
 	public void visitArguments(GNode n)
 	{
 		isArguments=true;
+	//	if(isCallExpression)
+	//	{
+			if(isInstance)
+			{
+				print(primIdentifier+",");
+				isInstance=false;
+				primIdentifier="";
+			}
+			else {
+				//print("__this"+ ",");
+			}
+	//	}
+
 		visitChildren(n, 0, n.size(), ",");
 		isArguments=false;
 	}
