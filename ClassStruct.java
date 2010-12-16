@@ -51,10 +51,10 @@ public class ClassStruct {
     /**  @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo",
 	  *	or empty list if blank package name			 */
     public ArrayList<String> getPackage() {
-	 	if (!packageName.equals("")) // if not blank
-        return new ArrayList<String>(java.util.Arrays.asList(packageName.split("\\.")));
-		else
-			return new ArrayList<String>();
+        if (!packageName.equals("")) // if not blank
+            return new ArrayList<String>(java.util.Arrays.asList(packageName.split("\\.")));
+	else
+            return new ArrayList<String>();
     }
 }
 

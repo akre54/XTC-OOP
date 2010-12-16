@@ -14,7 +14,7 @@ public class EWalk //extends Visitor
 	boolean VERBOSE = true; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
-	private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
+	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
 	private boolean isMethodChaining;//check if methodChaining is enacted (Starts if a CallExpression is the first child of another CallExpression)
 	private String savedReturnType; //saves the return type of a method for method chaining (starting at the bottom CallExpression
 		/**Constructor that takes an InheritanceTree Object, a Declaration Object, a GNode*/
@@ -42,6 +42,7 @@ public class EWalk //extends Visitor
 				isArray = false,
 				isPrintString = false,	
 				isString = false,
+				isInstance=false,
 				isSuper;//flag that saves whether super is inside a call expression
 
 			StringBuffer fcName= new StringBuffer();
@@ -77,7 +78,7 @@ public class EWalk //extends Visitor
 			{
 				if(n!=null)
 					{
-						if(VERBOSE) System.out.println("IS CALL? "+n.getName());
+						//if(VERBOSE) System.out.println("IS CALL? "+n.getName());
 						if(n.getName().equals("CallExpression")) {
 							return true;
 						}
@@ -93,7 +94,7 @@ public class EWalk //extends Visitor
 				isPrintln=false;
 				fcName= new StringBuffer();
 				fcNameList=new ArrayList<String>();
-				if(VERBOSE) System.out.println("\nVisiting a Call Expression node:");
+				//if(VERBOSE) System.out.println("\nVisiting a Call Expression node:");
 				inCall = true; //start looking for fully qualified name
 				
 				//get the first child
@@ -106,25 +107,33 @@ public class EWalk //extends Visitor
 						//if its super set the is super flag true
 						isSuper=true;
 					}
-					if(VERBOSE) System.out.println("NAME:" +firstc.getName());
+					if (firstc.getName().equals("PrimaryIdentifier")) {
+							isInstance=true;
+					}
+				
 					
 					dispatch(firstc); //visit the node
 
 				}
 				
 				String[] methodArray=setMethodInfo(n);
+				/*isPrint=false;
+				isPrintln=false;
+				fcName= new StringBuffer();
+				fcNameList=new ArrayList<String>();*/
 				//new method name to override in the tree
 				String newMethod= methodArray[1];
 				savedReturnType = methodArray[0];
-				if(VERBOSE) System.out.println("NEW METHOD" + newMethod);
+				//if(VERBOSE) System.out.println("NEW METHOD" + newMethod);
 				//code to replace the old method name with the new method name in the tree	
 				//where the current method name is current located as position 2
 				if(newMethod!=null)
 					n.set(2,newMethod);
+				
+				isInstance=false;
 				visit(n);
 				//reset print values here
-				isPrint=false;
-				isPrintln=false;
+				
 				
 								
 				
@@ -194,7 +203,20 @@ public class EWalk //extends Visitor
 					//isPrint=true;
 					return methodArray;
 				}*/
-
+				
+				if(isInstance)//check to see if the method call has a reciever
+				{
+					//Node  =new GNode();
+					//add the primary identifier to the Arguments Node
+					Node primary = n.getNode(0);
+					//get the arguments node (located at position 3)
+					Node argum = n.getNode(3);
+					//System.out.println(argum.MAX_FIXED + " " +argum.getName());
+					GNode gArgum=(GNode)argum;
+					GNode argue= gArgum.ensureVariable(gArgum);
+					//add the primary node to the first position in the arguments node
+					gArgum.add(0,primary);
+				}
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//run a check for System.out.print and println
 				System.out.println(isPrintln);
@@ -218,7 +240,7 @@ public class EWalk //extends Visitor
 				/*if the argumentlist is empty return a arraylist of the string 0 */
 				//if (argumentList.isEmpty()) {
 					//argumentList.add("");
-				//}
+			//	}
 								System.out.println("1hi---------------------------------");
 
 				return argumentList;
@@ -326,9 +348,9 @@ public class EWalk //extends Visitor
 				
 				//check to see if current package is now empty
 				//if it is append zero
-				if (currentPackage.isEmpty()) {
-					currentPackage.add("0");
-				}
+				//if (currentPackage.isEmpty()) {
+			//		currentPackage.add("0");
+			//	}
 				
 				String name="";
 				//get the name Locaed under declarator
@@ -393,7 +415,7 @@ public class EWalk //extends Visitor
 			
 			/**helper method that uses the inheritence tree search for method and 
 			   returns the givne string array that should contain the return type and methodname 
-			   puts in check for isSuper flag*/
+			   puts in check for isSuper flag and isInstance Flag*/
 			public String[] getMethodInfo(Node n,String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
 				if(VERBOSE){System.out.println("Running"+ Identifier+"," + nameList +","+name+","+argumentList);}
@@ -405,11 +427,14 @@ public class EWalk //extends Visitor
 					{
 					
 						ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
+							System.out.println("Methood.Search_for_type:" + Identifier);
 						//remove the last value from the arrayList (thats always the class name
-						String className =(String)qualities.remove(1);
+						String className =(String)qualities.remove(qualities.size()-1);
+						System.out.println("isInstance:className" + className);
 						//get the inheritance name of 
+							System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						b =tree.root.search(qualities,className); //search takes the current method name?
-						//when there are no arguments sends a NullPointerException
+						System.out.println(b.toString());
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isSuper) 
@@ -417,11 +442,6 @@ public class EWalk //extends Visitor
 						if(VERBOSE){System.out.println("On Super:"+ isInstance+"," + method +","+argumentList+","+name);}
 						//call the search for method on the superclass's tree
 						b=tree.superclass; //superclass is a public variable
-					
-						//if isSuper put the class name as a string on the first child
-						if(isSuper){
-							n.set(0,b.className);
-						}
 					}
 				else{
 					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}

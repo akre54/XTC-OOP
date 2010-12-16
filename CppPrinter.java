@@ -44,10 +44,13 @@ public class CppPrinter extends Visitor
 	private boolean DEBUG = false;
 	/*A global boolean that keeps track of the current modifier status*/
 	private boolean isPrivate; 	
+	private boolean isArguments; //checks to see if we're currently in an argument subtree
 	private boolean isReturn; //checks to see if there is a StringLiteral inside a return statement
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
 	{
+		isArguments=false;
+		System.out.println(n.toString());
 		if(n!=null){
 		if(DEBUG)System.out.println(n.toString());
 		}
@@ -66,12 +69,14 @@ public class CppPrinter extends Visitor
 //		logger.fine("Writing to the Log");
 		printer = new StringBuilder(); //intialize Stringbuilder
 		isPrivate =false; //sets false by default since structs are public by default
+		isArguments=false;
+
 		visit(n); //visit the given node (starts all the visiting)
 	}
 	/**Only prints out a special case if isTReturn Flag is set to true otherwise does normal behavor*/
 	public void visitStringLiteral(GNode n)
 	{
-		if(isReturn) //check to see if we are current in a return subtree
+		if(isReturn || isArguments) //check to see if we are current in a return subtree
 			print("new __String("+n.getString(0)+")"); //print out the proper code
 		else//otherwise just visit the tree as normal
 			visit(n);
@@ -223,7 +228,7 @@ public class CppPrinter extends Visitor
 	/**Assumes that all "smart' code has been handled in EWalk does nothing but print code *place holder**/
 	public void visitSuperExpression(GNode n)
 	{
-		print("superclass.");
+		print("getsuperclass(__this)->");
 		visit(n);
 	}
 	/**set the default binary behavior See setBinary*/
@@ -436,6 +441,10 @@ public class CppPrinter extends Visitor
 			}			
 		}
 	}
+	public void visitPrimaryIdentifier(GNode n)
+	{
+		print(n.getString(0));
+	}
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
 	{
@@ -450,7 +459,8 @@ public class CppPrinter extends Visitor
 				//if it is a primaryIdentifier print out a check statement
 				if (oNode.getName().equals("PrimaryIdentifier") ){
 					
-					print("__rt::CheckNotNull("+oNode.getString(0)+")");
+					print("__rt::checkNotNull("+oNode.getString(0)+");\n");
+					print(oNode.getString(0));
 				}
 				//else its not a PrimaryIdentifier Node dispatch on it as normal
 				else{
@@ -510,7 +520,9 @@ public class CppPrinter extends Visitor
 	/**Visists the argument Node and prints the children with a comma (,) i.e. (a, b,c)*/
 	public void visitArguments(GNode n)
 	{
+		isArguments=true;
 		visitChildren(n, 0, n.size(), ",");
+		isArguments=false;
 	}
 	/**visits the formal parameter node */
 	public void visitFormalParameter(GNode n)

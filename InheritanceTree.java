@@ -15,11 +15,12 @@ import xtc.tree.Visitor;
 
 public class InheritanceTree{
 	public InheritanceTree root;
+	public String packageName;
 	public final String className;
 	public ArrayList<InstanceField> fields;
 	public ArrayList<Declaration> constructors;
 	public ArrayList<Declaration> local; //all methods defined IN THIS CLASS virtual or not!
-	public ArrayList<Declaration> Vt_ptrs; //all methods able to be inherited by children
+	public ArrayList<Declaration> Vt_ptrs; //all methods in vtable
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
 	public ArrayList<String> packages;
@@ -30,6 +31,7 @@ public class InheritanceTree{
 	 * 
 	 */
 	InheritanceTree(){
+		this.packageName ="java.lang";
 		this.packages = new ArrayList<String>(0);
 		this.root = this;
 		packages.add("java");
@@ -86,6 +88,7 @@ public class InheritanceTree{
 	 */
 	InheritanceTree(InheritanceTree supr,String string_or_class){
 		this.root = supr.root;
+		this.packageName =supr.packageName;
 		this.packages = supr.packages;
 		this.superclass = supr;
 		this.className = string_or_class;
@@ -186,9 +189,10 @@ public class InheritanceTree{
 	 * will create vtable for class and then attach the tree to the superclass tree.
 	 * @param GNode (classdeclaration), InheritanceTree (superclass's).
 	 */
-	InheritanceTree(ArrayList<String> packages,GNode n, InheritanceTree supr){
+	InheritanceTree(String packageName,ArrayList<String> packages,GNode n, InheritanceTree supr){
 		this.root = supr.root;
 		this.packages= packages;
+		this.packageName =packageName;
 		this.superclass = supr;
 		this.className = n.getString(1);
 		
@@ -723,7 +727,7 @@ public class InheritanceTree{
 	private String make_name(boolean on_instance,Declaration d){
 		String result="";
 		if ((on_instance) && (d.isVirtual))
-                    result= "->vtpr->";
+                    result= "->__vptr->";
 		else if ((on_instance) && (!d.isVirtual))
                     result=".";
 		else
@@ -731,9 +735,28 @@ public class InheritanceTree{
 		result+= d.name;
 		if(d.overloadNum==0)return result;
 		else return result+"_"+d.overloadNum;
-	}/**
-	  * helper returns fully qualified name -classname for inheritancbuilder use
-	  */
+	}
+	/** will make a fully qualified string out of any String type
+	 */
+	public String FQfy(String type){//only use when all inheritanctrees are made
+
+		if(type.contains("."))
+			return getcppFQName();
+		//no FQ if primitive type
+		if((type.equals("int_32"))||(type.equals("char"))
+		   ||(type.equals("short"))||(type.equals("long"))
+		   ||(type.equals("float"))||(type.equals("double")))
+			return type;
+		else{
+			ArrayList<String> pack= new ArrayList<String>(java.util.Arrays.asList(type.split("\\.")));
+			type = pack.get(pack.size()-1);
+			pack.remove(pack.size()-1);
+			InheritanceTree t = this.root.search(pack,type);
+			return t.getFQName();
+		}
+	}
+	/** 
+	 */
 	public String getFQName(){
 		String s="";
 		if (packages.get(0).equals("")) return s;
@@ -742,5 +765,11 @@ public class InheritanceTree{
 		}
 		return s;
 	}
+	/**
+	 *
+	 */
+	public String getcppFQName(){
+		return this.packageName.replace(".","::");
+	}
 
-}
+}//end of inheritancetree

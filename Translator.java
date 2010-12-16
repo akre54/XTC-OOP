@@ -199,12 +199,12 @@ public class Translator extends Tool {
                             for (ClassStruct c : classes.keySet()) {
                                 if (classes.get(c) == false) {
                                     if (c.superClass.equals("")) {//*** extends object
-                                        new InheritanceTree(c.getPackage(), c.classNode, Object);
+                                        new InheritanceTree(c.packageName,c.getPackage(), c.classNode, Object);
                                         classes.put(c, true);
                                     } else {
                                         InheritanceTree superclass = Object.search(c.getPackage(), c.superClass);
                                         if (superclass != null) {//**extends an already translated class
-                                            new InheritanceTree(c.getPackage(), c.classNode, superclass);
+                                            new InheritanceTree(c.packageName,c.getPackage(), c.classNode, superclass);
                                             classes.put(c, true);
                                         }
                                     }
@@ -246,11 +246,11 @@ public class Translator extends Tool {
 										}//end of else check
 										num_classes = editablelist.size();
 									}//end of for loop
-									
-								}//end of while
-								try{cppfiles.close();}
-								catch(Exception e){}
-						}
+								
+							}//end of while
+							try{cppfiles.close();}
+							catch(Exception e){}
+						}//end of outer for loop
 						
 		}//end of runtime.test("translate") test
 //-----------------------------------------------------------------------
