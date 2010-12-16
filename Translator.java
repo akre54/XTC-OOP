@@ -119,16 +119,7 @@ public class Translator extends Tool {
 		Result result = parser.pCompilationUnit(0);
 		return (Node)parser.value(result);
 	}
-	/**
-	 * helper method test how many classes left to translate at any moment
-	 */
-	public int numFalse() {
-		int numRemaining = 0;
-		for (Boolean b : classes.values()) {
-			if (!b)numRemaining++;
-		}
-		return numRemaining;
-	}
+
 
 	//-----------------------------------------------------------------------
 	public void process(Node node) {
@@ -158,7 +149,8 @@ public class Translator extends Tool {
 				}.dispatch(node);
 			
 			}
-		/*
+	//-------------------------------------------------------------------
+		/**s
 		 * runtime option TRANSLATE 
 		 *
 		 */
@@ -186,9 +178,11 @@ public class Translator extends Tool {
                         for (ClassStruct c : classes.keySet()) {
                             c.rootPackage = t.rootPackage;
                         }
-
-			for(FileDependency d: allDependencies.keySet()) System.out.println(d+" "+d.fullPath);
-			for(ClassStruct c: classes.keySet()) System.out.println(c+" "+c.className);
+			
+			if(VERBOSE){//print out all files and classes to be translated
+				for(FileDependency d: allDependencies.keySet()) System.out.println(d+" "+d.fullPath);
+				for(ClassStruct c: classes.keySet()) System.out.println(c+" "+c.className);
+			}
 					  
 			//creates tree root a.k.a. the Object class
 			final InheritanceTree Object = new InheritanceTree();
@@ -221,23 +215,23 @@ public class Translator extends Tool {
 				leftTotranslate = classes.size();//**update for infiniteloop
 			}
 					 
-			//----- creates all InheritanceBuilders
-                        InheritanceBuilder inherit;
+			//----- creates all CppFileBuilders
+                        CppFileBuilder cppfiles;
                         boolean superiswritten =true;
                         LinkedList<ClassStruct> editablelist;
-                        int index;
                         for (FileDependency d: allDependencies.keySet()){
 							DependencyFinder dep = new DependencyFinder(getNodeFromFilename(d.fullPath), d.fullPath);
 							editablelist = new LinkedList<ClassStruct>(dep.getFileClasses());
-							//inheritancebuilder takes the Files dependencyfinder and arraylist of the ClassStructs
-							inherit = new InheritanceBuilder(dep, new ArrayList<ClassStruct>(classes.keySet()));
+							//CppFileBuilder takes the Files dependencyfinder and arraylist of the ClassStructs
+							cppfiles = new CppFileBuilder(dep, new ArrayList<ClassStruct>(classes.keySet()));
 							int num_classes = editablelist.size();
+							//writes to CppFileBuilder class by class
 							while(num_classes!=0){
 									for (int i=0;i< num_classes;i++){
 										ClassStruct c = editablelist.get(i);
 										superiswritten =true;
 										if( c.superClass.equals("")){//*** extends object
-												inherit.addClassdef(Object.search(c.getPackage(),c.className));
+												cppfiles.addClassdef(Object.search(c.getPackage(),c.className));
 												editablelist.remove(c);
 										}//end of if check
 										else{
@@ -246,7 +240,7 @@ public class Translator extends Tool {
 													superiswritten = false;
 											}
 											if (superiswritten){//**extends an already written class
-												inherit.addClassdef(Object.search(c.getPackage(),c.className));
+												cppfiles.addClassdef(Object.search(c.getPackage(),c.className));
 												editablelist.remove(c);
 											}
 										}//end of else check
@@ -254,23 +248,19 @@ public class Translator extends Tool {
 									}//end of for loop
 									
 								}//end of while
-								try{inherit.close();}
+								try{cppfiles.close();}
 								catch(Exception e){}
 						}
 						
-                   
-						if (runtime.test("printAST")) {
-							runtime.console().format(node).pln().flush();
-						}
-		}//end of runtime.test("Translate") test
+		}//end of runtime.test("translate") test
 //-----------------------------------------------------------------------
-                /* find dependencies of a single file, recursively calling until whole dependency topology is filled */
-
-		if (runtime.test("printJavaAST")) {
-			runtime.console().format(node).pln().flush();
-		}
-
+		/**
+		 *find dependencies of a single file, recursively calling until whole dependency topology is filled 
+		 */
 		if (runtime.test("finddependencies")) {
+			if (VERBOSE) {
+				runtime.console().p("gathering classes from import files...").pln().flush();
+			}
                     String fullPathName = "";
                     try { fullPathName = inputFile.getCanonicalPath(); }
                     catch (IOException e) { }
@@ -297,12 +287,28 @@ public class Translator extends Tool {
                             allDependencies.putAll(t.allDependencies);
                         }
                     }
+		}//end of runtime.test("finddependencies")
+		//------------------------------------------------------------------
+		
+		if (runtime.test("printJavaAST")) {
+			runtime.console().format(node).pln().flush();
 		}
 	}//end of process method
 
-        /** helper methods for translator */
+	//helper methods for translator
 
-        /** @return arbitrary node from any class belonging to filename,   */
+	/** @return how many classes left to translate at any moment
+	 */
+	public int numFalse() {
+		int numRemaining = 0;
+		for (Boolean b : classes.values()) {
+			if (!b)numRemaining++;
+		}
+		return numRemaining;
+	}
+
+        /** @return arbitrary node from any class belonging to filename,   
+		 */
         public Node getNodeFromFilename(String filename) {
             for (ClassStruct c : classes.keySet()) {
                 if (c.filePath.equals(filename))
@@ -311,7 +317,8 @@ public class Translator extends Tool {
             throw new RuntimeException("can't find any classes belonging to " + filename);
         }
 
-        /** stripped-down version of HashMap containsKey() and get() so we can search by file name  */
+        /** stripped-down version of HashMap containsKey() and get() so we can search by file name  
+		 */
         public static boolean containsKey (HashMap<FileDependency,Boolean> allDependencies,
                                     String filename) {
             for (FileDependency f : allDependencies.keySet()) {
