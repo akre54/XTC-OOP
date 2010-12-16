@@ -6,21 +6,17 @@
 
 package xtc.oop;
 
-import java.io.File;
 import java.util.ArrayList;
 import xtc.tree.Node;
 import xtc.tree.GNode;
 
 public class ClassStruct {
 
-    String filePath;
-    String packageName;
-    String className;
-    String superClass;
+    String filePath, packageName, className, superClass;
     ArrayList<FileDependency> fileDependencies;
     GNode classNode;
     Node fileNode;
-    String rootPackage;
+    String rootPackage, rootFile; // updated in -translate, after -finddependencies is complete
 
     public ClassStruct(String filePath, String packageName, String className,
             String superClass, ArrayList<FileDependency> fileDependencies, GNode classNode, Node fileNode) {
@@ -52,40 +48,18 @@ public class ClassStruct {
         return (this.filePath.equals(c.filePath));
     }
 
-    /**  @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo" */
+    /**  @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo",
+	  *	or empty list if blank package name			 */
     public ArrayList<String> getPackage() {
+	 	if (!packageName.equals("")) // if not blank
         return new ArrayList<String>(java.util.Arrays.asList(packageName.split("\\.")));
+		else
+			return new ArrayList<String>();
     }
 }
 
-/* Origin of a dependency, used for tracking call heirarchy */
+/** Origin of a dependency, used for tracking call heirarchy */
 enum DependencyOrigin {
     ROOTFILE, IMPORT, IMPORTEDPACKAGE, CURRENTPACKAGE, CURRENTDIRECTORY
-}
-
-class FileDependency {
-    
-    public String fullPath;
-    public DependencyOrigin origin;
-
-    public FileDependency(String fullPath, DependencyOrigin origin) {
-        this.fullPath = fullPath;
-        this.origin = origin;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof FileDependency) {
-            FileDependency other = (FileDependency)o;
-            return this.fullPath.equals((other.fullPath));
-        }
-        return false;
-    }
-
-
-    @Override
-    public int hashCode() {
-        return fullPath.hashCode();
-    }
 }
 
