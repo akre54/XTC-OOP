@@ -23,8 +23,8 @@ public class EWalk //extends Visitor
 		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
 		method=treeMethod;
-		eWalker(n); //walk before you run...
-		eRunner(n);
+		eRunner(n); //run before you walk?...
+		eWalker(n);
 	}
 	
 	/**Handles, System.out.print, 
@@ -47,15 +47,18 @@ public class EWalk //extends Visitor
 			StringBuffer fcName= new StringBuffer();
 			ArrayList<String> fcNameList=new ArrayList<String>();
 			
-			public void visitExpression(GNode n)
-			{
+			public int visitExpression(GNode n) {
 				Node primary = n.getNode(0);
 				String instanceName=primary.getString(0);
 				Node castex = n.getNode(2);//get the third node
-				if(castex.getName().equals("CastExpression"))//see if its a castexpression
-					{
-						visitCastExpression(castex,instanceName);
-					}
+				if(castex.getName().equals("CastExpression")) {//see if its a castexpression
+					visitCastExpression(castex,instanceName);
+				}
+				if(castex.getName().equals("NewArrayExpression")) {//see if its a castexpression
+					if(VERBOSE) System.out.println("Entering array!!!");
+					ArrayMaker array = new ArrayMaker (n);
+				}
+				return 0;
 			}
 			/**visit the declarator and update the type */
 			public void visitDeclarator(GNode n)
@@ -342,11 +345,9 @@ public class EWalk //extends Visitor
 					//visit(n);
 					isString = false;
 				}
-				visit(n);
-				if (isArray) {
-					if(VERBOSE) System.out.println("Entering array");
+				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
+					if(VERBOSE) System.out.println("Entering array!!!");
 					ArrayMaker goArray = new ArrayMaker (n);
-					isArray = false;
 				}
 				visit(n);
 			}
@@ -366,21 +367,6 @@ public class EWalk //extends Visitor
 				
 				return packages;
 			}
-			public void visitDimensions (GNode n) {
-				if(!isArray) {
-					if(VERBOSE) System.out.println("Setting array flag to true...");
-					isArray = true;
-				}
-				visit(n);
-			}
-			public void visitNewArrayExpression (GNode n) {
-				if(!isArray) {
-					if(VERBOSE) System.out.println("Setting array flag to true...");
-					isArray = true;
-					visit(n);
-				}
-			}
-			
 			/**helper method that uses the inheritence tree search for method and 
 			   returns the givne string array that should contain the return type and methodname 
 			   puts in check for isSuper flag*/

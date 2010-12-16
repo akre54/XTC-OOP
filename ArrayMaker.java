@@ -7,7 +7,7 @@ import xtc.tree.Visitor;
 //import xtc.util.Tool;
 /**
  * Translates a java array to a C array.
- * 
+
  */ 
 public class ArrayMaker {
 	/** 
@@ -32,23 +32,23 @@ public class ArrayMaker {
 			String typeO, type2;
 			public void visitFieldDeclaration (GNode n) {
 				inDeclaration = true;
+				n.getNode(1).getNode(0).set(0,"ArrayOf"+visitPrimitiveType((GNode)n.getNode(1).getNode(0)));
 				visit(n);
 				inDeclaration = false;
 			}
 			public void visitNewArrayExpression (GNode n) {
 				inExpression = true;
+				n.set(0,"__Array<"+n.getNode(0).get(0).toString()+">");
+				n.set(1,"("+visitConcreteDimensions((GNode)n.get(1))+")");
+						
 				visit(n);
 			}
-			public void visitPrimitiveType (GNode n) {
-				if (inArrayOf) {
-					typeO = n.getString(0);
-					System.out.println("Type set to\t\t"+typeO);
-					if (typeO.equals("int32_t")) type2="Int";
-					else type2 = typeO;
-					n.set(0,"ArrayOf"+type2);
-					inArrayOf = false;
-				}
-				visit(n);
+			public String visitPrimitiveType (GNode n) {
+				typeO = n.getString(0);
+				System.out.println("Type set to\t\t"+typeO);
+				if (typeO.equals("int32_t")) return "Int";
+				if (typeO.equals("int")) return "Int";
+				return typeO;
 			}
 			public void visitQualifiedIdentifier (GNode n) {
 				if (inArrayOf) {
@@ -56,17 +56,23 @@ public class ArrayMaker {
 					System.out.println("Type set to\t\t"+typeO);
 					n.set(0,"ArrayOf"+typeO);
 					inArrayOf = false;
+				} else {
+					String type = n.getString(0);
+					n.set(0,"__Array<"+type+">");
 				}
 				visit(n);
 			}
 			public void visitDimensions (GNode n) {
-				n.set(0,"[]");
+				n.set(0,"");
 				visit(n);
 			}
-			public void visitIniegerLiteral (GNode n) {
+
+			public int visitIniegerLiteral (GNode n) {
 				//Gives array dimensions
-				size = Integer.parseInt(n.getString(0));
-				visit(n);
+				return Integer.parseInt(n.getString(0));
+			}
+			public int visitConcreteDimensions( GNode n) {
+				return visitIniegerLiteral((GNode)n.get(0));
 			}
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
