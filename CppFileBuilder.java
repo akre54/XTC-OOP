@@ -291,7 +291,7 @@ public class CppFileBuilder{
 	 * @param GNode A method declaration GNode
 	 */ 
 	private void buildMain(Declaration n) {
-		CppCreator mainWriter = new CppCreator(jfile, "main.cpp");
+		FileMaker mainWriter = new FileMaker(jfile, "main.cpp");
 		//change parameters for c++
 		
 		n.returntype = "int32_t";
