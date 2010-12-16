@@ -645,7 +645,7 @@ public class InheritanceTree{
 		//for same named methods and same number of parameters
 		for (Declaration j : Vt_ptrs) {
 			if ((j.name.equals(method_name)) && ((j.params.size()-1) == paramtyps.size()))
-				possible.add(j);						
+				possible.add(j);
 		}
 		for (Declaration l : local ) {
 			if ((l.name.equals(method_name)) && (!l.isVirtual)&&(!((on_instance)&&(l.isprivate())))&&
@@ -671,7 +671,7 @@ public class InheritanceTree{
 					if (!pos_type.equals(type));
 					else {
 						int casting = gouptree(pos_type,type);
-						if (casting == -1) { possible.remove(c); }//not castable
+						if (casting == -1) { possible.remove(c); System.out.println("removed");}//not castable
 						else c.specificity = c.specificity + casting;
 					}
 				}
