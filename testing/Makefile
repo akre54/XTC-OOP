@@ -18,7 +18,7 @@ compile : translate
 
 #Remove previous translations
 clean:
-	rm -f  *.o *.h *.cpp *~ *.out *.txt
+	rm -r -f  *.o *.h *.cpp *~ *.out *.txt
 
 #Run the translator on demo.java
 translate:
@@ -31,3 +31,4 @@ ex:	compile
 javac: $(PRE).java
 	javac $(PRE).java
 	java -cp . $(PRE) > java.out.txt
+
