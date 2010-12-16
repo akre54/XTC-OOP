@@ -27,6 +27,7 @@ public class DependencyFinder {
     private ArrayList<FileDependency> fileDependencies = new ArrayList<FileDependency>();
     private ArrayList<ClassStruct> fileClasses = new ArrayList<ClassStruct>();
     private String currentPackage, currentSuperClass, currentFilePath, currentParentDirectory;
+    private DependencyOrigin origin;
     private Node fileNode;
 
     // ignores all dependencies from following top-level superpackages:
@@ -34,13 +35,14 @@ public class DependencyFinder {
                     {"java","javax"});
 
 
-    public DependencyFinder(Node n, String filename) {
+    public DependencyFinder(Node n, String filePath) {
 
-        currentFilePath = filename;
+        currentFilePath = filePath;
         currentParentDirectory = (new File ((new File(currentFilePath)).getParent())).getParent(); // all dependencies are relative to the translated file
         fileNode = n;
         currentPackage = "";
         currentSuperClass = "";
+        origin = null;
 
         new Visitor() {
 
@@ -64,8 +66,13 @@ public class DependencyFinder {
 
                 String path  = pathbuilder.toString();
                 currentPackage = path.replace("/",".");
-					 
-                gatherDirectoryFiles(path, DependencyOrigin.CURRENTPACKAGE);
+
+                try {
+                    String fullPath = (new File(currentParentDirectory, path)).getCanonicalPath();
+                    gatherDirectoryFiles(fullPath, DependencyOrigin.CURRENTPACKAGE);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             public void visitImportDeclaration(GNode g) {
@@ -93,7 +100,12 @@ public class DependencyFinder {
 			// if using the wildcard operator, visit the folder instead
                         // e.g. import A.B.*;
                         if (null != g.get(2) && g.getString(2).equals("*")) {
-                            gatherDirectoryFiles(pathbuilder.toString(), DependencyOrigin.IMPORTEDPACKAGE);
+                            try {
+                                String fullPath = (new File(currentParentDirectory, pathbuilder.toString())).getCanonicalPath();
+                                gatherDirectoryFiles(fullPath, DependencyOrigin.IMPORTEDPACKAGE);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                             return;
                         }
 								
@@ -129,27 +141,49 @@ public class DependencyFinder {
             } //end of visit method
         }.dispatch(n);
 
-        // empty package string is treated as its own package, searches the current directory
-        //if (currentPackage.equals(""))
-            //gatherDirectoryFiles("", DependencyOrigin.CURRENTDIRECTORY);
+        if (currentPackage.equals("")) {
+            gatherDirectoryFiles((new File(currentFilePath)).getParent(), DependencyOrigin.CURRENTPACKAGE);
+        }
+    } // end of DependencyFinder
+
+    /** used for second time we call DepFinder (in -translate) when we know the file's origin. */
+    public DependencyFinder(Node n, FileDependency inputFile) {
+        this(n, inputFile.fullPath);
+        this.origin = inputFile.origin;
     }
 
     /* Adds all files in directory to filePaths  */
-    private void gatherDirectoryFiles(String dirPath, DependencyOrigin origin) {
-        File dir = null;
+    private void gatherDirectoryFiles(String dirFullPath, DependencyOrigin origin) {
+        File dir = new File(dirFullPath);
 
-        try {
-            dir = new File(currentParentDirectory, dirPath);
-        } catch (NullPointerException e) {
-            System.out.println(dirPath + " could not be found. Exists?");
-            String failsafe = Object.class.getProtectionDomain().getCodeSource().getLocation().toString();
-				dir = new File(failsafe);
-        }
-
-        if (dir.exists()) {
+        /*
+                if (!dir.exists()) {
+                    try {
+                        String failsafe = Class.forName(fileClasses.get(0).className).getProtectionDomain().getCodeSource().getLocation().toString();
+                        dir = new File(failsafe);
+                    } catch (ClassNotFoundException x) { }
+                }
+                */
+        if (dir.isDirectory()) {
             for (String fileName : dir.list()) {
-                if (fileName.endsWith(".java")) {
-                    addPath(dirPath + '/' + fileName, origin);
+                try {
+                    if (fileName.endsWith(".java")) {
+                        //addPath(dirPath + '/' + fileName, origin);
+                        addPath((new File(dir, fileName)).getCanonicalPath(), origin);
+                    } else if (!fileName.contains(".")) { // support for recursively calling subdirectories
+                        try {
+                            File subDir = new File(dir, fileName);
+                            if (subDir.isDirectory()) {
+                                gatherDirectoryFiles(subDir.getCanonicalPath(), origin);
+                            }
+                            /*
+                            dirFiles = Arrays.copyOf(dirFiles, dirFiles.length + subDir.length);
+                            System.arraycopy(subDir, 0, dirFiles, dirFiles.length, subDir.length);
+                             */
+                        } catch (NullPointerException e) {
+                        }
+                    }
+                } catch (IOException i) {
                 }
             }
         }
@@ -157,14 +191,9 @@ public class DependencyFinder {
 
     /*  add file path (as string) to file dependencies Map, using canonical path
         *  rather than absolute to avoid collisions                    */
-       private void addPath (String path, DependencyOrigin origin) {
-
-           try {
-              path = (new File(currentParentDirectory, path)).getCanonicalPath();
-           } catch (IOException e) { }
-
-           if (!path.equals(currentFilePath)) // don't add self to dependencies
-               fileDependencies.add(new FileDependency(path, origin));
+       private void addPath (String fullPath, DependencyOrigin origin) {
+           if (!fullPath.equals(currentFilePath)) // don't add self to dependencies
+               fileDependencies.add(new FileDependency(fullPath, origin));
        }
 
     /**
@@ -297,6 +326,19 @@ public class DependencyFinder {
         public ArrayList<String> getCppUsingDeclarations(ArrayList<ClassStruct> allClasses) {
 
             ArrayList<String> files = new ArrayList<String>();
+
+            if (origin == DependencyOrigin.ROOTFILE) {
+                files.add("using java::lang::__Object;");
+                files.add("using java::lang::Class;");
+                files.add("using java::lang::__Class;");
+                files.add("using java::lang::String;");
+                files.add("using java::lang::__String;");
+                files.add("using java::lang::__Array;");
+                files.add("using java::lang::ArrayOfInt;");
+                files.add("using java::lang::ArrayOfObject;");
+                files.add("using java::lang::ArrayOfClass;");
+            }
+
             for (FileDependency d : fileDependencies) {
                 if (d.origin == DependencyOrigin.IMPORT) {
                     files.add("using " + qualifiedName(allClasses, d.fullPath) + ";");

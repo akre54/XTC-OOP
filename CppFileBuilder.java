@@ -59,17 +59,6 @@ public class CppFileBuilder{
                     h.write(importDeclaration+"\n");
             }
 
-             h.write(
-				 "using java::lang::Object;\n"+
-             "using java::lang::__Object;\n"+
-             "using java::lang::Class;\n"+
-             "using java::lang::__Class;\n"+
-             "using java::lang::String;\n"+
-             "using java::lang::__String;\n"+
-             "using java::lang::__Array;\n"+
-             "using java::lang::ArrayOfInt;\n"+
-             "using java::lang::ArrayOfObject;\n"+
-             "using java::lang::ArrayOfClass;\n");
             for (String usingDeclaration : fileinfo.getCppUsingDeclarations(allClasses)) {
                 h.write(usingDeclaration+"\n");
                 //h.write(DependencyFinder.getNamespace(fileinfo.getFileClasses(), fileinfo.getFilePath())+"\n");
@@ -291,7 +280,7 @@ public class CppFileBuilder{
 	 * @param GNode A method declaration GNode
 	 */ 
 	private void buildMain(Declaration n) {
-		CppCreator mainWriter = new CppCreator(jfile, "main.cpp");
+		FileMaker mainWriter = new FileMaker(jfile, "main.cpp");
 		//change parameters for c++
 		
 		n.returntype = "int32_t";
