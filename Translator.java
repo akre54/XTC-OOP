@@ -199,6 +199,7 @@ public class Translator extends Tool {
                             for (ClassStruct c : classes.keySet()) {
                                 if (classes.get(c) == false) {
                                     if (c.superClass.equals("")) {//*** extends object
+										
                                         new InheritanceTree(c.packageName,c.getPackage(), c.classNode, Object);
                                         classes.put(c, true);
                                     } else {

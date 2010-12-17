@@ -177,12 +177,13 @@ public class CppFileBuilder{
 	 * will write a string of all feild declarations in this class.
 	 */
 	private void write_all_feilds(InheritanceTree t) {
+		
             //loops through fields and prints out in proper syantax
             for (InstanceField f : t.fields) {
                 for(String modifier : f.modifiers) {
                    // h.write("\t   "+modifier+": ");
                 }
-                h.write("\t\t"+f.type+" "+f.var_name);
+                h.write("\t\t"+(f.type)+" "+f.var_name);
 				if(!f.value.equals(""))h.write("="+f.value);
 				h.write(";\n");
             }
@@ -194,6 +195,9 @@ public class CppFileBuilder{
 	 *
 	 */	
 	private void write_all_constructors(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
+		
 		//class with main method needs constructor
 		if(t.constructors.size()==0){
 			h.write("\t\t__"+t.className+"():__vptr(&__vtable)");
@@ -255,6 +259,9 @@ public class CppFileBuilder{
 	 *
 	 */		
 	private void write_all_methods(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
+		
             //loops through local methods and prints out in proper syantax
             for (Declaration method : t.local) {
                 if (method.name.equals("main")) {
@@ -273,8 +280,9 @@ public class CppFileBuilder{
                             h.write("_"+method.overloadNum);
                     h.write("(");
                     for (int j=0; j<method.params.size();j++) {
-                        if(j==0)h.write(method.params.get(j).type);//write without ","
-                        else h.write(","+method.params.get(j).type);
+						Fparam param= method.params.get(j);
+                        if(j==0)h.write(param.type);//write without ","
+                        else h.write(","+param.type);
                     }
                     h.write(");\n");
                 }
@@ -328,6 +336,8 @@ public class CppFileBuilder{
 	 * syntax --->  ",methodreturnType (*methodname)(methodparameters)",\n"
 	 */	
 	private void write_all_method_ptrs(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
 		
 		//ptr for __class()
 		h.write("\t\tClass __isa;\n");
@@ -347,7 +357,7 @@ public class CppFileBuilder{
 			for (int j=0;j<fpsize;j++) {
 				String type = method.params.get(j).type;
 				
-				if (j==0) h.write(t.className);
+				if (j==0){ h.write(FQclassName);}
 				else h.write(", "+type);
 			}
 			h.write(");\n");
@@ -364,6 +374,9 @@ public class CppFileBuilder{
 	 *
 	 */	
 	private void write_assign_method_ptrs(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
+		
 		//ptr for __class()
 		h.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class()),\n");
 		
@@ -416,7 +429,7 @@ public class CppFileBuilder{
 	 *	 then ends method "}"
 	 */
 	public void addMethodDef(InheritanceTree t){
-		
+		String FQclassName = t.className;//to change from classname to fully qualified easier
 		//writes the __class() method
 		cpp.write("\t"+t.local.get(0).returntype+" __"+t.className+
 							"::"+t.local.get(0).name+"(){"+
