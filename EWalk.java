@@ -128,8 +128,15 @@ public class EWalk //extends Visitor
 					n.set(2,newMethod);
 				
 				//reset flags
-				isInstance=false;
+				if(isMethodChaining)
+				{
+				}
+				else
+				{
+					isInstance=false;
+				}
 				isSuper=false;
+				isMethodChaining=false;
 			}
 			/**Returns Tree if a Node has the Name "PrimaryIdentifier"*/
 			public boolean isPrimaryIdentifier(Node n)
@@ -149,16 +156,20 @@ public class EWalk //extends Visitor
 				Node firstChild=n.getNode(0);
 				/**If methodChaining Flag is set save a the bottom methods return type to use 
 				 in Search_for_method later on up the tree*/
+				if(isCallExpression(firstChild))
+				{
+					System.out.println("FIRST_CHILD");
+					isMethodChaining=true;
+					//dispatch(firstChild);
+				}
 				if(isMethodChaining)
 					{
 						//store the method return type for later use
+						System.out.println("METHOD CHAINING");
 						primaryIdentifier=savedReturnType;
+						isInstance=true;
 					}
-				if(isCallExpression(firstChild))
-					{
-						isMethodChaining=true;
-						dispatch(firstChild);
-					}
+				
 				else if(firstChild!=null)
 					{
 						//check to see if its primaryidentifier
@@ -182,9 +193,10 @@ public class EWalk //extends Visitor
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				//get the method name
 				String[] methodArray= new String[2];
+				System.out.println(n.toString());
 				String methodName = n.getString(2);
 				//run checks for system.out.println and break from get method info Otherwise will crash
-				if(methodName.contains("std::cout<<"))  
+				if(methodName.contains("std::cout<<")) 
 				{
 					//isPrintln=true;
 					return methodArray;
@@ -406,9 +418,10 @@ public class EWalk //extends Visitor
 			   puts in check for isSuper flag and isInstance Flag*/
 			public String[] getMethodInfo(Node n,String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
+				if (VERBOSE) System.out.println("\t\t Method Chaining?"+isMethodChaining+"getMethodInfo");
 				//method .search for type with packages if you dont send a package its the package you're in
 				InheritanceTree b; //will be current Class, the superclass or the instance's class
-				if(isInstance)
+				if(isInstance && !isMethodChaining)
 					{
 						ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
 						if (VERBOSE)System.out.println("Method.Search_for_type:" + Identifier);
@@ -421,6 +434,14 @@ public class EWalk //extends Visitor
 						b =tree.root.search(qualities,className);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
+				else if (isMethodChaining)
+				{
+					ArrayList<String> packages = new ArrayList<String>();
+					//currently not supporting classes outside of the current methdo
+					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
+					b=tree.root.search(packages,Identifier);
+					//what do i do to get the full package name?
+				}
 				else if (isSuper) 
 					{
 						b = tree.superclass;
@@ -464,7 +485,8 @@ public class EWalk //extends Visitor
 				//check for call expressions' return type
 				else if (n.getName().equals("CallExpression"))
 				{
-					String[] methodArray;					//return the return type gotten from getMethodInfo (located as the first item in the given array)
+					String[] methodArray;
+					//return the return type gotten from getMethodInfo (located as the first item in the given array)
 					methodArray=setMethodInfo(n);
 					return methodArray[0];
 				}
