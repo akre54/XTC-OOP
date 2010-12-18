@@ -795,12 +795,12 @@ public class InheritanceTree{
 	 */
 	public String getFQName(){
 		if (packageName.equals("")) return "";
-		return packageName.replace("\\.","::") + "::";
+		return packageName.replace(".","::") + "::";
 	}
 	/**
 	 */
 	public String getcppFQName(){
-		return this.packageName.replace("\\.","::");
+		return this.packageName.replace(".","::");
 	}
 
 }//end of inheritancetree
