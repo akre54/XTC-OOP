@@ -46,7 +46,6 @@ PACKAGE     = xtc.oop
 PACKAGE_LOC = xtc/oop
 
 SOURCE = \
-	ArrayMaker.java \
 	ClassStruct.java \
 	CppFileBuilder.java \
 	CppPrinter.java \

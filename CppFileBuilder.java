@@ -59,17 +59,6 @@ public class CppFileBuilder{
                     h.write(importDeclaration+"\n");
             }
 
-             h.write(
-				 "using java::lang::Object;\n"+
-             "using java::lang::__Object;\n"+
-             "using java::lang::Class;\n"+
-             "using java::lang::__Class;\n"+
-             "using java::lang::String;\n"+
-             "using java::lang::__String;\n"+
-             "using java::lang::__Array;\n"+
-             "using java::lang::ArrayOfInt;\n"+
-             "using java::lang::ArrayOfObject;\n"+
-             "using java::lang::ArrayOfClass;\n");
             for (String usingDeclaration : fileinfo.getCppUsingDeclarations(allClasses)) {
                 h.write(usingDeclaration+"\n");
                 //h.write(DependencyFinder.getNamespace(fileinfo.getFileClasses(), fileinfo.getFilePath())+"\n");
@@ -478,10 +467,10 @@ public class CppFileBuilder{
 		cpp.write("namespace java {\n\tnamespace lang {");
 		//writes the template<> ... __Array<classname>::__class() method
 		cpp.write("template<>\n"+
-							"\tClass __Array<"+t.getFQName()+t.className+">::__class() {\n"+
+							"\tClass __Array<"+t.getCppPkg()+t.className+">::__class() {\n"+
 							"\t\tstatic Class k = new __Class(__rt::stringify(\"[L"+fileinfo.getPackageName()+"."+t.className+"\"),\n"+
-							"\t\t\t\t\t\t\t\t__Array<"+t.superclass.getFQName()+t.superclass.className+">::__class(),\n"+
-							"\t\t\t\t\t\t\t\t"+t.getFQName()+"__"+t.className+"::__class());\n"+
+							"\t\t\t\t\t\t\t\t__Array<"+t.superclass.getCppPkg()+t.superclass.className+">::__class(),\n"+
+							"\t\t\t\t\t\t\t\t"+t.getCppPkg()+"__"+t.className+"::__class());\n"+
 							"\t\treturn k;\n"+
 							"\t}\n\n"+
 							"\t//===========================================================================\n\n");

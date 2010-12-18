@@ -443,7 +443,9 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-						b =tree.root.search(qualities,className);
+                                                String packName = "";
+                                                for (String s : qualities) {packName += s;}
+						b =tree.root.search(packName,className);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isMethodChaining)
@@ -451,7 +453,9 @@ public class EWalk //extends Visitor
 					ArrayList<String> packages = new ArrayList<String>();
 					//currently not supporting classes outside of the current methdo
 					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
-					b=tree.root.search(packages,Identifier);
+                                        String packName = "";
+                                        for (String s : packages) {packName += s;}
+					b=tree.root.search(packName,Identifier);
 					//what do i do to get the full package name?
 				}
 				else if (isSuper) 

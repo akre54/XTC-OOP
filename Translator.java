@@ -174,9 +174,10 @@ public class Translator extends Tool {
 			classes = t.classes;
 			allDependencies = t.allDependencies;
 
-                        // set all ClassStruct's root packages to root package
+                        // set every ClassStruct's root packages and files
                         for (ClassStruct c : classes.keySet()) {
                             c.rootPackage = t.rootPackage;
+                            c.rootFile = fullPathName;
                         }
 			
 			if(VERBOSE){//print out all files and classes to be translated
@@ -199,13 +200,12 @@ public class Translator extends Tool {
                             for (ClassStruct c : classes.keySet()) {
                                 if (classes.get(c) == false) {
                                     if (c.superClass.equals("")) {//*** extends object
-										
-                                        new InheritanceTree(c.packageName,c.getPackage(), c.classNode, Object);
+                                        new InheritanceTree(c.packageName, c.classNode, Object);
                                         classes.put(c, true);
                                     } else {
-                                        InheritanceTree superclass = Object.search(c.getPackage(), c.superClass);
+                                        InheritanceTree superclass = Object.search(c.packageName, c.superClass);
                                         if (superclass != null) {//**extends an already translated class
-                                            new InheritanceTree(c.packageName,c.getPackage(), c.classNode, superclass);
+                                            new InheritanceTree(c.packageName, c.classNode, superclass);
                                             classes.put(c, true);
                                         }
                                     }
@@ -221,7 +221,7 @@ public class Translator extends Tool {
                         boolean superiswritten =true;
                         LinkedList<ClassStruct> editablelist;
                         for (FileDependency d: allDependencies.keySet()){
-							DependencyFinder dep = new DependencyFinder(getNodeFromFilename(d.fullPath), d.fullPath);
+							DependencyFinder dep = new DependencyFinder(getNodeFromFilename(d.fullPath), d);
 							editablelist = new LinkedList<ClassStruct>(dep.getFileClasses());
 							//CppFileBuilder takes the Files dependencyfinder and arraylist of the ClassStructs
 							cppfiles = new CppFileBuilder(dep, new ArrayList<ClassStruct>(classes.keySet()));
@@ -232,7 +232,7 @@ public class Translator extends Tool {
 										ClassStruct c = editablelist.get(i);
 										superiswritten =true;
 										if( c.superClass.equals("")){//*** extends object
-												cppfiles.addClassdef(Object.search(c.getPackage(),c.className));
+												cppfiles.addClassdef(Object.search(c.packageName,c.className));
 												editablelist.remove(c);
 										}//end of if check
 										else{
@@ -241,7 +241,7 @@ public class Translator extends Tool {
 													superiswritten = false;
 											}
 											if (superiswritten){//**extends an already written class
-												cppfiles.addClassdef(Object.search(c.getPackage(),c.className));
+												cppfiles.addClassdef(Object.search(c.packageName,c.className));
 												editablelist.remove(c);
 											}
 										}//end of else check
@@ -267,7 +267,7 @@ public class Translator extends Tool {
                     catch (IOException e) { }
 
                     DependencyFinder depend = new DependencyFinder(node, fullPathName);
-                    if (allDependencies.containsKey(new FileDependency(fullPathName, DependencyOrigin.ROOTFILE))) { // if we're translating the root file, set its package as the root package
+                    if (allDependencies.size() == 1 && allDependencies.containsKey(new FileDependency(fullPathName, DependencyOrigin.ROOTFILE))) { // if we're translating the root file, set its package as the root package
                         rootPackage = depend.getPackageName();
                     }
                     
