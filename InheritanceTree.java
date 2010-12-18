@@ -794,17 +794,13 @@ public class InheritanceTree{
 		/** helper for FQfy
 	 */
 	public String getFQName(){
-		String s="";
-		if (packages.get(0).equals("")) return s;
-		for(String dir: packages){
-			s=s+dir+"::";
-		}
-		return s;
+		if (packageName.equals("")) return "";
+		return packageName.replace("\\.","::") + "::";
 	}
 	/**
 	 */
 	public String getcppFQName(){
-		return this.packageName.replace(".","::");
+		return this.packageName.replace("\\.","::");
 	}
 
 }//end of inheritancetree
