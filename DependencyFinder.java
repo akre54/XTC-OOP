@@ -494,16 +494,4 @@ public class DependencyFinder {
             }
             throw new RuntimeException("no namespace found for " + filename);
         }
-
-        public static ArrayList<String> getUsingDeclarations(ArrayList<ClassStruct> classes, String filename) {
-            ArrayList<String> usings = new ArrayList<String>();
-
-            for (ClassStruct c : classes) {
-                if (c.filePath.equals(filename)) {
-                    usings.add( c.packageName.replaceAll("\\.", "::")
-                            + "::" + c.className + ";" );
-                }
-            }
-            return usings;
-        }
 }
