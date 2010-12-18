@@ -4,5 +4,6 @@ public class demo {
 		//ArrayOfInt x=__Array<int>(1);
 		x[1]=50;
 		x[2]=x[3];
+		System.out.println(x[2]);
 	}
 }
