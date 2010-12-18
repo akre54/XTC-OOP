@@ -69,26 +69,32 @@ public class EWalk //extends Visitor
 				visit(n);				
 				return null;
 			}
+			/*
 			public void visitSubscriptExpression (GNode n) {
-				// if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
-				// 	System.out.println("Multidimensional arrays not allowed!");
-				// 	System.exit(1);
-				// }
+				System.out.println("debug!!!!!!!!!!!!!!!!");
+				if (n.getNode(0)!=null) {
+					if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
+						System.out.println("Multidimensional arrays not allowed!");
+						System.exit(1);
+					}
+				}
 				GNode output = n;
 				output = output.ensureVariable(n);
-				String bounds=("__ArrayOfInt::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
-				output.add(1,"->data__[");
+				String type = ""; // the data type of the array HELP - not neccessry now that operator[] is overloaded
+				String bounds=("__ArrayOf"+type+"::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
+				output.add(1,"->__data[");
 				output.add("]");
 				visit(output);
 				n.set(0,output);
 				n.set(1,""); //clear the old node;
 				boundsChecks.append(bounds+"\n");
 			}
+			*/
 			public void visitNewArrayExpression (GNode n) {
 				if(VERBOSE) System.out.println("Entering newArrayExpression");
 				GNode output = (GNode)n.getNode(1);
 				output = output.ensureVariable(output);
-				n.set(0,"__Array<"+n.getNode(0).get(0).toString()+">(");
+				n.set(0,"new __Array<"+n.getNode(0).get(0).toString()+">(");
 				visit(output);
 				output.add(")");
 				n.set(1,output);
