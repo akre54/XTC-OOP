@@ -392,15 +392,11 @@ public class EWalk //extends Visitor
 				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
 
 				method.update_type(name,currentPackage, newtype);
-				
-				/**Pat What is this Doing?*/
-				if (isString) {
-					//visit(n);
-					isString = false;
-				}
+				if (n.getNode(1).getNode(1) !=null ) {
 				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
 					if(VERBOSE) System.out.println("Entering array field declaration...");
 					n.getNode(1).getNode(0).set(0,"ArrayOf"+visitPrimitiveType((GNode)n.getNode(1).getNode(0)));
+				}
 				}
 				visit(n);
 			}

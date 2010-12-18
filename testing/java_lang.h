@@ -349,9 +349,9 @@ namespace java {
 	  typedef __rt::Ptr<__Array<double> > ArrayOfDouble;
 	  typedef __rt::Ptr<__Array<bool> > ArrayOfBoolean;
 	  typedef __rt::Ptr<__Array<float> > ArrayOfFloat;
-	  typedef __rt::Ptr<__Array<char> > ArrayOfChar;
-	  typedef __rt::Ptr<__Array<long> > ArrayOfLong;
-	  typedef __rt::Ptr<__Array<short> > ArrayOfShort;
+	  typedef __rt::Ptr<__Array<char> > ArrayOfChar; //should be an int16_t
+	  typedef __rt::Ptr<__Array<long> > ArrayOfLong; //should be an int64_t
+	  typedef __rt::Ptr<__Array<short> > ArrayOfShort;//should be an int16_t
 	  
 	  
     // The data layout for arrays.
