@@ -629,14 +629,28 @@ public class EWalk //extends Visitor
 				if (type.equals("int")) {
 					n.set(0,"int32_t");
 					if (VERBOSE) System.out.println("changing int to int32_t");
-				} if (type.equals("boolean")) {
+				} 
+				if (type.equals("boolean")) {
 					n.set(0,"bool");
 					if (VERBOSE) System.out.println("changing boolean to bool");
 				}
-				if (type.equals("byte")) {
-					n.set(0,"char");
-					if (VERBOSE) System.out.println("changing byte to char");
+				/*if (type.equals("char")) {
+					n.set(0,"int16_t");
+					if (VERBOSE) System.out.println("changing char to int16_t");
+				}*/
+				if (type.equals("long")) {
+					n.set(0,"int64_t");
+					if (VERBOSE) System.out.println("changing long and int64_t");
 				}
+				if (type.equals("short")) {
+					n.set(0,"int16_t");
+					if (VERBOSE) System.out.println("changing short to int16_t");
+				}
+				if (type.equals("byte")) {
+					n.set(0,"int8_t");
+					if (VERBOSE) System.out.println("changing byte to int8_t");
+				}
+
 				visit(n);
 			}
 			public void visitModifier (GNode n) {
