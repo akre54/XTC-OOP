@@ -753,7 +753,7 @@ public class InheritanceTree{
 		return distance;
 	}	
 	/**
-	 * helper method returns proper method call 
+	 * helper method for search_for_method returns proper method call
 	 * 
 	 */
 	private String make_name(boolean on_instance,Declaration d){
@@ -768,39 +768,10 @@ public class InheritanceTree{
 		if(d.overloadNum==0)return result;
 		else return result+"_"+d.overloadNum;
 	}
-	/** will make a fully qualified string out of any String type
+	/** will return packageName in cpp syntax "::"
 	 */
-	public String FQfy(String type){//only use when all inheritanctrees are made
-
-		if(type.contains("."))
-			return getcppFQName();
-		//no FQ if primitive type
-		if((type.equals("int_32"))||(type.equals("char"))
-		   ||(type.equals("short"))||(type.equals("long"))
-		   ||(type.equals("float"))||(type.equals("double")))
-			return type;
-		else{
-			ArrayList<String> pack= new ArrayList<String>(java.util.Arrays.asList(type.split("\\.")));
-			type = pack.get(pack.size()-1);
-			pack.remove(pack.size()-1);
-                        String packName = "";
-                        for (String s : pack) {packName += s;}
-			InheritanceTree t = this.root.search(packName,type);
-			return t.getFQName();
-		}
-	}
-	/** 
-	
-		/** helper for FQfy
-	 */
-	public String getFQName(){
-		if (packageName.equals("")) return "";
-		return packageName.replace(".","::") + "::";
-	}
-	/**
-	 */
-	public String getcppFQName(){
-		return this.packageName.replace(".","::");
+	public String getCppPkg(){
+		return this.packageName.replace(".","::")+"::";
 	}
 
 }//end of inheritancetree
