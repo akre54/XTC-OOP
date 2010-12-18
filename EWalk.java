@@ -54,6 +54,7 @@ public class EWalk //extends Visitor
 			 *FullQualified Name i.e. java.lang etc */
 			StringBuffer fcName= new StringBuffer();
 			StringBuffer boundsChecks = new StringBuffer();
+			StringBuffer chainGang = new StringBuffer();
 			ArrayList<String> fcNameList=new ArrayList<String>();
 			
 			public String visitExpression(GNode n) {
@@ -168,8 +169,9 @@ public class EWalk //extends Visitor
 					n.set(2,newMethod);
 				
 				//reset flags
-				if(isMethodChaining)
-				{
+				if(isMethodChaining) {
+					//set args of this call expression to the chainGang
+
 				}
 				else
 				{
