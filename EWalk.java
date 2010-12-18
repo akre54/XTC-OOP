@@ -4,7 +4,6 @@ import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 import java.util.ArrayList;
-import xtc.oop.ArrayMaker;
 
 /**
  * Does all the smart Translating, visits every node inside a method's block
@@ -23,8 +22,8 @@ public class EWalk //extends Visitor
 		if(VERBOSE) System.out.println("EWalk Called....");
 		tree=treeClass;
 		method=treeMethod;
-		eRunner(n); //run before you walk?...
 		eWalker(n);
+		eRunner(n);
 	}
 	
 	/**Handles, System.out.print, 
@@ -45,25 +44,56 @@ public class EWalk //extends Visitor
 				isSuper;//flag that saves whether super is inside a call expression
 
 			StringBuffer fcName= new StringBuffer();
+			StringBuffer boundsChecks = new StringBuffer();
 			ArrayList<String> fcNameList=new ArrayList<String>();
 			
-			public int visitExpression(GNode n) {
+			public String visitExpression(GNode n) {
 				Node primary = n.getNode(0);
-				String instanceName=primary.getString(0);
-				Node castex = n.getNode(2);//get the third node
-				if(castex.getName().equals("CastExpression")) {//see if its a castexpression
-					visitCastExpression(castex,instanceName);
+				System.out.println(n.getName());
+				if (!primary.getName().toString().equals("SubscriptExpression")) {
+						System.out.println(primary.getName());
+						String instanceName = primary.getString(0);
+						Node castex = n.getNode(2);//get the third node
+						if(castex.getName().equals("CastExpression")) {//see if its a castexpression
+							visitCastExpression(castex,instanceName);
+						}
+				} else {
 				}
-				if(castex.getName().equals("NewArrayExpression")) {//see if its a castexpression
-					if(VERBOSE) System.out.println("Entering array!!!");
-					ArrayMaker array = new ArrayMaker (n);
-				}
-				return 0;
+				visit(n);				
+				return null;
+			}
+			public void visitSubscriptExpression (GNode n) {
+				// if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
+				// 	System.out.println("Multidimensional arrays not allowed!");
+				// 	System.exit(1);
+				// }
+				GNode output = n;
+				output = output.ensureVariable(n);
+				String bounds=("__ArrayOfInt::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
+				output.add(1,"[");
+				output.add("]");
+				visit(output);
+				n.set(0,output);
+				n.set(1,""); //clear the old node;
+				boundsChecks.append(bounds+"\n");
+			}
+			public void visitNewArrayExpression (GNode n) {
+				if(VERBOSE) System.out.println("Entering newArrayExpression");
+				GNode output = (GNode)n.getNode(1);
+				output = output.ensureVariable(output);
+				n.set(0,"__Array<"+n.getNode(0).get(0).toString()+">(");
+				visit(output);
+				output.add(")");
+				n.set(1,output);
+			}
+			public void visitDimensions (GNode n) {
+				n.set(0,"");
+				visit(n);
 			}
 			/**visit the declarator and update the type */
 			public void visitDeclarator(GNode n)
 			{
-				
+				visit(n);
 			}
 			/**NOTE: This is not a VISIT method but my own created method*/
 			public void visitCastExpression(Node n, String name) {
@@ -305,7 +335,6 @@ public class EWalk //extends Visitor
 			
 			/**Gets back ingormation inside identifier calls inheritencetree to update the method type  Also has support for an rray*/
 			public void visitFieldDeclaration (GNode n) {
-				//visit(n);
 				//get the packge information(Inside Qualified Identifier)
 				//get the type which is located at the second child
 				ArrayList<String> currentPackage = new ArrayList<String>();
@@ -346,10 +375,14 @@ public class EWalk //extends Visitor
 					isString = false;
 				}
 				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
-					if(VERBOSE) System.out.println("Entering array!!!");
-					ArrayMaker goArray = new ArrayMaker (n);
+					if(VERBOSE) System.out.println("Entering array field declaration...");
+					n.getNode(1).getNode(0).set(0,"ArrayOf"+visitPrimitiveType((GNode)n.getNode(1).getNode(0)));
 				}
 				visit(n);
+			}
+			public String visitPrimitiveType (GNode n) {
+				if (n.getString(0).equals("int")) return "Int";
+				return n.getString(0);
 			}
 			/**Helper method that gets an array list of a pack when given  node assuming qualifiedId or Prim*/
 			public ArrayList<String> getPackage(Node n)
