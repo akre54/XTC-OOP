@@ -40,13 +40,16 @@ if [ $D ]; then
 	cp ../java_lang.h ./
 	cp ../ptr.h ./
 	make -f ../Makefile PRE=$P TFLAGS='-verbose'
-	echo
-	echo "Comparing output files:"
-	echo
+	if [ $? -eq '0' ] # made successfully!
+	then
+	   	echo "Comparing output files:"
+		echo
 		#sdiff will output both files to command line, more useful here than diff
-	sdiff java.out.txt cpp.out.txt
+		sdiff java.out.txt cpp.out.txt
+		echo
+		echo "DONE"
+	fi
 	echo
-	echo "DONE"
 	echo
 	cd ../
 	PRE="";
