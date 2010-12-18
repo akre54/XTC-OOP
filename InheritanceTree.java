@@ -21,7 +21,6 @@ public class InheritanceTree{
 	public ArrayList<Declaration> Vt_ptrs; //all methods in vtable
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
-	public ArrayList<String> packages;
         public String packageName;
 	public final String className;
 
