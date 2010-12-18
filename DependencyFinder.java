@@ -343,9 +343,9 @@ public class DependencyFinder {
             }
 
             for (FileDependency d : fileDependencies) {
-                //if (d.origin == DependencyOrigin.IMPORT) { // we're importing all files in directory now, so this check not needed until we update Inheritancebuilder to handle implicit imports
+                // only add using if from different namespaces
+                if (!this.currentPackage.equals(getNamespace(allClasses, d.fullPath)))
                     files.add("using " + qualifiedName(allClasses, d.fullPath) + ";");
-                //}
             }
 
             return files;

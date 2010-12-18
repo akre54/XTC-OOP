@@ -69,26 +69,32 @@ public class EWalk //extends Visitor
 				visit(n);				
 				return null;
 			}
+			/*
 			public void visitSubscriptExpression (GNode n) {
-				// if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
-				// 	System.out.println("Multidimensional arrays not allowed!");
-				// 	System.exit(1);
-				// }
+				System.out.println("debug!!!!!!!!!!!!!!!!");
+				if (n.getNode(0)!=null) {
+					if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
+						System.out.println("Multidimensional arrays not allowed!");
+						System.exit(1);
+					}
+				}
 				GNode output = n;
 				output = output.ensureVariable(n);
-				String bounds=("__ArrayOfInt::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
-				output.add(1,"->data__[");
+				String type = ""; // the data type of the array HELP - not neccessry now that operator[] is overloaded
+				String bounds=("__ArrayOf"+type+"::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
+				output.add(1,"->__data[");
 				output.add("]");
 				visit(output);
 				n.set(0,output);
 				n.set(1,""); //clear the old node;
 				boundsChecks.append(bounds+"\n");
 			}
+			*/
 			public void visitNewArrayExpression (GNode n) {
 				if(VERBOSE) System.out.println("Entering newArrayExpression");
 				GNode output = (GNode)n.getNode(1);
 				output = output.ensureVariable(output);
-				n.set(0,"__Array<"+n.getNode(0).get(0).toString()+">(");
+				n.set(0,"new __Array<"+n.getNode(0).get(0).toString()+">(");
 				visit(output);
 				output.add(")");
 				n.set(1,output);
@@ -437,9 +443,7 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-                                                String packName = "";
-                                                for (String s : qualities) {packName += s;}
-						b =tree.root.search(packName,className);
+						b =tree.root.search(qualities,className);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isMethodChaining)
@@ -447,9 +451,7 @@ public class EWalk //extends Visitor
 					ArrayList<String> packages = new ArrayList<String>();
 					//currently not supporting classes outside of the current methdo
 					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
-                                        String packName = "";
-                                        for (String s : packages) {packName += s;}
-					b=tree.root.search(packName,Identifier);
+					b=tree.root.search(packages,Identifier);
 					//what do i do to get the full package name?
 				}
 				else if (isSuper) 
@@ -596,6 +598,7 @@ public class EWalk //extends Visitor
 			
 			/**Default Visit Method*/
 			public void visit(Node n) {
+				System.out.println(n.getName());
 				if(n!=null){
 					for (Object o : n){ 
 						if (o instanceof Node){ 
