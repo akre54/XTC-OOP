@@ -340,6 +340,8 @@ public class DependencyFinder {
                 files.add("using java::lang::ArrayOfInt;");
                 files.add("using java::lang::ArrayOfObject;");
                 files.add("using java::lang::ArrayOfClass;");
+            } else {
+                files.add("using namespace java::lang;");
             }
 
             for (FileDependency d : fileDependencies) {
