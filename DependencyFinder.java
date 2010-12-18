@@ -352,7 +352,7 @@ public class DependencyFinder {
             }
             else {
                 Thread.dumpStack();
-                throw new RuntimeException();
+                throw new RuntimeException("Trying to compare DependencyFinder with wrong object type");
             }
         }
 
@@ -361,35 +361,47 @@ public class DependencyFinder {
             return currentFilePath.hashCode();
         }
 
-            public static String javaFileName(String fullPath) {
-                return (new File(fullPath)).getName();
+        public static String javaFileName(String fullPath) {
+            return (new File(fullPath)).getName();
+        }
+
+        /** @return just name of file (ie ImportFile from ImportFile.java,
+                      * used for cpp import headers */
+        public String cppFileName(ArrayList<ClassStruct> c, String fullPath) {
+            String directory = getNamespaceDirectory(c, fullPath);
+            String basename = javaFileName(fullPath).replace(".java",".cpp");
+
+            if (directory.equals(""))
+                return basename;
+            else
+                return directory + "/" + basename;
+        }
+        public static String hFileName(ArrayList<ClassStruct> c, String fullPath) {
+            String directory = getNamespaceDirectory(c, fullPath);
+            String basename = javaFileName(fullPath).replace(".java","_dataLayout.h");
+
+            if (directory.equals(""))
+                return basename;
+            else
+                return directory + "/" + basename;
+        }
+        public static String qualifiedName(ArrayList<ClassStruct> c, String fullPath) {
+            String namespace = getNamespace(c, fullPath);
+            String basename = javaFileName(fullPath).replace(".java","");
+            return namespace + "::" + basename;
+        }
+
+        /** @return classes belonging to packname */
+        public static ArrayList<ClassStruct> getAllClassesInPackage(ArrayList<ClassStruct> classes, String packname) {
+            ArrayList<ClassStruct> packageClasses = new ArrayList<ClassStruct>();
+
+            for (ClassStruct c : classes) {
+                if (c.packageName.equals(packname))
+                    packageClasses.add(c);
             }
 
-            /* @return just name of file (ie ImportFile from ImportFile.java,
-                * used for cpp import headers */
-            public String cppFileName(ArrayList<ClassStruct> c, String fullPath) {
-                String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
-                String basename = javaFileName(fullPath).replace(".java",".cpp");
-
-                if (directory.equals(""))
-                    return basename;
-                else
-                    return directory + "/" + basename;
-            }
-            public static String hFileName(ArrayList<ClassStruct> c, String fullPath) {
-                String directory = DependencyFinder.getNamespaceDirectory(c, fullPath);
-                String basename = javaFileName(fullPath).replace(".java","_dataLayout.h");
-
-                if (directory.equals(""))
-                    return basename;
-                else
-                    return directory + "/" + basename;
-            }
-            public static String qualifiedName(ArrayList<ClassStruct> c, String fullPath) {
-                String namespace = DependencyFinder.getNamespace(c, fullPath);
-                String basename = javaFileName(fullPath).replace(".java","");
-                return namespace + "::" + basename;
-            }
+            return packageClasses;
+        }
 
         public static ArrayList<String> getImports(ArrayList<ClassStruct> classes, String filename) {
             ArrayList<String> imports = new ArrayList<String>();

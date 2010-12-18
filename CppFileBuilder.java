@@ -9,18 +9,18 @@ package xtc.oop;
 import java.io.File;
 import java.util.ArrayList;
 
-public class InheritanceBuilder{
+public class CppFileBuilder{
 	public final boolean DEBUG=false;
 	
-	CppCreator h;
-	CppCreator cpp;
+	FileMaker h;
+	FileMaker cpp;
 	DependencyFinder fileinfo;
 	ArrayList<ClassStruct> allClasses;
 	
 	private File jfile;
 
 	
-	InheritanceBuilder(DependencyFinder fileinfo, ArrayList<ClassStruct> allClasses){
+	CppFileBuilder(DependencyFinder fileinfo, ArrayList<ClassStruct> allClasses){
 		/*
 		 *creates new cc file h
 		 *copies start of translation.h into h
@@ -29,7 +29,7 @@ public class InheritanceBuilder{
                 this.allClasses = allClasses;
 			
 		jfile = new File(fileinfo.getFilePath());
-		h = (new CppCreator(jfile,"_dataLayout","h"));
+		h = (new FileMaker(jfile,"_dataLayout","h"));
 		h.write("/* Object-Oriented Programming\n"+
               "* Copyright (C) 2010 Robert Grimm\n"+
               "*\n"+
@@ -90,7 +90,7 @@ public class InheritanceBuilder{
 		 *creates new cc file cc_methoddef
 		 *copies start of translation.cc into cc_classdef
 		 */
-		cpp =(new CppCreator(jfile,"_methoddef","cpp"));
+		cpp =(new FileMaker(jfile,"_methoddef","cpp"));
 		cpp.write(
 							"/* Object-Oriented Programming\n"+
 							"* Copyright (C) 2010 Robert Grimm\n"+
@@ -126,10 +126,10 @@ public class InheritanceBuilder{
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
 	 */
 	public void addClassdef(InheritanceTree t){
-	
+		
 		String ClassName = t.className;
 		h.write(
-				"//data layout for "+fileinfo.getPackageName()+t.className);
+				"//data layout for "+fileinfo.getPackageName()+ClassName);
 		h.write(/* CLASS STRUCT DECLARATION*/
 				"\n\tstruct __"+ClassName+"{ \n"+
 				"\t\t__"+ClassName+"_VT* __vptr;\n");//vtable ptr
@@ -168,7 +168,7 @@ public class InheritanceBuilder{
 		);// end of writing
 		
 		//now create .cpp file
-		addMethodDec(t);
+		addMethodDef(t);
 					
 	}//end of addClassdef
 	
@@ -177,12 +177,13 @@ public class InheritanceBuilder{
 	 * will write a string of all feild declarations in this class.
 	 */
 	private void write_all_feilds(InheritanceTree t) {
+		
             //loops through fields and prints out in proper syantax
             for (InstanceField f : t.fields) {
                 for(String modifier : f.modifiers) {
                    // h.write("\t   "+modifier+": ");
                 }
-                h.write("\t\t"+f.type+" "+f.var_name);
+                h.write("\t\t"+(f.type)+" "+f.var_name);
 				if(!f.value.equals(""))h.write("="+f.value);
 				h.write(";\n");
             }
@@ -194,6 +195,9 @@ public class InheritanceBuilder{
 	 *
 	 */	
 	private void write_all_constructors(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
+		
 		//class with main method needs constructor
 		if(t.constructors.size()==0){
 			h.write("\t\t__"+t.className+"():__vptr(&__vtable)");
@@ -255,6 +259,9 @@ public class InheritanceBuilder{
 	 *
 	 */		
 	private void write_all_methods(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
+		
             //loops through local methods and prints out in proper syantax
             for (Declaration method : t.local) {
                 if (method.name.equals("main")) {
@@ -273,8 +280,9 @@ public class InheritanceBuilder{
                             h.write("_"+method.overloadNum);
                     h.write("(");
                     for (int j=0; j<method.params.size();j++) {
-                        if(j==0)h.write(method.params.get(j).type);//write without ","
-                        else h.write(","+method.params.get(j).type);
+						Fparam param= method.params.get(j);
+                        if(j==0)h.write(param.type);//write without ","
+                        else h.write(","+param.type);
                     }
                     h.write(");\n");
                 }
@@ -291,7 +299,7 @@ public class InheritanceBuilder{
 	 * @param GNode A method declaration GNode
 	 */ 
 	private void buildMain(Declaration n) {
-		CppCreator mainWriter = new CppCreator(jfile, "main.cpp");
+		FileMaker mainWriter = new FileMaker(jfile, "main.cpp");
 		//change parameters for c++
 		
 		n.returntype = "int32_t";
@@ -328,6 +336,8 @@ public class InheritanceBuilder{
 	 * syntax --->  ",methodreturnType (*methodname)(methodparameters)",\n"
 	 */	
 	private void write_all_method_ptrs(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
 		
 		//ptr for __class()
 		h.write("\t\tClass __isa;\n");
@@ -347,7 +357,7 @@ public class InheritanceBuilder{
 			for (int j=0;j<fpsize;j++) {
 				String type = method.params.get(j).type;
 				
-				if (j==0) h.write(t.className);
+				if (j==0){ h.write(FQclassName);}
 				else h.write(", "+type);
 			}
 			h.write(");\n");
@@ -364,8 +374,11 @@ public class InheritanceBuilder{
 	 *
 	 */	
 	private void write_assign_method_ptrs(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
+
+		
 		//ptr for __class()
-		h.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class()),");
+		h.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class()),\n");
 		
 		//ptr for __delete()
 		h.write("\t\t\t__delete(&__rt::__delete<__"+t.className+">)");
@@ -415,8 +428,8 @@ public class InheritanceBuilder{
 	 *    CALLS TO CPPMETHOD to build the body
 	 *	 then ends method "}"
 	 */
-	public void addMethodDec(InheritanceTree t){
-		
+	public void addMethodDef(InheritanceTree t){
+		String FQclassName = t.className;//to change from classname to fully qualified easier
 		//writes the __class() method
 		cpp.write("\t"+t.local.get(0).returntype+" __"+t.className+
 							"::"+t.local.get(0).name+"(){"+
@@ -496,6 +509,6 @@ public class InheritanceBuilder{
 	//--------------end of methods -------------------------
 	
 	
-}// end of InheritanceBuilder
+}// end of CppFileBuilder
 
 

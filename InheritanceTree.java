@@ -15,11 +15,12 @@ import xtc.tree.Visitor;
 
 public class InheritanceTree{
 	public InheritanceTree root;
+	public String packageName;
 	public final String className;
 	public ArrayList<InstanceField> fields;
 	public ArrayList<Declaration> constructors;
 	public ArrayList<Declaration> local; //all methods defined IN THIS CLASS virtual or not!
-	public ArrayList<Declaration> Vt_ptrs; //all methods able to be inherited by children
+	public ArrayList<Declaration> Vt_ptrs; //all methods in vtable
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
 	public ArrayList<String> packages;
@@ -30,6 +31,7 @@ public class InheritanceTree{
 	 * 
 	 */
 	InheritanceTree(){
+		this.packageName ="java.lang";
 		this.packages = new ArrayList<String>(0);
 		this.root = this;
 		packages.add("java");
@@ -86,6 +88,7 @@ public class InheritanceTree{
 	 */
 	InheritanceTree(InheritanceTree supr,String string_or_class){
 		this.root = supr.root;
+		this.packageName =supr.packageName;
 		this.packages = supr.packages;
 		this.superclass = supr;
 		this.className = string_or_class;
@@ -186,9 +189,10 @@ public class InheritanceTree{
 	 * will create vtable for class and then attach the tree to the superclass tree.
 	 * @param GNode (classdeclaration), InheritanceTree (superclass's).
 	 */
-	InheritanceTree(ArrayList<String> packages,GNode n, InheritanceTree supr){
+	InheritanceTree(String packageName,ArrayList<String> packages,GNode n, InheritanceTree supr){
 		this.root = supr.root;
 		this.packages= packages;
+		this.packageName =packageName;
 		this.superclass = supr;
 		this.className = n.getString(1);
 		
@@ -251,7 +255,7 @@ public class InheritanceTree{
 			//same name test
 			if (method.equals(i.name)) {
 				//diff params test
-				if ((params.size() == i.params.size())&&(typetest(params, i.params))&&(is_virtual)){
+				if ((params.size() == i.params.size())&&(is_virtual)&&(typetest(i.params, params))){
 					this.Vt_ptrs.set(6,new Declaration(i.overloadNum,i.modifiers,i.isVirtual,i.returntype,i.name,
 															this.className,params,body,new ArrayList<LocalVariable>(0)));
 						//signify to NOT ADD TO VIRTUAL
@@ -276,10 +280,10 @@ public class InheritanceTree{
 	 *helper method used in overload__ridden_check 
 	 *  returns true if both params arraylist have same types through and through
 	 */
-	private boolean typetest(ArrayList<Fparam> vptrs, ArrayList<Fparam> local){
+	private boolean typetest(ArrayList<Fparam> vptrs, ArrayList<Fparam> other){
 		for (int j = 1; j<vptrs.size(); j++) {//ignore __this param checking
                     //if types do not match up return FALSE
-                    if (!(vptrs.get(j).type.equals(local.get(j).type)))
+                    if (!(vptrs.get(j).type.equals(other.get(j).type)))
                         return false;//***this means that this is an overloaded method
 		}
 		return true;
@@ -294,7 +298,6 @@ public class InheritanceTree{
 		Node node = n;
 		//declare a virutal arraylist<Declaration>
 		final ArrayList<Declaration> virtual = new ArrayList<Declaration>(0);
-
 		new Visitor(){
 			
 			//declare initalize variables 
@@ -316,6 +319,7 @@ public class InheritanceTree{
 			
 			public void visitClassDeclaration(GNode n){
 				className = n.getString(1);
+				System.out.println("CLASSNAME"+className);
 				visit(n);
 			}
 			public void visitConstructorDeclaration(GNode n){
@@ -353,7 +357,6 @@ public class InheritanceTree{
 				
 				//search in Vt_ptrs and local for OVERLOADnum and if it is OVERRIDEN
 				overloaded_ridden = overloaded_ridden_check(methodname,params,is_virtual,block);
-				
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if((is_virtual)&&(overloaded_ridden[1]==1)) 
 					virtual.add(new Declaration(overloaded_ridden[0]+1,modifiers,is_virtual,retrn,methodname,className,params,
@@ -376,13 +379,19 @@ public class InheritanceTree{
 				 //notes that private/staic methods are not virtual and should not go into Vtable
 				else if ((n.getString(0).equals("private"))||(n.getString(0).equals("static")))
 					 is_virtual = false;
+				
+				else if(n.getString(0).equals("final")) modifiers.add("const");
 				else modifiers.add(n.getString(0));
 			}
 			public void visitVoidType(GNode n){
 				retrn = "void";
 			}
 			public void visitQualifiedIdentifier(GNode n){
-				String type=n.getString(0);
+				String type =n.getString(0);
+				int size = n.size();
+				for(int i=1;i<size;i++)
+					type=type+"::"+n.getString(i);
+				if(n.size()==1)type = FQify(type);
 				if(is_fparam) fptype=type;
 				else retrn = type;
 			}
@@ -396,23 +405,19 @@ public class InheritanceTree{
 			}
 			public void visitDimensions(GNode n){
 				if(is_fparam){ 
-					if(fptype.equals("Class"))fptype ="ArrayOfClass";
-					if(fptype.equals("int32_t"))fptype ="ArrayOfInt";
-					if(fptype.equals("Object"))fptype ="ArrayOfObject";
-					//more need to be added!!!!!!!!
-				
+					//all arrays defined in java.lang
+					fptype ="java::lang::ArrayOf"+forArrays(fptype);
 				}
 				else{ 
-					if(retrn.equals("Class"))retrn ="ArrayOfClass";
-					if(retrn.equals("int32_t"))retrn ="ArrayOfInt";
-					if(retrn.equals("Object"))retrn ="ArrayOfObject";
-					//more need to be added!!!!!!!!
+					//all arrays defined in java.lang
+					retrn ="java::lang::ArrayOf"+forArrays(retrn);
 				}
 			}
 			public void visitFormalParameters(GNode n){
 				//add __this parameter for virtual methods
 				if((is_virtual)&&(!is_constructor)) 
 					params.add(new Fparam(new ArrayList<String>(0),className,"__this"));
+
 				visit(n);
 			}
 			public void visitFormalParameter(GNode n){//variable name
@@ -427,6 +432,29 @@ public class InheritanceTree{
 			}
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+			}
+			/** returns String to add on to ArrayOf..
+			 */
+			public String forArrays(String name){
+
+				if(name.contains("::"))return name.substring(name.lastIndexOf(":")+1);
+				if(name.equals("int32_t")) return "Int";
+				if(name.equals("bool")) return "Boolean";
+				if((name.equals("char"))||(name.equals("short"))||(name.equals("long"))
+				   ||(name.equals("float"))||(name.equals("double"))){
+					char c = (char)(name.charAt(0)-32);//uppercase first letter
+					return c + name.substring(1);
+				}
+				return name;
+			}
+			/** returns String of fully qualified type 
+			 */
+			public String FQify(String type){
+				if((type.equals("Object"))||(type.equals("Class"))||(type.equals("String")))
+					return "java::lang::"+type;
+				else {
+					return packageName.replace(".","::")+"::"+type;
+				}
 			}
 			
 		}.dispatch(n);
@@ -589,6 +617,20 @@ public class InheritanceTree{
 		}
 		return found;
 	
+	}/** search will return a InheritanceTree of mathing fullyqualifiedname
+	  * or a null inheritanctree if no tree exists yet as child of the root
+	  */
+	public InheritanceTree search(String fullyqualifiedname){
+		InheritanceTree found = null;
+		if ((this.packageName+this.className).equals(fullyqualifiedname))
+			return this;
+		
+		for (InheritanceTree i : subclasses) {
+			found = i.search(fullyqualifiedname);
+			if (found!=null) return found;
+		}
+		return found;
+	
 	}
 	/**
 	 * method used to retrieve the corret overloaded constructor and append its overloaded number
@@ -645,7 +687,7 @@ public class InheritanceTree{
 		//for same named methods and same number of parameters
 		for (Declaration j : Vt_ptrs) {
 			if ((j.name.equals(method_name)) && ((j.params.size()-1) == paramtyps.size()))
-				possible.add(j);						
+				possible.add(j);
 		}
 		for (Declaration l : local ) {
 			if ((l.name.equals(method_name)) && (!l.isVirtual)&&(!((on_instance)&&(l.isprivate())))&&
@@ -671,7 +713,7 @@ public class InheritanceTree{
 					if (!pos_type.equals(type));
 					else {
 						int casting = gouptree(pos_type,type);
-						if (casting == -1) { possible.remove(c); }//not castable
+						if (casting == -1) { possible.remove(c); System.out.println("removed");}//not castable
 						else c.specificity = c.specificity + casting;
 					}
 				}
@@ -723,7 +765,7 @@ public class InheritanceTree{
 	private String make_name(boolean on_instance,Declaration d){
 		String result="";
 		if ((on_instance) && (d.isVirtual))
-                    result= "->vtpr->";
+                    result= "->__vptr->";
 		else if ((on_instance) && (!d.isVirtual))
                     result=".";
 		else
@@ -731,9 +773,10 @@ public class InheritanceTree{
 		result+= d.name;
 		if(d.overloadNum==0)return result;
 		else return result+"_"+d.overloadNum;
-	}/**
-	  * helper returns fully qualified name -classname for inheritancbuilder use
-	  */
+	}
+	
+		/** helper for FQfy
+	 */
 	public String getFQName(){
 		String s="";
 		if (packages.get(0).equals("")) return s;
@@ -742,5 +785,10 @@ public class InheritanceTree{
 		}
 		return s;
 	}
+	/**
+	 */
+	public String getcppFQName(){
+		return this.packageName.replace(".","::");
+	}
 
-}
+}//end of inheritancetree

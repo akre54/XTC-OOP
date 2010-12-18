@@ -12,7 +12,7 @@ import xtc.util.Runtime;
  * 
  */
  
-class CppCreator {
+class FileMaker {
 
     File cFile;
 	FileWriter outputWriter;
@@ -22,7 +22,7 @@ class CppCreator {
  *
  * @param jFile a file whose name ends in .java
  */ 
-	public CppCreator (File jFile, String desc,String end) {
+	public FileMaker (File jFile, String desc,String end) {
 		cFile = convertNameToC (jFile, desc, end);
 		try {
 			outputWriter = new FileWriter(cFile);
@@ -31,7 +31,7 @@ class CppCreator {
 		}
     }
 
-   public CppCreator (File jFile, String name) {
+   public FileMaker (File jFile, String name) {
 		cFile = createCustom (jFile, name);
 		try {
 			outputWriter = new FileWriter(cFile);
@@ -49,7 +49,7 @@ class CppCreator {
     }
 	
 
-	public CppCreator (File jFile) {
+	public FileMaker (File jFile) {
 		cFile = convertNameToC (jFile);
 		try {
 			outputWriter = new FileWriter(cFile);
@@ -63,7 +63,7 @@ class CppCreator {
  * Follows the pathname conventions of the File class: http://download.oracle.com/javase/1.4.2/docs/api/java/io/File.html
  * @param pathName A String that contains the path and file name of a file ending in .java.
  */ 
-	public CppCreator (String pathName) {
+	public FileMaker (String pathName) {
 		cFile = convertNameToC (pathName);
 		try {
 			outputWriter = new FileWriter(cFile);

@@ -48,14 +48,13 @@ PACKAGE_LOC = xtc/oop
 SOURCE = \
 	ArrayMaker.java \
 	ClassStruct.java \
-	ConstructorDec.java \
+	CppFileBuilder.java \
 	CppPrinter.java \
-	CppCreator.java \
 	Declaration.java \
 	DependencyFinder.java \
 	EWalk.java \
-	Translator.java\
-	InheritanceBuilder.java \
+	FileDependency.java \
+	FileMaker.java \
 	InheritanceTree.java \
 	InstanceField.java \
 	Translator.java\

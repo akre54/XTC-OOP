@@ -31,7 +31,7 @@ if [ $D ]; then
 	echo Cleaning directory $D/
 	cd $D
 	echo
-	echo $P.java:
+	#echo $P.java:
 	cat $P.java | nl
 	echo
 		#clean out previous translations
@@ -39,7 +39,7 @@ if [ $D ]; then
 	cp ../java_lang.cpp ./
 	cp ../java_lang.h ./
 	cp ../ptr.h ./
-	make -f ../Makefile PRE=$P TFLAGS='-verbose -printAST'
+	make -f ../Makefile PRE=$P TFLAGS='-verbose'
 	echo
 	echo "Comparing output files:"
 	echo
