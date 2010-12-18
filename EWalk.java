@@ -57,7 +57,7 @@ public class EWalk //extends Visitor
 			ArrayList<String> fcNameList=new ArrayList<String>();
 			
 			public String visitExpression(GNode n) {
-				System.out.println(n.getName());
+				if(VERBOSE)System.out.println(n.getName());
 				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
 					String instanceName = n.getNode(0).getString(0);
 						Node castex = n.getNode(2);//get the third node
@@ -69,31 +69,40 @@ public class EWalk //extends Visitor
 				visit(n);				
 				return null;
 			}
+			/*
 			public void visitSubscriptExpression (GNode n) {
-				// if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
-				// 	System.out.println("Multidimensional arrays not allowed!");
-				// 	System.exit(1);
-				// }
+			if (n.getNode(0)!=null) {
+					if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
+						System.out.println("Multidimensional arrays not allowed!");
+						System.exit(1);
+					}
+				}
 				GNode output = n;
 				output = output.ensureVariable(n);
-				String bounds=("__ArrayOfInt::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
-				output.add(1,"->data__[");
+				String type = ""; // the data type of the array HELP - not neccessry now that operator[] is overloaded
+				String bounds=("__ArrayOf"+type+"::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
+				output.add(1,"->__data[");
 				output.add("]");
 				visit(output);
 				n.set(0,output);
 				n.set(1,""); //clear the old node;
 				boundsChecks.append(bounds+"\n");
 			}
+			*/
 			public void visitNewArrayExpression (GNode n) {
 				if(VERBOSE) System.out.println("Entering newArrayExpression");
 				GNode output = (GNode)n.getNode(1);
 				output = output.ensureVariable(output);
-				n.set(0,"__Array<"+n.getNode(0).get(0).toString()+">(");
+				n.set(0,"new __Array<"+n.getNode(0).get(0).toString()+">(");
 				visit(output);
 				output.add(")");
 				n.set(1,output);
 			}
 			public void visitDimensions (GNode n) {
+				if (n.get(1)!=null) {
+					System.out.println("Multidimensional arrays not allowed!");
+					System.exit(1);
+				}
 				n.set(0,"");
 				visit(n);
 			}
@@ -189,14 +198,14 @@ public class EWalk //extends Visitor
 				 in Search_for_method later on up the tree*/
 				if(isCallExpression(firstChild))
 				{
-					System.out.println("FIRST_CHILD");
+					if(VERBOSE)System.out.println("FIRST_CHILD");
 					isMethodChaining=true;
 					//dispatch(firstChild);
 				}
 				if(isMethodChaining)
 					{
 						//store the method return type for later use
-						System.out.println("METHOD CHAINING");
+						if(VERBOSE)System.out.println("METHOD CHAINING");
 						primaryIdentifier=savedReturnType;
 						isInstance=true;
 					}
@@ -224,7 +233,7 @@ public class EWalk //extends Visitor
 				ArrayList<String> argumentTypes =getArgumentTypes(arguments);
 				//get the method name
 				String[] methodArray= new String[2];
-				System.out.println(n.toString());
+				if(VERBOSE)System.out.println(n.toString());
 				String methodName = n.getString(2);
 				//run checks for system.out.println and break from get method info Otherwise will crash
 				if(methodName.contains("std::cout<<")) 
@@ -261,20 +270,15 @@ public class EWalk //extends Visitor
 				 getType should support Expressions, Identifiers and MethodCalls
 				 */
 				isArgument=true;
-				System.out.println("1hi---------------------------------");
-								ArrayList<String> argumentList = new ArrayList<String>();
-								System.out.println("1hi---------------------------------");
-
+				if(VERBOSE)System.out.println("getArgumentTypes 1");
+				ArrayList<String> argumentList = new ArrayList<String>();
+				if(VERBOSE)System.out.println("getArgumentTypes 2");
 				for(int i=0;i<n.size();i++)	{
 					argumentList.add(getType(n.getNode(i)));
-				} 
-								System.out.println("1hi---------------------------------");
-
-								System.out.println("1hi---------------------------------");
-
+				}
+				if(VERBOSE)System.out.println("getArgumentTypes3");
 				isArgument=false;
 				return argumentList;
-				
 			}
 			
 			/**Helper Method that checks for the System.out.print Special Case.
@@ -596,6 +600,7 @@ public class EWalk //extends Visitor
 			
 			/**Default Visit Method*/
 			public void visit(Node n) {
+				if(VERBOSE)System.out.println(n.getName());
 				if(n!=null){
 					for (Object o : n){ 
 						if (o instanceof Node){ 

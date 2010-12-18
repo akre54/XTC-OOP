@@ -98,6 +98,19 @@ public class CppPrinter extends Visitor
 		//visit the next batch of code
 		visitChildren(n, 1,n.size(),"");
 	}
+	//prints brackets
+	public void visitSubscriptExpression(GNode n)
+	{
+		//visit child 
+		visitChildren(n, 0,1,"");
+		//print bracket
+		print("->__data[");
+		
+		//visit 2nd child
+		visitChildren(n,1,n.size(),"");
+		//close bracket
+		print("]");
+	}
 	public void visitLogicalNegationExpression(GNode n)
 	{
 		print("!");
