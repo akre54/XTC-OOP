@@ -115,10 +115,10 @@ public class CppFileBuilder{
 	 *	same structure as http://cs.nyu.edu/rgrimm/teaching/fa10-oop/1007/java_lang.h from class notes
 	 */
 	public void addClassdef(InheritanceTree t){
-	
+		
 		String ClassName = t.className;
 		h.write(
-				"//data layout for "+fileinfo.getPackageName()+t.className);
+				"//data layout for "+fileinfo.getPackageName()+ClassName);
 		h.write(/* CLASS STRUCT DECLARATION*/
 				"\n\tstruct __"+ClassName+"{ \n"+
 				"\t\t__"+ClassName+"_VT* __vptr;\n");//vtable ptr
@@ -354,7 +354,7 @@ public class CppFileBuilder{
 	 */	
 	private void write_assign_method_ptrs(InheritanceTree t){
 		//ptr for __class()
-		h.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class()),");
+		h.write("\t\t\t"+t.Vt_ptrs.get(0).name+"(__"+t.Vt_ptrs.get(0).ownerClass+"::__class()),\n");
 		
 		//ptr for __delete()
 		h.write("\t\t\t__delete(&__rt::__delete<__"+t.className+">)");
