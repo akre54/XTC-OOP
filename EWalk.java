@@ -59,7 +59,8 @@ public class EWalk //extends Visitor
 			public String visitExpression(GNode n) {
 				System.out.println(n.getName());
 				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
-					String instanceName = n.getNode(0).getString(0);
+                                        // AK edit 12/18, added extra .getNode(0) to avoid ClassCastException java.lang.ClassCastException: Not a token	at xtc.tree.Node.getTokenText(Node.java:110), at xtc.tree.Node.getString(Node.java:444)
+					String instanceName = n.getNode(0).getNode(0).getString(0);
 						Node castex = n.getNode(2);//get the third node
 						if(castex.getName().equals("CastExpression")) {//see if its a castexpression
 							visitCastExpression(castex,instanceName);
@@ -443,7 +444,9 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-						b =tree.root.search(qualities,className);
+                                                String packName = "";
+                                                for (String s : qualities) {packName += s;}
+						b =tree.root.search(packName,className);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isMethodChaining)
@@ -451,7 +454,9 @@ public class EWalk //extends Visitor
 					ArrayList<String> packages = new ArrayList<String>();
 					//currently not supporting classes outside of the current methdo
 					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
-					b=tree.root.search(packages,Identifier);
+                                        String packName = "";
+                                        for (String s : packages) {packName += s;}
+					b=tree.root.search(packName,Identifier);
 					//what do i do to get the full package name?
 				}
 				else if (isSuper) 
