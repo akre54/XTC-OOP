@@ -596,6 +596,7 @@ public class EWalk //extends Visitor
 			
 			/**Default Visit Method*/
 			public void visit(Node n) {
+				System.out.println(n.getName());
 				if(n!=null){
 					for (Object o : n){ 
 						if (o instanceof Node){ 
