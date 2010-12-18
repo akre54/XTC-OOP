@@ -58,8 +58,8 @@ public class EWalk //extends Visitor
 			
 			public String visitExpression(GNode n) {
 				System.out.println(n.getName());
-				if (!primary.getName().toString().equals("SubscriptExpression")) {
-						String instanceName = primary.getString(0);
+				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
+					String instanceName = n.getNode(0).getString(0);
 						Node castex = n.getNode(2);//get the third node
 						if(castex.getName().equals("CastExpression")) {//see if its a castexpression
 							visitCastExpression(castex,instanceName);
@@ -77,7 +77,7 @@ public class EWalk //extends Visitor
 				GNode output = n;
 				output = output.ensureVariable(n);
 				String bounds=("__ArrayOfInt::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
-				output.add(1,"[");
+				output.add(1,"->data__[");
 				output.add("]");
 				visit(output);
 				n.set(0,output);
