@@ -53,7 +53,7 @@ public class ClassStruct {
     public ArrayList<String> getPackage() {
         if (!packageName.equals("")) // if not blank
             return new ArrayList<String>(java.util.Arrays.asList(packageName.split("\\.")));
-		else
+	else
             return new ArrayList<String>();
     }
 }

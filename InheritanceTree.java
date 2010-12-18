@@ -15,8 +15,6 @@ import xtc.tree.Visitor;
 
 public class InheritanceTree{
 	public InheritanceTree root;
-	public String packageName;
-	public final String className;
 	public ArrayList<InstanceField> fields;
 	public ArrayList<Declaration> constructors;
 	public ArrayList<Declaration> local; //all methods defined IN THIS CLASS virtual or not!
@@ -24,6 +22,8 @@ public class InheritanceTree{
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
 	public ArrayList<String> packages;
+        public String packageName;
+	public final String className;
 
 	/**
 	 * The constructor for creating the Object class Inheritance tree.
@@ -31,11 +31,8 @@ public class InheritanceTree{
 	 * 
 	 */
 	InheritanceTree(){
-		this.packageName ="java.lang";
-		this.packages = new ArrayList<String>(0);
+		this.packageName = "java.lang";
 		this.root = this;
-		packages.add("java");
-		packages.add("lang");
 		
 		className = "Object";
 		superclass = null; //no superclass for Object
@@ -88,8 +85,7 @@ public class InheritanceTree{
 	 */
 	InheritanceTree(InheritanceTree supr,String string_or_class){
 		this.root = supr.root;
-		this.packageName =supr.packageName;
-		this.packages = supr.packages;
+		this.packageName = supr.packageName;
 		this.superclass = supr;
 		this.className = string_or_class;
 		
@@ -189,10 +185,9 @@ public class InheritanceTree{
 	 * will create vtable for class and then attach the tree to the superclass tree.
 	 * @param GNode (classdeclaration), InheritanceTree (superclass's).
 	 */
-	InheritanceTree(String packageName,ArrayList<String> packages,GNode n, InheritanceTree supr){
+	InheritanceTree(String packageName, GNode n, InheritanceTree supr){
 		this.root = supr.root;
-		this.packages= packages;
-		this.packageName =packageName;
+		this.packageName = packageName;
 		this.superclass = supr;
 		this.className = n.getString(1);
 		
@@ -582,13 +577,13 @@ public class InheritanceTree{
 	 * this is meant to be used only on the root Object Tree so that the entire tree is searched
 	 *
 	 */
-	public InheritanceTree search(ArrayList<String> pkgs, String name){
+	public InheritanceTree search(String pkgName, String name){
 		InheritanceTree found = null;
-		if ((this.className.equals(name)) && (packages.containsAll(pkgs)))
+		if ((this.className.equals(name)) && (this.packageName.equals(pkgName)))
 			return this;
 		
 		for (InheritanceTree i : subclasses) {
-			found = i.search(pkgs,name);
+			found = i.search(pkgName,name);
 			if (found!=null) return found;
 		}
 		return found;
@@ -713,7 +708,7 @@ public class InheritanceTree{
 			return primatives.indexOf(casted_to) - primatives.indexOf(castee);
 		
 		//search on root of tree for castee class
-		InheritanceTree type = this.root.search(this.packages,castee);
+		InheritanceTree type = this.root.search(this.packageName,castee);
 		while( !type.className.equals(casted_to) ){
                     distance++;
                     type = type.superclass;
@@ -751,7 +746,9 @@ public class InheritanceTree{
 			ArrayList<String> pack= new ArrayList<String>(java.util.Arrays.asList(type.split("\\.")));
 			type = pack.get(pack.size()-1);
 			pack.remove(pack.size()-1);
-			InheritanceTree t = this.root.search(pack,type);
+                        String packName = "";
+                        for (String s : pack) {packName += s;}
+			InheritanceTree t = this.root.search(packName,type);
 			return t.getFQName();
 		}
 	}

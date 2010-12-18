@@ -298,11 +298,13 @@ public class DependencyFinder {
 
             ArrayList<String> files = new ArrayList<String>();
             for (FileDependency d : fileDependencies) {
-                if (d.origin == origin) {
+                /*if (d.origin == origin) {
                     switch (origin) {
                         case IMPORT:
+                        case IMPORTEDPACKAGE: // we're importing all files in directory now, so these two checks not needed until we update Inheritancebuilder to handle implicit imports
+                        case CURRENTPACKAGE: */
                             files.add("#include \"" + hFileName(allClasses, d.fullPath) + "\"");
-                            break;
+                    /*        break;
                         /*case IMPORTEDPACKAGE:
 	                          files.add("using " + currentPackage.replaceAll("\\.", "::") + ";");
 	                          break; 
@@ -314,8 +316,8 @@ public class DependencyFinder {
 									????
 									break;
 								*/
-                    }
-                }
+                  /*  }
+                } */
             }
 
             return files;
@@ -328,6 +330,7 @@ public class DependencyFinder {
             ArrayList<String> files = new ArrayList<String>();
 
             if (origin == DependencyOrigin.ROOTFILE) {
+                files.add("using java::lang::Object;");
                 files.add("using java::lang::__Object;");
                 files.add("using java::lang::Class;");
                 files.add("using java::lang::__Class;");
@@ -340,9 +343,9 @@ public class DependencyFinder {
             }
 
             for (FileDependency d : fileDependencies) {
-                if (d.origin == DependencyOrigin.IMPORT) {
+                //if (d.origin == DependencyOrigin.IMPORT) { // we're importing all files in directory now, so this check not needed until we update Inheritancebuilder to handle implicit imports
                     files.add("using " + qualifiedName(allClasses, d.fullPath) + ";");
-                }
+                //}
             }
 
             return files;
