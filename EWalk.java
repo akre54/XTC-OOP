@@ -4,7 +4,6 @@ import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 import java.util.ArrayList;
-import xtc.oop.ArrayMaker;
 
 /**
  * Does all the smart Translating, visits every node inside a method's block, 
@@ -54,24 +53,56 @@ public class EWalk //extends Visitor
 			/**StringBuffer and Arraylist to store the 
 			 *FullQualified Name i.e. java.lang etc */
 			StringBuffer fcName= new StringBuffer();
+			StringBuffer boundsChecks = new StringBuffer();
 			ArrayList<String> fcNameList=new ArrayList<String>();
 			
-			/**Checks for CastExpression i.e. double r = (double) k;*/
-			public void visitExpression(GNode n)
-			{
-				Node primary = n.getNode(0);
-				String instanceName=primary.getString(0);
-				Node castex = n.getNode(2);
-				if(castex.getName().equals("CastExpression"))
-					{
-						visitCastExpression(castex,instanceName);
-					}
+			public String visitExpression(GNode n) {
+				System.out.println(n.getName());
+				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
+					String instanceName = n.getNode(0).getString(0);
+						Node castex = n.getNode(2);//get the third node
+						if(castex.getName().equals("CastExpression")) {//see if its a castexpression
+							visitCastExpression(castex,instanceName);
+						}
+				} else {
+				}
+				visit(n);				
+				return null;
 			}
-			/**
-			 *Called from visitExpression calls Declarators Update_type to make sure 
-			 *the proper type is decared in the InheritanceTree
-			 *NOTE: This is not a VISIT method but my own created method
-			 */
+			public void visitSubscriptExpression (GNode n) {
+				// if (n.getNode(0).getName().equals("SubscriptExpression")) {//should only happen if somebody tries a multi-dimensional array
+				// 	System.out.println("Multidimensional arrays not allowed!");
+				// 	System.exit(1);
+				// }
+				GNode output = n;
+				output = output.ensureVariable(n);
+				String bounds=("__ArrayOfInt::checkIndex("+output.getNode(0).getString(0)+","+output.getNode(1).getString(0)+");\n");
+				output.add(1,"->data__[");
+				output.add("]");
+				visit(output);
+				n.set(0,output);
+				n.set(1,""); //clear the old node;
+				boundsChecks.append(bounds+"\n");
+			}
+			public void visitNewArrayExpression (GNode n) {
+				if(VERBOSE) System.out.println("Entering newArrayExpression");
+				GNode output = (GNode)n.getNode(1);
+				output = output.ensureVariable(output);
+				n.set(0,"__Array<"+n.getNode(0).get(0).toString()+">(");
+				visit(output);
+				output.add(")");
+				n.set(1,output);
+			}
+			public void visitDimensions (GNode n) {
+				n.set(0,"");
+				visit(n);
+			}
+			/**visit the declarator and update the type */
+			public void visitDeclarator(GNode n)
+			{
+				visit(n);
+			}
+			/**NOTE: This is not a VISIT method but my own created method*/
 			public void visitCastExpression(Node n, String name) {
 				//get and variable and the new types
 				Node qual = n.getNode(0);
@@ -361,22 +392,19 @@ public class EWalk //extends Visitor
 				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
 
 				method.update_type(name,currentPackage, newtype);
-				
-				/**Pat What is this Doing?*/
-				if (isString) {
-					//visit(n);
-					isString = false;
+				if (n.getNode(1).getNode(1) !=null ) {
+				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
+					if(VERBOSE) System.out.println("Entering array field declaration...");
+					n.getNode(1).getNode(0).set(0,"ArrayOf"+visitPrimitiveType((GNode)n.getNode(1).getNode(0)));
 				}
-				
-				visit(n);
-				/**Visits an Array and creates the C++ type arrays based in the ArrayMaker Class*/
-				if (isArray) {
-					if(VERBOSE) System.out.println("Entering array");
-					ArrayMaker goArray = new ArrayMaker (n);
-					isArray = false;
 				}
 				visit(n);
 			}
+			public String visitPrimitiveType (GNode n) {
+				if (n.getString(0).equals("int")) return "Int";
+				return n.getString(0);
+			}
+			/**Helper method that gets an array list of a pack when given  node assuming qualifiedId or Prim*/
 			
 			/**Helper method that gets an array list of a package when given 
 			 node assuming it is a qualifiedId or PrimimitveType*/
@@ -391,28 +419,6 @@ public class EWalk //extends Visitor
 				}
 				return packages;
 			}
-			/**Visits the argument Subtree and sets the isArgument Flag to tree */
-			public void visitArguments(GNode n){
-				isArgument=true;
-				visit(n);
-				isArgument=false; //once out of argument subtree make sure to reset the argument flag
-			}
-			
-			public void visitDimensions (GNode n) {
-				if(!isArray) {
-					//if(VERBOSE) System.out.println("Setting array flag to true...");
-					isArray = true;
-				}
-				visit(n);
-			}
-			public void visitNewArrayExpression (GNode n) {
-				if(!isArray) {
-					//if(VERBOSE) System.out.println("Setting array flag to true...");
-					isArray = true;
-					visit(n);
-				}
-			}
-			
 			/**helper method that uses the inheritence tree search for method and 
 			   returns the givne string array that should contain the return type and c++ Standard methodname 
 			   puts in check for isSuper flag and isInstance Flag*/

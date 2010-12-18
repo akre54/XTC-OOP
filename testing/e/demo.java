@@ -1,12 +1,8 @@
 public class demo {
 	public static void main (String [] args) {
-		int [] a;
-		Class [] b = new Class[10];
-		int [] x = new int[1];
-
-		int name = new Integer(args);
-		a = new int[1];
-		a = new int[methodname()];
-		//a[0]=1;
+   		Class [] x= new Object [123];
+		//ArrayOfInt x=__Array<int>(1);
+		x[1]=50;
+		x[2]=x[3];
 	}
 }
