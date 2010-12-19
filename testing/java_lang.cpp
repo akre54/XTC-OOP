@@ -249,6 +249,15 @@ namespace java {
 	  
 	  // =======================================================================
 	  
+	  // Internal accessor for byte's class.
+	  Class __Byte::__primitiveClass() {
+		  static Class k = new __Class(__rt::stringify("short"),
+									   __rt::null(), __rt::null(), true);
+		  return k;
+	  }
+	  
+	  // =======================================================================
+	  
 	  
     // Template specialization for arrays of ints.
     template<>
@@ -323,13 +332,13 @@ namespace java {
 	  }
 	  // Template specialization for arrays of long.
 	  template<>
-	  __Array<long>::__Array(const int32_t length)
-      : __vptr(&__vtable), length(length), __data(new long[length]) {
-		  std::memset(__data, 0, length * sizeof(long));
+	  __Array<int64_t>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new int64_t[length]) {
+		  std::memset(__data, 0, length * sizeof(int64_t));
 	  }
 	  
 	  template<>
-	  Class __Array<long>::__class() {
+	  Class __Array<int64_t>::__class() {
 		  static Class k = new __Class(__rt::stringify("[J"),
 									   __Object::__class(),
 									   __Integer::__primitiveClass());
@@ -337,14 +346,28 @@ namespace java {
 	  }
 	  // Template specialization for arrays of short.
 	  template<>
-	  __Array<short>::__Array(const int32_t length)
-      : __vptr(&__vtable), length(length), __data(new short[length]) {
-		  std::memset(__data, 0, length * sizeof(short));
+	  __Array<int16_t>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new int16_t[length]) {
+		  std::memset(__data, 0, length * sizeof(int16_t));
 	  }
 	  
 	  template<>
-	  Class __Array<short>::__class() {
+	  Class __Array<int16_t>::__class() {
 		  static Class k = new __Class(__rt::stringify("[S"),
+									   __Object::__class(),
+									   __Integer::__primitiveClass());
+		  return k;
+	  }
+	  // Template specialization for arrays of byte.
+	  template<>
+	  __Array<int8_t>::__Array(const int32_t length)
+      : __vptr(&__vtable), length(length), __data(new int8_t[length]) {
+		  std::memset(__data, 0, length * sizeof(int8_t));
+	  }
+	  
+	  template<>
+	  Class __Array<int8_t>::__class() {
+		  static Class k = new __Class(__rt::stringify("[B"),
 									   __Object::__class(),
 									   __Integer::__primitiveClass());
 		  return k;

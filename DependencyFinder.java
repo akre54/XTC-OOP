@@ -143,9 +143,11 @@ public class DependencyFinder {
             } //end of visit method
         }.dispatch(n);
 
+		/* don't import current directory files... for now
         if (currentPackage.equals("")) {
             gatherDirectoryFiles((new File(currentFilePath)).getParent(), DependencyOrigin.CURRENTPACKAGE);
-        }
+        
+		 }*/
     } // end of DependencyFinder
 
     /** used for second time we call DepFinder (in -translate) when we know the file's origin. */

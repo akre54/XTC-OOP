@@ -295,7 +295,11 @@ namespace java {
 		  
 		  static Class __primitiveClass();
 	  };
-	  
+	  // The completely incomplete data layout for java.lang.Byte.
+	  struct __Byte {
+		  
+		  static Class __primitiveClass();
+	  };  
 	  
 	  //****************** end my edits ***************
 	  
@@ -349,7 +353,7 @@ namespace java {
 	  typedef __rt::Ptr<__Array<double> > ArrayOfDouble;
 	  typedef __rt::Ptr<__Array<bool> > ArrayOfBoolean;
 	  typedef __rt::Ptr<__Array<float> > ArrayOfFloat;
-	  typedef __rt::Ptr<__Array<int16_t> > ArrayOfChar;
+	  typedef __rt::Ptr<__Array<int16_t> > ArrayOfChar;//defined in java_lang.cpp as __Array<char> for now
 	  typedef __rt::Ptr<__Array<int64_t> > ArrayOfLong;
 	  typedef __rt::Ptr<__Array<int16_t> > ArrayOfShort;
 	  typedef __rt::Ptr<__Array<int8_t> > ArrayOfByte;

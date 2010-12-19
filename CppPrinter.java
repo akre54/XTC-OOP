@@ -41,7 +41,7 @@ public class CppPrinter extends Visitor
 {
 	private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("CppPrinterLog");
 	private StringBuilder printer; //a StringBuilder that stores the code translated by the print
-	private boolean DEBUG = true;
+	private boolean DEBUG = false;
 	/*A global boolean that keeps track of the current modifier status*/
 	private boolean isPrivate; 	
 	private boolean isArguments; //checks to see if we're currently in an argument subtree
@@ -82,7 +82,7 @@ public class CppPrinter extends Visitor
 	/**Only prints out a special case if isTReturn Flag is set to true otherwise does normal behavor*/
 	public void visitStringLiteral(GNode n)
 	{
-		if(isReturn || !isPrint) //check to see if we are current in a return subtree
+		if(isReturn) //check to see if we are current in a return subtree
 			print("new __String("+n.getString(0)+")"); //print out the proper code
 		else//otherwise just visit the tree as normal
 			visit(n);
