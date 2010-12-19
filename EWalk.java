@@ -160,6 +160,7 @@ public class EWalk //extends Visitor
 				//new method name to override in the tree
 				String newMethod= methodArray[1];
 				savedReturnType = methodArray[0];
+				System.out.println("THE RETURN TYPE" +savedReturnType );
 				//replace the AST methodName with the given name
 				if(newMethod!=null)
 					n.set(2,newMethod);
@@ -450,7 +451,7 @@ public class EWalk //extends Visitor
 				{
 					ArrayList<String> packages = new ArrayList<String>();
 					//currently not supporting classes outside of the current methdo
-					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
+					System.out.print("Is Method Chaining:" +packages +"," + Identifier);
 					b=tree.root.search(packages,Identifier);
 					//what do i do to get the full package name?
 				}
