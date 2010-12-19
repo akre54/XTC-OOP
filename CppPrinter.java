@@ -49,10 +49,12 @@ public class CppPrinter extends Visitor
 	private boolean isInstance;
 	private boolean isPrint;
 	private String primIdentifier;
+	private String declared; //string that stores declared variable for NewclassExpressions
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
 	{
 		isArguments=false;
+		declared = "";
 		//System.out.println(n.toString());
 		if(n!=null){
 		if(DEBUG)System.out.println(n.toString());
@@ -454,8 +456,24 @@ public class CppPrinter extends Visitor
 			
 			if (i==3) {
 				print(")");
-			}			
+			}	
+			
 		}
+		//close the brackets print a new line and then print the init
+		print(";\n");
+		//  b->init(b,8,"string");
+		print(declared);
+		print("->init");
+		print("(" +declared);
+		//check to see if their are any arguemnts
+		Node arguments = n.getNode(3);
+		if(arguments.size()>0)
+		{
+			print(",");
+			visitChildren(arguments,0,arguments.size(),",");
+			
+		}
+		print(")");
 	}
 	public void visitPrimaryIdentifier(GNode n)
 	{
@@ -642,16 +660,21 @@ public class CppPrinter extends Visitor
 		}
 	}
 	
-	/**Visit the declarators i.e. int i = 5; */
+	/**Visit the declarators i.e. int i = 5; 
+	 if there is */
 	public void visitDeclarator(GNode n)
 	{
-		print(" " +n.getString(0));
+		declared=n.getString(0); //declarator name is at the first child
+		print(" " +declared);
 		//get the object at position 1 and check to make sure its not null
 		Object one = n.get(1);
 		checkInstance(one);
 		if(one!=null)
 		{//check the instance of the object and decide what to do with it
+			
+			
 			checkInstance(one);
+			
 		}
 		//do the same with object at position 2
 		Object two = n.get(2);
@@ -730,6 +753,24 @@ public class CppPrinter extends Visitor
 			return true;
 		else
 			return false;			
+	}
+	public void visitInstanceOfExpression(GNode n)
+	{
+		//get left side identifier (object to be checked)
+		String primary = n.getNode(0).getString(0);
+		
+		//get right side Class (class to check for instance
+		String className = n.getNode(1).getNode(0).getString(0);
+		/*
+		 if(({ Class k=d->__vptr->getClass(d);
+		 std::cout<<"K"<<k->__vptr->toString(k)<<std::endl;
+		 k->__vptr->isInstance(k,d);})){
+		 std::cout<<"RAWR"<<std::endl;
+		 }
+		 */
+		print("({ Class k=");
+		print(primary+"->__vptr->getClass("+primary+");\n");
+		print("k->__vptr->isInstance(k,"+primary+");})");
 	}
 	/**checks for calls inside break and continue statements and prints those values*/
 	public void setBreCon(GNode n)
