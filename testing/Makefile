@@ -5,7 +5,7 @@ SHELL = /bin/sh
 
 PRE = demo
 METHODDEFS = $(wildcard */*_methoddef.cpp)
-TARGETS = main.cpp $(METHODDEFS) java_lang.cpp
+TARGETS = main.cpp *_methoddef.cpp $(METHODDEFS) java_lang.cpp
 CC = g++
 DEBUG = -g
 FLAGS = $(DEBUG)
