@@ -172,7 +172,7 @@ public class EWalk //extends Visitor
 				//reset flags
 				if(isMethodChaining) {
 					//set args of this call expression to the chainGang
-					n.getNode(3).add(0,newMethod);
+					//n.getNode(3).add(0,newMethod);
 					if(VERBOSE)System.out.println("Added "+newMethod+" to arguments");
 				}
 				else
@@ -474,10 +474,9 @@ public class EWalk //extends Visitor
 					String packages = "";
 					String FullName = "";
 					//currently not supporting classes outside of the current methdo
-					if(VERBOSE)System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
 					if(!packages.equals(""))FullName = packages+"."+Identifier;
 					else FullName =Identifier;
-                                        
+					if(VERBOSE)System.out.println("Is Method Chaining: b=tree.root.search("+FullName+")");
 					b=tree.root.search(FullName);
 					//what do i do to get the full package name?
 				}
