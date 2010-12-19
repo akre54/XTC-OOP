@@ -52,10 +52,10 @@ if [ $D ]; then
 	done
 
 	#echo $P.java:
-	cat $P.java | nl
+	#cat $P.java | nl
 	echo "pkg name:"
 	echo $(egrep ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1
-	#PACKAGE = $(echo $P.java | $(egrep ^package) | cut -d ' ' -f2 | cut -d ';' -f1) # get root file's package, used for classpaths
+	PACKAGE = $(echo $P.java | $(egrep ^package) | cut -d ' ' -f2 | cut -d ';' -f1) # get root file's package, used for classpaths
 	if [ $PACKAGE ]
 		then
 		make -f ../Makefile PRE=$P TFLAGS='-verbose' PACKAGE=$D
