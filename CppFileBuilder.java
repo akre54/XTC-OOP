@@ -64,6 +64,8 @@ public class CppFileBuilder{
                 //h.write(DependencyFinder.getNamespace(fileinfo.getFileClasses(), fileinfo.getFilePath())+"\n");
             }
 
+            h.write("\n");
+
             for(String p : fileinfo.getPackageToNamespace()){
                     h.write("namespace "+p+" {\n");
             }
@@ -117,11 +119,12 @@ public class CppFileBuilder{
 	public void addClassdef(InheritanceTree t){
 		
 		String ClassName = t.className;
-		h.write(
-				"//data layout for "+fileinfo.getPackageName()+ClassName);
+		h.write("//data layout for "+fileinfo.getPackageName()+ClassName);
 		h.write(/* CLASS STRUCT DECLARATION*/
 				"\n\tstruct __"+ClassName+"{ \n"+
-				"\t\t__"+ClassName+"_VT* __vptr;\n");//vtable ptr
+				"\t\t__"+ClassName+"_VT* __vptr;\n"+
+                                "\t\t"+ClassName+"* __this;\n");//vtable ptr
+
 						 
 				/* FEILDS ---> ex: int x;  */
 		        write_all_feilds(t); h.write("\n\n");
@@ -129,6 +132,7 @@ public class CppFileBuilder{
 				/*CONSTRUCTOR(S)*/
 				write_all_constructors(t); 
 		
+                                
 		        /*  ALL INSTANCE METHODS */
 				write_all_methods(t);
 
@@ -230,13 +234,37 @@ public class CppFileBuilder{
 					if(f.value.equals("")) h.write(","+f.var_name+"("+f.var_name+")");
 					else h.write(","+f.var_name+"("+f.value+")");
                 }
-                h.write("{\n\t\t\t");//3 tabs for Ewalk
+                h.write("{");//3 tabs for Ewalk
+                h.write("//empty constructor. All work done in init");
+                h.write("\n\t   };\n\n");
+
+                // create init() method
+                h.write("\t\tvoid init");
+                if(constr.overloadNum!=0)
+                    h.write("_"+constr.overloadNum);
+                h.write("("+t.className+"* __passedthis");
+
+                // create init's formal parameters
+                for (int i=0;i<constr.params.size();i++) {
+                    h.write(","); //comma
+                    Fparam fp = constr.params.get(i);
+
+                    //loop through formal parameter's modifiers
+                    for (String modifier : fp.modifiers) {
+                        h.write(modifier+" ");
+                    }
+                    //writes formal parameter's type and name
+                    h.write(fp.type+" "+fp.var_name);
+                }
+
+                h.write(") {\n"+
+                    "\t\t\t__"+t.className+"::__this = const_cast<"+t.className+"*> (__passedthis);\n");
 
                 //**  EWalk is called on constructor's block node  **//
                 EWalk changes = new EWalk(t,constr,constr.bnode);
                 CppPrinter print = new CppPrinter(constr.bnode);
                 h.write(print.getString().toString());//write body of the constructor
-                h.write("\n\t   };\n\n");
+                h.write("\t\t}\n\n");
             }
 		}
 	}
