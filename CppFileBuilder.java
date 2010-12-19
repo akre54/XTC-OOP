@@ -259,7 +259,7 @@ public class CppFileBuilder{
                 //**  EWalk is called on constructor's block node  **//
                 EWalk changes = new EWalk(t,constr,constr.bnode);
                 CppPrinter print = new CppPrinter(constr.bnode);
-                h.write(print.getString().toString());//write body of the constructor
+                h.write(print.getString().toString());//write body of the constructor in itit() method
                 h.write("\t\t}\n\n");
             }
 		}
