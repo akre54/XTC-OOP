@@ -258,7 +258,7 @@ public class InheritanceTree{
                             return "java::lang::"+type;
                     else {
                             if(!packageName.equals(""))
-                                    return packageName.replace("\\.","::")+"::"+type;
+                                    return packageName.replace(".","::")+"::"+type;
                             else return type;
                     }
             }

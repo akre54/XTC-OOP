@@ -122,8 +122,8 @@ public class CppFileBuilder{
 		h.write("//data layout for "+fileinfo.getPackageName()+ClassName);
 		h.write(/* CLASS STRUCT DECLARATION*/
 				"\n\tstruct __"+ClassName+"{ \n"+
-				"\t\t__"+ClassName+"_VT* __vptr;\n"+
-                                "\t\t"+ClassName+"* __this;\n");//vtable ptr
+				"\t\t__"+ClassName+"_VT* __vptr;\n"+ //vtable ptr
+                                "\t\t"+ClassName+" __this;\n"); // __this pointer
 
 						 
 				/* FEILDS ---> ex: int x;  */
@@ -242,7 +242,7 @@ public class CppFileBuilder{
                 h.write("\t\tvoid init");
                 if(constr.overloadNum!=0)
                     h.write("_"+constr.overloadNum);
-                h.write("("+t.className+"* __passedthis");
+                h.write("("+t.className+" __passedthis");
 
                 // create init's formal parameters
                 for (int i=0;i<constr.params.size();i++) {
@@ -258,12 +258,12 @@ public class CppFileBuilder{
                 }
 
                 h.write(") {\n"+
-                    "\t\t\t__"+t.className+"::__this = const_cast<"+t.className+"*> (__passedthis);\n");
+                    "\t\t\t__this = __passedthis;\n");
 
                 //**  EWalk is called on constructor's block node  **//
                 EWalk changes = new EWalk(t,constr,constr.bnode);
                 CppPrinter print = new CppPrinter(constr.bnode);
-                h.write(print.getString().toString());//write body of the constructor
+                h.write(print.getString().toString());//write body of the constructor in itit() method
                 h.write("\t\t}\n\n");
             }
 		}
@@ -296,7 +296,7 @@ public class CppFileBuilder{
                             h.write("_"+method.overloadNum);
                     h.write("(");
                     for (int j=0; j<method.params.size();j++) {
-						Fparam param= method.params.get(j);
+			Fparam param= method.params.get(j);
                         if(j==0)h.write(param.type);//write without ","
                         else h.write(","+param.type);
                     }
