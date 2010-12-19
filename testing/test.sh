@@ -20,6 +20,7 @@ fi
 echo "Enter the testing directory (return blank to quit):"
 read D
 if [ $D ]; then
+
 	echo compiling...
 	cd ..
 	make
@@ -27,14 +28,19 @@ if [ $D ]; then
 	then
 	   	exit $?
 	fi
+
 	cd testing/
 	echo Cleaning directory $D/
 	cd $D
+	if [ $? -ne '0' ]
+	then
+			echo "bad path name"
+	   	exit $?
+	fi
+
 	echo
-	#echo $P.java:
-	cat $P.java | nl
-	echo
-		#clean out previous translations
+
+	#clean out previous translations
 	make -f ../Makefile clean
 
 	#recursively copy java_lang to each directory
@@ -44,10 +50,21 @@ if [ $D ]; then
 			cp ../java_lang.h $directory
 			cp ../ptr.h $directory
 	done
-	make -f ../Makefile PRE=$P TFLAGS=''
+
+	#echo $P.java:
+	cat $P.java | nl
+	echo "pkg name:"
+	echo $(egrep ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1
+	#PACKAGE = $(echo $P.java | $(egrep ^package) | cut -d ' ' -f2 | cut -d ';' -f1) # get root file's package, used for classpaths
+	if [ $PACKAGE ]
+		then
+		make -f ../Makefile PRE=$P TFLAGS='-verbose' PACKAGE=$D
+	else
+		make -f ../Makefile PRE=$P TFLAGS='-verbose'
+	fi
 	if [ $? -eq '0' ] # made successfully!
-	then
-	   	echo "Comparing output files:"
+		then
+	  echo "Comparing output files:"
 		echo
 		#sdiff will output both files to command line, more useful here than diff
 		sdiff java.out.txt cpp.out.txt
