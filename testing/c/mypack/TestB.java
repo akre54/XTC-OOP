@@ -1,4 +1,4 @@
-package mypack;
+package c.mypack;
 public class TestB
 { 
   public double x; 
