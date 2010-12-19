@@ -131,8 +131,11 @@ public class Translator extends Tool {
 			{
 				runtime.console().p("Testing...").pln().flush();
 			
+				Node yyValue;
+				yyValue = GNode.create("CompilationUnit");
+				
 				/*Create a new visitor to visit the CompilationUnit */
-				new Visitor(){
+				/*new Visitor(){
 					public void visitBlock(GNode n)
 					{
 						CppPrinter print= new CppPrinter(n,true);
@@ -146,7 +149,7 @@ public class Translator extends Tool {
 						
 						}
 					}
-				}.dispatch(node);
+				}.dispatch(node);*/
 			
 			}
 	//-------------------------------------------------------------------

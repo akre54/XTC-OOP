@@ -453,15 +453,10 @@ public class EWalk //extends Visitor
 				{
 					ArrayList<String> packages = new ArrayList<String>();
 					//currently not supporting classes outside of the current methdo
-<<<<<<< HEAD
-					System.out.print("Is Method Chaining:" +packages +"," + Identifier);
-					b=tree.root.search(packages,Identifier);
-=======
 					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
                                         String packName = "";
                                         for (String s : packages) {packName += s;}
 					b=tree.root.search(packName,Identifier);
->>>>>>> 98676cc2e91794e14c5c74cadf9951de173220fb
 					//what do i do to get the full package name?
 				}
 				else if (isSuper) 
@@ -678,5 +673,11 @@ public class EWalk //extends Visitor
 				}//make sure n is not null
 			}		
 		}.dispatch(node);
+	}
+}
+class CustomNode extends GNode 
+{
+	CustomNode()
+	{
 	}
 }
