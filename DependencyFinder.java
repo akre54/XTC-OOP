@@ -68,8 +68,10 @@ public class DependencyFinder {
                 currentPackage = path.replace("/",".");
 
                 try {
-                    String fullPath = (new File(currentParentDirectory, path)).getCanonicalPath();
-                    gatherDirectoryFiles(fullPath, DependencyOrigin.CURRENTPACKAGE);
+                    if (!currentPackage.equals("")) { // don't import if empty package
+                        String fullPath = (new File(currentParentDirectory, path)).getCanonicalPath();
+                        gatherDirectoryFiles(fullPath, DependencyOrigin.CURRENTPACKAGE);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -337,7 +339,7 @@ public class DependencyFinder {
 
             ArrayList<String> files = new ArrayList<String>();
 
-            if (origin != DependencyOrigin.ROOTFILE) {
+            if (origin != DependencyOrigin.ROOTFILE || files.isEmpty()) { // if the root file but no included files
                 files.add("using java::lang::Object;");
                 files.add("using java::lang::__Object;");
                 files.add("using java::lang::Class;");
