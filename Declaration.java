@@ -55,7 +55,10 @@ public class Declaration{
 		this.overloadNum = 0;//default
 		this.specificity = 0;//default
 			
-	}	
+	}
+	public void initializeLocalVariables(ArrayList<InstanceField> variables){
+		this.variables.addAll(variables);
+	}
 		
 	/**
 	 * will cycle through all variables for name

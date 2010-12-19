@@ -190,9 +190,7 @@ public class InheritanceTree{
 		this.superclass = supr;
 		this.className = n.getString(1);
 		
-		//field arraylist defined with all field declarations
-		this.fields = new ArrayList<InstanceField>(supr.fields);
-		this.fields = addfielddeclarations(n);
+		
 		
 		this.constructors = new ArrayList<Declaration>(0);
 		this.local = new ArrayList<Declaration>(0);
@@ -225,7 +223,14 @@ public class InheritanceTree{
 		
 		//add virtual methods to vtable
 		Vt_ptrs.addAll(virtual);
+		
 
+		//field arraylist defined with all field declarations
+		this.fields = addfielddeclarations(n);
+		
+		//add instancevariables to the localvariables of each method in this class
+		for(Declaration d: Vt_ptrs) d.initializeLocalVariables(fields);
+		for(Declaration d: local) d.initializeLocalVariables(fields);
 			
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
@@ -353,11 +358,12 @@ public class InheritanceTree{
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if((is_virtual)&&(overloaded_ridden[1]==1)) 
 					virtual.add(new Declaration(overloaded_ridden[0]+1,modifiers,is_virtual,retrn,methodname,className,params,
-								block,new ArrayList<Variable>(fields)));
+								block,new ArrayList<Variable>(0)));
 				
 				//add it to local with true as isvirtual field
+				
 				local.add(new Declaration(overloaded_ridden[0]+1,modifiers,is_virtual,retrn,methodname,className,params,
-								block,new ArrayList<Variable>(fields)));
+								block,new ArrayList<Variable>(0)));
 				
 									
 			}
@@ -542,124 +548,7 @@ public class InheritanceTree{
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 			}
 		}.dispatch(node);
-		/**
-		new Visitor(){
-			
-			ArrayList<String> mods= new ArrayList<String>(0);
-			String type="";
-			ArrayList<String[]> names= new ArrayList<String[]>(0);
-			String val;
-			boolean is_field = false;
-			boolean is_selectExp = false;
-			boolean is_arg = false;
-			
-			
-			public void visitClassBody(GNode n){
-				visit(n);
-			}
-			public void visitConstructorDeclaration(GNode n){
-				//do not look in constructor
-			}
-			public void visitMethodDeclaration(GNode n){
-				//do not look in methods
-			}
-			public void visitFieldDeclaration(GNode n){
-				is_field = true;
-				
-				//clear variables
-				mods.clear();
-				type ="";
-				names.clear();
-				val="";
-				
-				visit(n);
-				//add instancefield for each name in names
-				for(int i=0; i<names.size();i++){System.out.println("in inheritanceTree"+names.get(i)[1]);
-					f.add(new InstanceField(names.get(i)[0],mods,type,names.get(i)[1],val));
-				}
-				
-				is_field = false;
-			}
-			//if not looking in FieldDeclaration's subtree ignore nodes
-			public void visitModifier(GNode n){
-				if(is_field)mods.add(n.getString(0));
-				
-			}
-			public void visitPrimitiveType(GNode n){
-				if(is_field){
-					String type = n.getString(0);
-					if(type.equals("int"))type="int32_t";
-					if(type.equals("boolean"))type="bool";
-				}
-				visit(n);
-			}
-	
-			public void visitDeclarator(GNode n){//variable name
-				if(is_field){ 
-					String pkg="";
-					int size =n.size();
-					for(int i=1;i<size;i++){
-						pkg+= "."+n.getString(i);
-						if(i==size-1)names.add(new String[]{pkg,n.getString(i)});
-					}
-				}
-			}
-			public void visitQualifiedIdentifier(GNode n){//type
-				if(is_field) type=n.getString(0);
-				
-			}
-			public void visitAdditiveExpression(GNode n){
-				visit(n.getNode(0));
-				val = val+" "+n.getString(1);
-				visit(n.getNode(2));
-			}
-			public void visitIntegerLiteral(GNode n){
-				val = val+n.getString(0);
-			}
-			public void visitStringLiteral(GNode n){
-				val = val+n.getString(0);
-			}
-			public void visitCallExpression(GNode n){
-				if(is_field){
-					visit(n.getNode(0));
-					visit(n.getNode(1));
-					val = val+n.getString(2);
-					visit(n.getNode(3));
-				}	
-			}
-			public void visitArguments(GNode n){
-				if(is_field){
-					is_arg =true;
-					val=val+"(";
-					visit(n);
-					//val.  take off last ,
-					val=val+")";
-					is_arg=false;
-				}
-			}
-			public void visitSelectionExpression(GNode n){
-				if(is_field){
-					is_selectExp=true;
-					//get primary identifer
-					visit(n);
-					//add selectionExp member
-					val = val+n.getString(1);
-					is_selectExp=false;
-				}
-			}
-			public void visitPrimaryIdentifier(GNode n){
-				if(is_field){
-					if(is_selectExp)
-						val = val+n.getString(0)+".";
-					if(is_arg)
-						val = val+n.getString(0)+",";
-				}
-			}
-			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-			}
 		
-		}.dispatch(node);*/
 		return f;
 	
 	}

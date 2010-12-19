@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = false; //debugging boolean
+	boolean VERBOSE = true; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
