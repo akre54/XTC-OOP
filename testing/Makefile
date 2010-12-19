@@ -12,7 +12,7 @@ DEBUG = -g
 FLAGS = $(DEBUG)
 TFLAGS = #-verbose -printJavaAST
 
-all : javac ex
+#all : javac ex
 
 #Compile the translated code
 compile : translate
