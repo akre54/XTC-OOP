@@ -36,9 +36,14 @@ if [ $D ]; then
 	echo
 		#clean out previous translations
 	make -f ../Makefile clean
-	cp ../java_lang.cpp ./
-	cp ../java_lang.h ./
-	cp ../ptr.h ./
+
+	#recursively copy java_lang to each directory
+	for directory in `find . -type d`
+	do
+			cp ../java_lang.cpp $directory
+			cp ../java_lang.h $directory
+			cp ../ptr.h $directory
+	done
 	make -f ../Makefile PRE=$P TFLAGS='-verbose'
 	if [ $? -eq '0' ] # made successfully!
 	then

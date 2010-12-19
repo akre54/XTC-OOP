@@ -4,13 +4,14 @@ SHELL = /bin/sh
 .SUFFIXES: .c .o .h .cpp
 
 PRE = demo
-TARGETS = main.cpp *_methoddef.cpp  java_lang.cpp
+METHODDEFS = $(wildcard */*_methoddef.cpp)
+TARGETS = main.cpp *_methoddef.cpp $(METHODDEFS) java_lang.cpp
 CC = g++
 DEBUG = -g
 FLAGS = $(DEBUG)
 TFLAGS = #-verbose -printJavaAST
 
-all : ex javac
+all : javac ex
 
 #Compile the translated code
 compile : translate
@@ -18,7 +19,7 @@ compile : translate
 
 #Remove previous translations
 clean:
-	rm -f  *.o *.h *.cpp *~ *.out *.txt
+	rm -r -f  *.o *.h *.cpp *~ *.out *.txt
 
 #Run the translator on demo.java
 translate:
@@ -31,3 +32,4 @@ ex:	compile
 javac: $(PRE).java
 	javac $(PRE).java
 	java -cp . $(PRE) > java.out.txt
+
