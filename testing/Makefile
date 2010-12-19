@@ -12,7 +12,7 @@ DEBUG = -g
 FLAGS = $(DEBUG)
 TFLAGS = #-verbose -printJavaAST
 
-all : javac ex
+#all : javac ex
 
 #Compile the translated code
 compile : translate
@@ -27,6 +27,7 @@ clean:
 #Run the translator on demo.java
 translate:
 	java xtc.oop.Translator $(TFLAGS) -translate $(PRE).java
+	cat $(PRE)_methoddef.cpp | nl
 
 #Execute the translated code
 ex:	compile

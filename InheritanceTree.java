@@ -625,6 +625,9 @@ public class InheritanceTree{
 	 */
 	public String[] search_for_method(boolean on_instance,ArrayList<String> paramtyps, 
 																String method_name){
+		if(method_name.equals("super")){System.out.println("searching for super method WRONG");}
+		if(method_name.equals("this")){System.out.println("searching for this method WRONG");}
+
 		LinkedList<Declaration> possible= new LinkedList<Declaration>();
 		
 		//-----ACCESSABLE/SAME NAME/SAME #PARAMS CHECK

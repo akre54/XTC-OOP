@@ -58,6 +58,9 @@ public class Declaration{
 	}
 	public void initializeLocalVariables(ArrayList<InstanceField> variables){
 		this.variables.addAll(variables);
+		for(Fparam f:params){
+			update_type(f.var_name,"",f.type);
+		}
 	}
 		
 	/**
@@ -71,7 +74,10 @@ public class Declaration{
                     return new String[]{i.packages,i.type};
                 }
             }
-			System.out.println("YOU DID NOT UPDATE TYPE SOMEWHERE");
+			System.out.println("YOU DID NOT UPDATE TYPE SOMEWHERE - cannot find "+name+" in "+this.ownerClass+"::"+this.name);
+			for (Variable i : variables) {
+				System.out.println("\t type ="+i.type+", name ="+i.var_name);
+			}
             return null; //error type does not exist
 	}
 	
@@ -82,15 +88,16 @@ public class Declaration{
 	 */
 	public void update_type(String name, String newpack, String newtype) {
             boolean found = false;
-
             for (Variable v : variables) {
                 if (name.equals(v.var_name)) {
                     found = true;
                     v.type = newtype;
                     v.packages = newpack;
+					//System.out.println("\tUPDATE TYPE"+ newpack+newtype+""+name);
                 }
             }
             if (!found) {
+				//System.out.println("\tUPDATE TYPE"+ newpack+newtype+""+name);
                 variables.add(new Variable(newpack,newtype,name));
             }
 	}
@@ -134,10 +141,16 @@ class Fparam {
 	public ArrayList<String> modifiers;
 	public String type;
 	public String var_name;
+	public String pkg;
         Fparam(String type, String var_name) {
             this.type = type;
             this.var_name = var_name;
             this.modifiers = new ArrayList<String>(0);
+			this.pkg ="";
+			/*if (type.contains(".")) {
+				this.pkg = type.substring(0,type.indexOf(".")));
+				this.type = type.substring(type.indexOf(".");
+			}*/
         }
 	Fparam(ArrayList<String> mods, String type, String var_name) {
             this(type, var_name);

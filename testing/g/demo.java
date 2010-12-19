@@ -1,7 +1,7 @@
 public class demo {
 	public static void main (String [] args) {
 		beta b = new beta();
-		String a = b.m2();
+		String a = b.m1().m2();
 		System.out.println(a);
 	}
 }

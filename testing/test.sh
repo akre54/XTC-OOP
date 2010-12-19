@@ -51,12 +51,15 @@ if [ $D ]; then
 			cp ../ptr.h $directory
 	done
 
-	#echo $P.java:
+	echo $P.java:
 	cat $P.java | nl
 	echo "pkg name:"
-	echo $(egrep ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1
-	#PACKAGE = $(echo $P.java | $(egrep ^package) | cut -d ' ' -f2 | cut -d ';' -f1) # get root file's package, used for classpaths
-	if [ $PACKAGE ]
+	echo $(grep -e ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1
+	#PACKAGE = `file "$arg" | grep -e ^package`
+	#PACKAGE = `$(egrep ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1` # get root file's package, used for classpaths
+	#echo $PACKAGE
+	file $P.java | grep -e ^package
+	if [ "$?" -eq "0" ]
 		then
 		make -f ../Makefile PRE=$P TFLAGS='-verbose' PACKAGE=$D
 	else
@@ -70,6 +73,8 @@ if [ $D ]; then
 		sdiff java.out.txt cpp.out.txt
 		echo
 		echo "DONE"
+		else
+		echo "something went wrong"
 	fi
 	echo
 	echo
