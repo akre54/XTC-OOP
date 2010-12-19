@@ -9,11 +9,13 @@ public class Declaration{
 	public ArrayList<Fparam> params;
 	public String ownerClass;
 	public GNode bnode;
-	public ArrayList<LocalVariable> variables;
+	public ArrayList<Variable> variables;
 	public boolean isVirtual;
 	public int overloadNum;
 	public int specificity;
 
+	
+	
 	//constructor for Class and Object methods
 	Declaration(String returntype, String name, String ownerClass, ArrayList<Fparam> params) {
 		this.modifiers = new ArrayList<String>(0);//default
@@ -22,7 +24,7 @@ public class Declaration{
 		this.params = new ArrayList<Fparam>(params);
 		this.ownerClass = ownerClass;
 		this.bnode = null;//default
-		this.variables = new ArrayList<LocalVariable>(0);//default
+		this.variables = new ArrayList<Variable>(0);//default
 		this.isVirtual = true;//default
 		this.overloadNum = 0;//default
 		this.specificity = 0;//default
@@ -30,7 +32,7 @@ public class Declaration{
 	}
 	//constructor for all other methods
 	Declaration(int overloadNum,ArrayList<String> modifiers, boolean isVirtual, String returntype, String name,
-                    String ownerClass,ArrayList<Fparam> params,GNode bnode,ArrayList<LocalVariable> variables){
+                    String ownerClass,ArrayList<Fparam> params,GNode bnode,ArrayList<Variable> variables){
 		this(returntype, name, ownerClass, params);
 		this.isVirtual = isVirtual;
 		this.variables.addAll(variables);
@@ -39,18 +41,31 @@ public class Declaration{
 		this.bnode =bnode;
 		
 	}
-	
+	//constructor for blank representation of a method used to pass to ewalk when getting instancefield values
+	Declaration(String ownerClass,ArrayList<InstanceField> fields) {
+		this.modifiers = new ArrayList<String>(0);
+		this.modifiers.add("public");//default
+		this.returntype = "void";
+		this.name = ".blank";//no method can have a . in it
+		this.params = new ArrayList<Fparam>(0);
+		this.ownerClass = ownerClass;//NEED CLASSNAME
+		this.bnode = null;//default
+		this.variables = new ArrayList<Variable>(fields);//default
+		this.isVirtual = true;//default
+		this.overloadNum = 0;//default
+		this.specificity = 0;//default
+			
+	}	
+		
 	/**
 	 * will cycle through all variables for name
 	 * returns the type of that name in arraylist [java,lang,Foo]
 	 *
 	 */
-	public ArrayList<String> search_for_type(String name){
-            for (LocalVariable i : variables) {
-                if(name.equals(i.name)){
-                    ArrayList<String> type = new ArrayList<String>(i.packages);
-                    type.add(i.type);
-                    return type;
+	public String[] search_for_type(String name){
+            for (Variable i : variables) {
+                if(name.equals(i.var_name)){
+                    return new String[]{i.packages,i.type};
                 }
             }
 			System.out.println("YOU DID NOT UPDATE TYPE SOMEWHERE");
@@ -62,18 +77,18 @@ public class Declaration{
 	 * and then update the type to the new type
 	 * will create a new LocalVariable if none exists
 	 */
-	public void update_type(String name, ArrayList<String> newpack, String newtype) {
+	public void update_type(String name, String newpack, String newtype) {
             boolean found = false;
 
-            for (LocalVariable v : variables) {
-                if (name.equals(v.name)) {
+            for (Variable v : variables) {
+                if (name.equals(v.var_name)) {
                     found = true;
                     v.type = newtype;
                     v.packages = newpack;
                 }
             }
             if (!found) {
-                variables.add(new LocalVariable(newpack,newtype,name));
+                variables.add(new Variable(newpack,newtype,name));
             }
 	}
 	/*
@@ -94,18 +109,17 @@ public class Declaration{
 
 }
 /*
- * defines a Local Variable
- *
+ * defines a Local Variable 
+ * 
  */
-class LocalVariable {
-	ArrayList<String> packages;
-	String name;
+class Variable{
+	String packages;
 	String type;
-
-	LocalVariable(ArrayList<String> packages, String type, String name) {
-            this.packages = packages;
-            this.name = name;
-            this.type = type;
+	String var_name;
+	Variable(String packages, String type, String name) {
+		this.packages = packages;
+		this.type = type;
+		this.var_name = name;
 	}
 
 }
