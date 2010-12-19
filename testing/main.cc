@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 
+
 using namespace java::lang;
 
 int main(void) {
@@ -101,6 +102,14 @@ int main(void) {
   // String s2 = "Robb";
   String s2 = __rt::stringify("Robb");
 
+  String sdf3 = __rt::stringify(({std::ostringstream sout;
+		sout << "foo" << s1 << s2;
+	  sout.str();
+	  }));
+
+  std::cout <<"---------"<< sdf3 << std::endl;
+
+
   // s1.equals(o)
   if (s1->__vptr->equals(s1, o)) {
     std::cout << "s1.equals(o)" << std::endl;
@@ -174,10 +183,10 @@ int main(void) {
 
   // b[1] = b.getClass().getSuperClass();
   std::cout << "b[1] <- b.getClass().getSuperclass();" << std::endl;
-
+  
   __rt::checkNotNull(b);
   Class t1 = b->__vptr->getClass(b);
-
+  
   __rt::checkNotNull(t1);
   Class t2 = t1->__vptr->getSuperclass(t1);
 

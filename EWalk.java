@@ -171,7 +171,8 @@ public class EWalk //extends Visitor
 				//reset flags
 				if(isMethodChaining) {
 					//set args of this call expression to the chainGang
-
+					n.getNode(3).add(0,newMethod);
+					if(VERBOSE)System.out.println("Added "+newMethod+" to arguments");
 				}
 				else
 				{
@@ -354,15 +355,30 @@ public class EWalk //extends Visitor
 			 Checks
 			 Expressions are handled in GetType*/
 			public void visitAdditiveExpression (GNode n) {
-				//System.out.println("\n\n\n\n\nAdditive Expression/n/n//n/n/n/n:"+isPrint);
-				if(isPrint) {
-					String type = getType(n);
-                    if(type.equals("String"))//gets the type for a AdditiveExpression (if its a string use the concat <<)
-					   {
-						if(isPrintString) n.set(1,"<<");
-						}
-				}
+				//should check the 0 and 2 children if they are stingliterals and if so, Encapsulat!
+
+				/*({ std::ostringstream sout;
+				  sout << n.getNode(0) << n.getNode(2);
+				  sout.str(); })*/
+
 				visit(n);
+				if(n.get(0) instanceof Node) {
+					if(getType(n.getNode(0)).equals("String")||getType(n.getNode(2)).equals("String")) {
+						// if either 0 or 2 is returns a string: HELP
+						isString = true;
+						Node side1;
+						Node side2;
+						side1 = GNode.create("StringLiteral",n.getNode(0));
+						side2 = GNode.create("StringLiteral",n.getNode(2));
+						GNode sideA = (GNode)n.getNode(0);
+						GNode sideB = (GNode)n.getNode(2);
+						sideA = sideA.ensureVariable((GNode)side1);
+						sideB = sideB.ensureVariable((GNode)side2);
+						sideA.add(0,"({ std::ostringstream sout;\nsout <<");
+						sideB.add(";\nsout.str(); })");
+						n.set(0,sideA); n.set(1,"<<"); n.set(2,sideB);
+					}
+				}
 			}
 			
 			/**Gets back information inside identifier calls inheritencetree to update the method type  Also has support for an rray*/
@@ -462,11 +478,19 @@ public class EWalk //extends Visitor
 					{
 						b = tree.superclass;
 					}
-				else{
+				else {
 					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}
 					b=tree; //set be = to the current tree
 				}
+				if (b==null) {
+				System.out.println("null------------------------!\n");
+				System.exit(2);
+				}
 				//returns an array of string 0= return type and 1=new method string
+				if(b.search_for_method(isInstance,argumentList,name)==null){
+					System.out.println("No info found from search_for_method");
+					System.exit(1);
+				}
 				return b.search_for_method(isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
@@ -581,22 +605,13 @@ public class EWalk //extends Visitor
 					}
 				}
 			}
-			
-			/**What is This doing pat?*/
-			public void visitQualifiedIdentifier (GNode n) {
-				if (!isString) {
-					String temp = n.getString(0);
-					if (temp.equals("String")) isString = true;
-				}
-				visit(n);
-			}/**Double Check This!!!!*/
 			public void visitStringLiteral (GNode n) {
 				if (isString) {
 					String temp = n.getString(0);
 					n.set(0,"__rt::stringify("+temp+")");
 					isString = false; //make sure it only happens once
 				}
-				if (isPrint) isPrintString = true;
+				//				if (isPrint) isPrintString = true;
 				visit(n);
 			}
 			

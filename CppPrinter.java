@@ -82,7 +82,7 @@ public class CppPrinter extends Visitor
 	/**Only prints out a special case if isTReturn Flag is set to true otherwise does normal behavor*/
 	public void visitStringLiteral(GNode n)
 	{
-		if(isReturn || !isPrint) //check to see if we are current in a return subtree
+		if(isReturn) //check to see if we are current in a return subtree
 			print("new __String("+n.getString(0)+")"); //print out the proper code
 		else//otherwise just visit the tree as normal
 			visit(n);
