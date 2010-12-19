@@ -196,6 +196,7 @@ public class Translator extends Tool {
 					 
 			//---- creates all InheritanceTrees ----
 			int leftTotranslate = classes.size();
+			String FQ="";
                         while (classes.containsValue(false)) {
                             for (ClassStruct c : classes.keySet()) {
                                 if (classes.get(c) == false) {
@@ -203,7 +204,9 @@ public class Translator extends Tool {
                                         new InheritanceTree(c.packageName, c.classNode, Object);
                                         classes.put(c, true);
                                     } else {
-                                        InheritanceTree superclass = Object.search(c.packageName, c.superClass);
+										if(!c.packageName.equals(""))FQ=c.packageName+"."+c.superClass;
+										else FQ=c.packageName+c.superClass;
+										InheritanceTree superclass = Object.search(FQ);
                                         if (superclass != null) {//**extends an already translated class
                                             new InheritanceTree(c.packageName, c.classNode, superclass);
                                             classes.put(c, true);
@@ -230,10 +233,12 @@ public class Translator extends Tool {
 							while(num_classes!=0){
 									for (int i=0;i< num_classes;i++){
 										ClassStruct c = editablelist.get(i);
+										if(!c.packageName.equals(""))FQ=c.packageName+"."+c.className;
+										else FQ=c.packageName+c.className;
 										superiswritten =true;
 										if( c.superClass.equals("")){//*** extends object
-												cppfiles.addClassdef(Object.search(c.packageName,c.className));
-												editablelist.remove(c);
+											cppfiles.addClassdef(Object.search(FQ));
+											editablelist.remove(c);
 										}//end of if check
 										else{
 											for (ClassStruct check: editablelist){
@@ -241,7 +246,7 @@ public class Translator extends Tool {
 													superiswritten = false;
 											}
 											if (superiswritten){//**extends an already written class
-												cppfiles.addClassdef(Object.search(c.packageName,c.className));
+												cppfiles.addClassdef(Object.search(FQ));
 												editablelist.remove(c);
 											}
 										}//end of else check
@@ -317,7 +322,9 @@ public class Translator extends Tool {
             for (ClassStruct c : classes.keySet()) {
                 if (c.filePath.equals(filename))
                     return c.fileNode;
+				System.out.println(c+" "+c.className+" "+c.filePath);
             }
+			System.out.println(filename);
             throw new RuntimeException("can't find any classes belonging to " + filename);
         }
 

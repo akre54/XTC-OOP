@@ -53,7 +53,7 @@ public class CppPrinter extends Visitor
 	public CppPrinter(GNode n)
 	{
 		isArguments=false;
-		System.out.println(n.toString());
+		//System.out.println(n.toString());
 		if(n!=null){
 		if(DEBUG)System.out.println(n.toString());
 		}
@@ -466,26 +466,6 @@ public class CppPrinter extends Visitor
 	{
 		isPrint=false;
 		//check the first child to see if its a primaryIdentifier 
-		Object o= n.get(0);
-		if (o!=null)
-		{
-			if(isNode(o))
-			{
-				Node oNode = (Node)o;
-				//if it is a primaryIdentifier print out a check statement
-				if (oNode.getName().equals("PrimaryIdentifier") ){
-					
-					print("__rt::checkNotNull("+oNode.getString(0)+");\n");
-					primIdentifier= oNode.getString(0);
-					print(primIdentifier);
-					isInstance=true;
-				}
-				//else its not a PrimaryIdentifier Node dispatch on it as normal
-				else{
-					dispatch(oNode);
-				}
-			}
-		}
 		//put in the special case for Pat's Cout
 		Object third= n.get(2);
 		if(third !=null)
@@ -505,22 +485,47 @@ public class CppPrinter extends Visitor
 					//print 1
 					print(n.getString(1));
 				}
+				else
+				{
+					//visit all the children minus the arguments
+					visitChildren(n, 1, 3, "");
+					//visit the arguments
+					print("(");
+					visitChildren(n, 3, n.size(), "");
+					print(")");
+					
+				}
 				
 			}
-			else if (third instanceof Node)
+			//else if (third instanceof Node)
+			//{
+			//	dispatch((Node)third);
+			//}
+		}
+
+		/*if(isPrint){
+		Object o= n.get(0);
+		if (o!=null)
+		{
+			if(isNode(o))
 			{
-				dispatch((Node)third);
+				Node oNode = (Node)o;
+				//if it is a primaryIdentifier print out a check statement
+				if (oNode.getName().equals("PrimaryIdentifier") ){
+					
+					//print("__rt::checkNotNull("+oNode.getString(0)+");\n");
+					primIdentifier= oNode.getString(0);
+					print(primIdentifier);
+					isInstance=true;
+				}
+				//else its not a PrimaryIdentifier Node dispatch on it as normal
+				else{
+					dispatch(oNode);
+				}
 			}
 		}
-		if(!isPrint)
-		{
-			//visit all the children minus the arguments
-			visitChildren(n, 1, 3, "");
-			//visit the arguments
-			print("(");
-			visitChildren(n, 3, n.size(), "");
-			print(")");
-		}
+		}*/
+		
 	}
 	/**visit qualifiedIdentifier i.e. custom Objects
 	 It is assumed that all the "SMART" work has already been handled in EWalk

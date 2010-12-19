@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true; //debugging boolean
+	boolean VERBOSE = false; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -27,7 +27,7 @@ public class EWalk //extends Visitor
 		tree=treeClass;
 		method=treeMethod;
 		eWalker(n); //walk before you run...
-		eRunner(n); //Does all clrean up work
+		eRunner(n); //Does all clean up work
 	}
 	
 	/**Handles, System.out.print, 
@@ -118,7 +118,7 @@ public class EWalk //extends Visitor
 				Node qual = n.getNode(0);
 				String type =qual.getString(0);
 				//fcNameList is a global ArrayList<String>
-				method.update_type(name,fcNameList,type);
+				method.update_type(name,fcName.toString(),type);
 			}
 			/*returns true if a node has the name "CallExpression" */
 			public boolean isCallExpression(Node n)
@@ -164,6 +164,7 @@ public class EWalk //extends Visitor
 				//new method name to override in the tree
 				String newMethod= methodArray[1];
 				savedReturnType = methodArray[0];
+				if(VERBOSE)System.out.println("THE RETURN TYPE" +savedReturnType );
 				//replace the AST methodName with the given name
 				if(newMethod!=null)
 					n.set(2,newMethod);
@@ -387,14 +388,14 @@ public class EWalk //extends Visitor
 				 Get the Type = second child of the SubTree 
 				 Remove the last value from the currentPackages Arraylist (its the new type to update too
 				 */
-				ArrayList<String> currentPackage = new ArrayList<String>();
+				String[] currentPackage= new String[]{"",""};
 				Object o = n.get(1);
 				if(o!=null)
 					{
 						currentPackage=getPackage((Node)o);
 					}
 				//remove the last Value (its the object name.)
-				String newtype = currentPackage.remove(currentPackage.size()-1);
+				String newtype = currentPackage[1];
 				
 				String name="";
 				//get the name Located under declarator node
@@ -413,7 +414,7 @@ public class EWalk //extends Visitor
 				//update the type of the variable in the Declarator
 				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
 
-				method.update_type(name,currentPackage, newtype);
+				method.update_type(name,currentPackage[0], newtype);
 				if (n.getNode(1).getNode(1) !=null ) {
 				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
 					if(VERBOSE) System.out.println("Entering array field declaration...");
@@ -430,16 +431,20 @@ public class EWalk //extends Visitor
 			
 			/**Helper method that gets an array list of a package when given 
 			 node assuming it is a qualifiedId or PrimimitveType*/
-			public ArrayList<String> getPackage(Node n)
+			public String[] getPackage(Node n)
 			{
-				ArrayList<String> packages = new ArrayList<String>();
+				String packages="";
+				String name="";
 				//get every child of the given node (either PrimirtiveType or QualifiedIdentifier)
 				Node node = n.getNode(0);
-				for(int i=0; i<node.size(); i++){
+				name = node.getString(node.size()-1);
+				for(int i=0; i<node.size()-1; i++){
 					//for every child in QualifiedIdentifier append it to the array list
-					packages.add(node.getString(i));
+					if(i==0)packages =node.getString(i);
+					else packages+="."+node.getString(i);
+					
 				}
-				return packages;
+				return new String[]{packages,name};
 			}
 			/**helper method that uses the inheritence tree search for method and 
 			   returns the givne string array that should contain the return type and c++ Standard methodname 
@@ -451,27 +456,29 @@ public class EWalk //extends Visitor
 				InheritanceTree b; //will be current Class, the superclass or the instance's class
 				if(isInstance && !isMethodChaining)
 					{
-						ArrayList<String> qualities=method.search_for_type(Identifier);//send the primary Identifier
+						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
 						if (VERBOSE)System.out.println("Method.Search_for_type:" + Identifier);
 						
 						//remove the last value from the arrayList (thats always the class name
-						String className =(String)qualities.remove(qualities.size()-1);
+						String className =(String)qualities[1];
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-                                                String packName = "";
-                                                for (String s : qualities) {packName += s;}
-						b =tree.root.search(packName,className);
+                                                String FullName = qualities[0]+"."+qualities[1];
+                                                
+						b =tree.root.search(FullName);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isMethodChaining)
 				{
-					ArrayList<String> packages = new ArrayList<String>();
+					String packages = "";
+					String FullName = "";
 					//currently not supporting classes outside of the current methdo
-					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
-                                        String packName = "";
-                                        for (String s : packages) {packName += s;}
-					b=tree.root.search(packName,Identifier);
+					if(VERBOSE)System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
+					if(!packages.equals(""))FullName = packages+"."+Identifier;
+					else FullName =Identifier;
+                                        
+					b=tree.root.search(FullName);
 					//what do i do to get the full package name?
 				}
 				else if (isSuper) 
@@ -535,8 +542,8 @@ public class EWalk //extends Visitor
 					//call the method in the inheritence tree to get the type of the primaryIde
 					String type = " ";
 					if(!isPrint){
-						ArrayList<String> packageNType= method.search_for_type(n.getString(0));
-						type = packageNType.remove(packageNType.size()-1);
+						String[] packageNType= method.search_for_type(n.getString(0));
+						type = packageNType[1];
 					}
 					return type;
 				}
@@ -648,14 +655,28 @@ public class EWalk //extends Visitor
 				if (type.equals("int")) {
 					n.set(0,"int32_t");
 					if (VERBOSE) System.out.println("changing int to int32_t");
-				} if (type.equals("boolean")) {
+				} 
+				if (type.equals("boolean")) {
 					n.set(0,"bool");
 					if (VERBOSE) System.out.println("changing boolean to bool");
 				}
-				if (type.equals("byte")) {
-					n.set(0,"char");
-					if (VERBOSE) System.out.println("changing byte to char");
+				/*if (type.equals("char")) {
+					n.set(0,"int16_t");
+					if (VERBOSE) System.out.println("changing char to int16_t");
+				}*/
+				if (type.equals("long")) {
+					n.set(0,"int64_t");
+					if (VERBOSE) System.out.println("changing long and int64_t");
 				}
+				if (type.equals("short")) {
+					n.set(0,"int16_t");
+					if (VERBOSE) System.out.println("changing short to int16_t");
+				}
+				if (type.equals("byte")) {
+					n.set(0,"int8_t");
+					if (VERBOSE) System.out.println("changing byte to int8_t");
+				}
+
 				visit(n);
 			}
 			public void visitModifier (GNode n) {
