@@ -494,9 +494,9 @@ public class CppFileBuilder{
 		cpp.write("namespace java {\n\tnamespace lang {");
 		//writes the template<> ... __Array<classname>::__class() method
 		cpp.write("template<>\n"+
-							"\tClass __Array<"+t.getCppPkg()+t.className+">::__class() {\n"+
+							"\tClass __Array<"+t.FQify(t.className)+">::__class() {\n"+
 							"\t\tstatic Class k = new __Class(__rt::stringify(\"[L"+fileinfo.getPackageName()+"."+t.className+"\"),\n"+
-							"\t\t\t\t\t\t\t\t__Array<"+t.superclass.getCppPkg()+t.superclass.className+">::__class(),\n"+
+							"\t\t\t\t\t\t\t\t__Array<"+t.FQify(t.className)+">::__class(),\n"+
 							"\t\t\t\t\t\t\t\t"+t.getCppPkg()+"__"+t.className+"::__class());\n"+
 							"\t\treturn k;\n"+
 							"\t}\n\n"+

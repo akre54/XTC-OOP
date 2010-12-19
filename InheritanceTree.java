@@ -236,6 +236,33 @@ public class InheritanceTree{
 		
 		
 	}
+
+        /** returns String to add on to ArrayOf..
+			 */
+            public String forArrays(String name){
+
+                    if(name.contains("::"))return name.substring(name.lastIndexOf(":")+1);
+                    if(name.equals("int32_t")) return "Int";
+                    if(name.equals("bool")) return "Boolean";
+                    if((name.equals("char"))||(name.equals("short"))||(name.equals("long"))
+                       ||(name.equals("float"))||(name.equals("double"))){
+                            char c = (char)(name.charAt(0)-32);//uppercase first letter
+                            return c + name.substring(1);
+                    }
+                    return name;
+            }
+            /** returns String of fully qualified type
+             */
+            public String FQify(String type){
+                    if((type.equals("Object"))||(type.equals("Class"))||(type.equals("String")))
+                            return "java::lang::"+type;
+                    else {
+                            if(!packageName.equals(""))
+                                    return packageName.replace("\\.","::")+"::"+type;
+                            else return type;
+                    }
+            }
+
 	/**
 	 *looks in Vt_ptrs and local for methods with same name but diff params
 	 * if multiple are found keeps method with max overloadNum stored
@@ -425,33 +452,7 @@ public class InheritanceTree{
 			}
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-			}
-			/** returns String to add on to ArrayOf..
-			 */
-			public String forArrays(String name){
-
-				if(name.contains("::"))return name.substring(name.lastIndexOf(":")+1);
-				if(name.equals("int32_t")) return "Int";
-				if(name.equals("bool")) return "Boolean";
-				if((name.equals("char"))||(name.equals("short"))||(name.equals("long"))
-				   ||(name.equals("float"))||(name.equals("double"))){
-					char c = (char)(name.charAt(0)-32);//uppercase first letter
-					return c + name.substring(1);
-				}
-				return name;
-			}
-			/** returns String of fully qualified type 
-			 */
-			public String FQify(String type){
-				if((type.equals("Object"))||(type.equals("Class"))||(type.equals("String")))
-					return "java::lang::"+type;
-				else {
-					if(!packageName.equals(""))
-						return packageName.replace(".","::")+"::"+type;
-					else return type;
-				}
-			}
-			
+			}			
 		}.dispatch(n);
 	
 		return virtual;
