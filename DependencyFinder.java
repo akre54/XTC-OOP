@@ -18,7 +18,7 @@ import xtc.tree.Visitor;
 
 public class DependencyFinder {
 
-    public boolean verbose = false;
+    public boolean verbose = true;
 
    /**
        *  filePaths holds canonical paths to file's dependencies

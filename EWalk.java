@@ -467,7 +467,7 @@ public class EWalk //extends Visitor
 						
 						//set the inheritance tree based on the found class in the package
                                                 String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
-                                                
+						System.out.println(FullName);
 						b =tree.root.search(FullName);
                                                 System.out.println(FullName);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
