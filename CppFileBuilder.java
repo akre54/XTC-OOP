@@ -258,6 +258,7 @@ public class CppFileBuilder{
 
                 //**  EWalk is called on constructor's block node  **//
                 EWalk changes = new EWalk(t,constr,constr.bnode);
+				//System.out.println("BEFORE PRINTER IS CALLED: " + constr.bnode);
                 CppPrinter print = new CppPrinter(constr.bnode);
                 h.write(print.getString().toString());//write body of the constructor in itit() method
                 h.write("\t\t}\n\n");
@@ -474,7 +475,7 @@ public class CppFileBuilder{
 
                     //**  cppBlock is called on method's block node  **//
                     //cppMethod mblock = new cppMethod(t.local.get(index).mnode);
-                    //EWalk changes = new EWalk(t,method,method.bnode);
+                    EWalk changes = new EWalk(t,method,method.bnode);
                     CppPrinter mblock=new CppPrinter(method.bnode);
                     cpp.write(mblock.getString().toString());//write body of the method
                     cpp.write("\n\t}\n\n");

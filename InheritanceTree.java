@@ -520,6 +520,7 @@ public class InheritanceTree{
 			 */
 			public void visitFieldDeclaration(GNode n){
 				EWalk e =new EWalk(myclass,new Declaration(classname,f),n);
+				System.out.println("BEFORE PRINTER2:" +n);
 				CppPrinter field =new CppPrinter(n);
 				
 				String s =field.getString().toString();
