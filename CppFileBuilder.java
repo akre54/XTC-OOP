@@ -176,9 +176,7 @@ public class CppFileBuilder{
                 for(String modifier : f.modifiers) {
                    // h.write("\t   "+modifier+": ");
                 }
-                h.write("\t\t"+(f.type)+" "+f.var_name);
-				if(!f.value.equals(""))h.write("="+f.value);
-				h.write(";\n");
+                h.write("\t\t"+(f.type)+" "+f.var_name+";\n");//do not assign the value!!!
             }
 	}
 	
@@ -233,7 +231,8 @@ public class CppFileBuilder{
 
                 // intialize all the instance fields
                 for (InstanceField f : t.fields) {
-                    h.write(","+f.var_name+"("+f.var_name+")");
+					if(f.value.equals("")) h.write(","+f.var_name+"("+f.var_name+")");
+					else h.write(","+f.var_name+"("+f.value+")");
                 }
                 h.write("{");//3 tabs for Ewalk
                 h.write("//empty constructor. All work done in init");

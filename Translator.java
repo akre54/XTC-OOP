@@ -203,7 +203,7 @@ public class Translator extends Tool {
                                         new InheritanceTree(c.packageName, c.classNode, Object);
                                         classes.put(c, true);
                                     } else {
-                                        InheritanceTree superclass = Object.search(c.packageName, c.superClass);
+                                        InheritanceTree superclass = Object.search(c.packageName+"."+c.superClass);
                                         if (superclass != null) {//**extends an already translated class
                                             new InheritanceTree(c.packageName, c.classNode, superclass);
                                             classes.put(c, true);
@@ -232,7 +232,7 @@ public class Translator extends Tool {
 										ClassStruct c = editablelist.get(i);
 										superiswritten =true;
 										if( c.superClass.equals("")){//*** extends object
-												cppfiles.addClassdef(Object.search(c.packageName,c.className));
+												cppfiles.addClassdef(Object.search(c.packageName+"."+c.className));
 												editablelist.remove(c);
 										}//end of if check
 										else{
@@ -241,7 +241,7 @@ public class Translator extends Tool {
 													superiswritten = false;
 											}
 											if (superiswritten){//**extends an already written class
-												cppfiles.addClassdef(Object.search(c.packageName,c.className));
+												cppfiles.addClassdef(Object.search(c.packageName+"."+c.className));
 												editablelist.remove(c);
 											}
 										}//end of else check

@@ -6,44 +6,15 @@ import xtc.tree.Visitor;
 
 
 
-public class InstanceField{
+public class InstanceField extends Variable{
 	
 	public ArrayList<String> modifiers;	
-	public String type;
-	public String var_name;
 	public String value;
 	
-	InstanceField(ArrayList<String> mods,String typ,String name,String val){
-		modifiers = mods;
-		type = typ;
-		var_name = name;
+	InstanceField(String pkg,ArrayList<String> mods,String typ,String name,String val){
+		super(pkg,typ,name);
+		this.modifiers = mods;
 		value=val;
-		//initialize blank values
-		if(value.equals("")){
-		
-			if(type.equals("String")) value ="";
-			if(type.equals("int32_t")) value ="0";
-			if(type.equals("float")) value ="0.0";
-			if(type.equals("long")) value ="0";
-			if(type.equals("short")) value ="0";
-			if(type.equals("double")) value ="0.0";
-			if(type.equals("byte")) value ="0";
-			if(type.equals("char")) value ="''";
-			if(type.equals("bool")) value ="false";
-			if( (!type.equals("String"))&&
-				(!type.equals("int"))&&
-				(!type.equals("float"))&&
-				(!type.equals("long"))&&
-				(!type.equals("short"))&&
-				(!type.equals("double"))&&
-				(!type.equals("byte"))&&
-				(!type.equals("char"))&&
-				(!type.equals("boolean"))
-			   )value ="null";
-		
-		
-		}
-			
 	}
-
+	
 }

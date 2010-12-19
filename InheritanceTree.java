@@ -251,7 +251,7 @@ public class InheritanceTree{
 				//diff params test
 				if ((params.size() == i.params.size())&&(is_virtual)&&(typetest(i.params, params))){
 					this.Vt_ptrs.set(6,new Declaration(i.overloadNum,i.modifiers,i.isVirtual,i.returntype,i.name,
-															this.className,params,body,new ArrayList<LocalVariable>(0)));
+															this.className,params,body,new ArrayList<Variable>(0)));
 						//signify to NOT ADD TO VIRTUAL
 						//bc its overridden
 						return new int[]{i.overloadNum-1,0};
@@ -287,7 +287,7 @@ public class InheritanceTree{
 	 * also documents local methods that are not virtual for definition later
 	 *@param GNode (always a classDeclaration)
 	 */
-	private ArrayList<Declaration> addmethoddeclarations(GNode n){
+	private ArrayList<Declaration> addmethoddeclarations(GNode n){;
 		// cast to a node
 		Node node = n;
 		//declare a virutal arraylist<Declaration>
@@ -313,7 +313,6 @@ public class InheritanceTree{
 			
 			public void visitClassDeclaration(GNode n){
 				className = n.getString(1);
-				System.out.println("CLASSNAME"+className);
 				visit(n);
 			}
 			public void visitConstructorDeclaration(GNode n){
@@ -333,7 +332,7 @@ public class InheritanceTree{
 				overloaded = constructors.size();
 				//add declaration to constructor
 				constructors.add(new Declaration(overloaded, modifiers, is_virtual, retrn, methodname, className, params,
-								block, new ArrayList<LocalVariable>(0)));
+								block, new ArrayList<Variable>(0)));
 				
 				is_constructor = false;
 			}
@@ -354,11 +353,11 @@ public class InheritanceTree{
 				//test to see if the modifier was public or protected(if it should be virtual)
 				if((is_virtual)&&(overloaded_ridden[1]==1)) 
 					virtual.add(new Declaration(overloaded_ridden[0]+1,modifiers,is_virtual,retrn,methodname,className,params,
-								block,new ArrayList<LocalVariable>(0)));
+								block,new ArrayList<Variable>(fields)));
 				
 				//add it to local with true as isvirtual field
 				local.add(new Declaration(overloaded_ridden[0]+1,modifiers,is_virtual,retrn,methodname,className,params,
-								block,new ArrayList<LocalVariable>(0)));
+								block,new ArrayList<Variable>(fields)));
 				
 									
 			}
@@ -384,7 +383,7 @@ public class InheritanceTree{
 				String type =n.getString(0);
 				int size = n.size();
 				for(int i=1;i<size;i++)
-					type=type+"::"+n.getString(i);
+					type+="::"+n.getString(i);
 				if(n.size()==1)type = FQify(type);
 				if(is_fparam) fptype=type;
 				else retrn = type;
@@ -447,7 +446,9 @@ public class InheritanceTree{
 				if((type.equals("Object"))||(type.equals("Class"))||(type.equals("String")))
 					return "java::lang::"+type;
 				else {
-					return packageName.replace(".","::")+"::"+type;
+					if(!packageName.equals(""))
+						return packageName.replace(".","::")+"::"+type;
+					else return type;
 				}
 			}
 			
@@ -464,9 +465,9 @@ public class InheritanceTree{
 	 */
 	private ArrayList<InstanceField> addfielddeclarations(GNode n){
 		Node node = n;
-	
+		final InheritanceTree myclass = this;
 		final ArrayList<InstanceField> f = new ArrayList<InstanceField>(0);
-		
+		final java.util.List<String> fmodifiers = java.util.Arrays.asList(new String[]{"public","static","private","const","protected"});
 		//---adds all non-private/static fields from superclass to this class
 		
 		for(InstanceField i: superclass.fields){
@@ -477,13 +478,76 @@ public class InheritanceTree{
 				
 			}
 		}
-		
-		
+		new Visitor(){
+			String classname;
+			public void visitClassDeclaration(GNode n){
+				classname = n.getString(1);
+				visit(n);
+			}
+			/** FieldDeclarations use EWalk to  get their values-------
+			 */
+			public void visitFieldDeclaration(GNode n){
+				EWalk e =new EWalk(myclass,new Declaration(classname,f),n);
+				CppPrinter field =new CppPrinter(n);
+				String s =field.getString().toString();
+				
+				ArrayList<String> mods = new ArrayList<String>(0);
+				String value, modsAndNames;//variables to be filled with info
+				String pkg="";//needs initialization
+				String type="";//needs initialization
+				if(s.contains("=")){
+					String[] valueSplit =s.split("=");
+					modsAndNames = valueSplit[0];
+					value = valueSplit[1];
+				}
+				else{ 
+					value="";
+					modsAndNames =s;
+				}
+				String[] slist =modsAndNames.split(" ");
+				
+				int j =0;
+				while (fmodifiers.contains(slist[j])){j++;}
+				
+				for(int m=0;m<slist.length;m++){
+					if(m<j)mods.add(slist[m]);//modifiers
+					else if(m>j){//add the field
+						f.add(new InstanceField(pkg,mods,type,slist[m],value));
+					}
+					else if(slist[m].contains(".")){//package and type
+						pkg = slist[m].substring(0,slist[m].lastIndexOf("."));
+						type = slist[m].substring(slist[m].lastIndexOf("."));
+					}
+					else {type = slist[m]; pkg="";}
+				}
+			}//end of FieldDeclarations -----------------------------
+			
+			public void visitClassBody(GNode n){visit(n);}
+			public void visitMethodDeclaration(GNode n){/*do not visit below here*/}
+			
+		/** returns String of fully qualified type 
+		*/
+			public String FQify(String type){
+				if((type.equals("Object"))||(type.equals("Class"))||(type.equals("String")))
+					return "java::lang::"+type;
+				else {
+					if(!packageName.equals("")){
+						InheritanceTree t = myclass.search(type);
+						return t.packageName.replace(".","::")+"::"+type;
+					}
+					else return type;
+				}
+			}		   	   
+			public void visit(Node n) {
+				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+			}
+		}.dispatch(node);
+		/**
 		new Visitor(){
 			
 			ArrayList<String> mods= new ArrayList<String>(0);
 			String type="";
-			ArrayList<String> names= new ArrayList<String>(0);
+			ArrayList<String[]> names= new ArrayList<String[]>(0);
 			String val;
 			boolean is_field = false;
 			boolean is_selectExp = false;
@@ -510,8 +574,8 @@ public class InheritanceTree{
 				
 				visit(n);
 				//add instancefield for each name in names
-				for(int i=0; i<names.size();i++){
-					f.add(new InstanceField(mods,type,names.get(i),val));
+				for(int i=0; i<names.size();i++){System.out.println("in inheritanceTree"+names.get(i)[1]);
+					f.add(new InstanceField(names.get(i)[0],mods,type,names.get(i)[1],val));
 				}
 				
 				is_field = false;
@@ -531,8 +595,14 @@ public class InheritanceTree{
 			}
 	
 			public void visitDeclarator(GNode n){//variable name
-				if(is_field) names.add(n.getString(0));
-					
+				if(is_field){ 
+					String pkg="";
+					int size =n.size();
+					for(int i=1;i<size;i++){
+						pkg+= "."+n.getString(i);
+						if(i==size-1)names.add(new String[]{pkg,n.getString(i)});
+					}
+				}
 			}
 			public void visitQualifiedIdentifier(GNode n){//type
 				if(is_field) type=n.getString(0);
@@ -589,7 +659,7 @@ public class InheritanceTree{
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 			}
 		
-		}.dispatch(node);
+		}.dispatch(node);*/
 		return f;
 	
 	}
@@ -599,7 +669,7 @@ public class InheritanceTree{
 	 *@param String name
 	 * this is meant to be used only on the root Object Tree so that the entire tree is searched
 	 *
-	 */
+	 
 	public InheritanceTree search(String pkgName, String name){
 		InheritanceTree found = null;
 		if ((this.className.equals(name)) && (this.packageName.equals(pkgName)))
@@ -611,16 +681,34 @@ public class InheritanceTree{
 		}
 		return found;
 	
-	}/** search will return a InheritanceTree of mathing fullyqualifiedname
+	}*/
+	/** search will return a InheritanceTree of mathing fullyqualifiedname
 	  * or a null inheritanctree if no tree exists yet as child of the root
 	  */
 	public InheritanceTree search(String fullyqualifiedname){
 		InheritanceTree found = null;
-		if ((this.packageName+this.className).equals(fullyqualifiedname))
+		//check if we did not get a fullyqualified name to search by
+		if((!fullyqualifiedname.contains("."))&&(!fullyqualifiedname.contains("::"))){
+			return searchUnqualified(fullyqualifiedname);
+		}
+		if ((this.packageName+"."+this.className).equals(fullyqualifiedname))
 			return this;
 		
 		for (InheritanceTree i : subclasses) {
 			found = i.search(fullyqualifiedname);
+			if (found!=null) return found;
+		}
+		return found;
+	
+	}/** will check the unqualified name to see if there are matches
+	  */
+	public InheritanceTree searchUnqualified(String type){
+		InheritanceTree found = null;
+		if ((this.className).equals(type))
+			return this;
+		
+		for (InheritanceTree i : subclasses) {
+			found = i.searchUnqualified(type);
 			if (found!=null) return found;
 		}
 		return found;
@@ -707,7 +795,7 @@ public class InheritanceTree{
 					if (!pos_type.equals(type));
 					else {
 						int casting = gouptree(pos_type,type);
-						if (casting == -1) { possible.remove(c); System.out.println("removed");}//not castable
+						if (casting == -1) { possible.remove(c);}//not castable
 						else c.specificity = c.specificity + casting;
 					}
 				}
@@ -745,7 +833,7 @@ public class InheritanceTree{
 			return primatives.indexOf(casted_to) - primatives.indexOf(castee);
 		
 		//search on root of tree for castee class
-		InheritanceTree type = this.root.search(this.packageName,castee);
+		InheritanceTree type = this.root.search(castee);
 		while( !type.className.equals(casted_to) ){
                     distance++;
                     type = type.superclass;
