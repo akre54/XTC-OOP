@@ -172,12 +172,9 @@ public class EWalk //extends Visitor
 				//reset flags
 				if(isMethodChaining) {
 					//set args of this call expression to the chainGang
-<<<<<<< HEAD
 				//	n.getNode(3).add(0,newMethod);
-=======
                                         System.out.println("fix method chaining");
 					//n.getNode(3).add(0,newMethod);
->>>>>>> d47d8e14cd35fff81f38433ed1d53497ea0d5918
 					if(VERBOSE)System.out.println("Added "+newMethod+" to arguments");
 				}
 				else
