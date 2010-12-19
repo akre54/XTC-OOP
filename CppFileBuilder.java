@@ -33,8 +33,6 @@ public class CppFileBuilder{
 		h.write("/* Object-Oriented Programming\n"+
               "* Copyright (C) 2010 Robert Grimm\n"+
               "*\n"+
-              "*Edited by Liz Pelka\n"+
-              "*\n"+
               "* This program is free software; you can redistribute it and/or\n"+
               "* modify it under the terms of the GNU General Public License\n"+
               "* version 2 as published by the Free Software Foundation.\n"+
@@ -56,21 +54,18 @@ public class CppFileBuilder{
             for (String importDeclaration : fileinfo.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
                     h.write(importDeclaration+"\n");
             }
-            
             h.write("\n");
 
             for (String usingDeclaration : fileinfo.getCppUsingDeclarations(allClasses)) {
                 h.write(usingDeclaration+"\n");
                 //h.write(DependencyFinder.getNamespace(fileinfo.getFileClasses(), fileinfo.getFilePath())+"\n");
             }
-
             h.write("\n");
 
             for(String p : fileinfo.getPackageToNamespace()){
                     h.write("namespace "+p+" {\n");
             }
-
-             for (ClassStruct c : fileinfo.getFileClasses()) {
+			for (ClassStruct c : fileinfo.getFileClasses()) {
                 h.write("\n\tstruct __" + c.className + "; \n"
                         +/**/ "\tstruct __" + c.className + "_VT;\n"
                         +/**/ "\ttypedef __rt::Ptr<__" + c.className + "> " + c.className + ";\n"
@@ -83,33 +78,31 @@ public class CppFileBuilder{
 		 */
 		cpp =(new FileMaker(jfile,"_methoddef","cpp"));
 		cpp.write(
-							"/* Object-Oriented Programming\n"+
-							"* Copyright (C) 2010 Robert Grimm\n"+
-							"*\n"+
-							"*Edited by Liz Pelka\n"+
-							"*\n"+
-							"* This program is free software; you can redistribute it and/or\n"+
-							"* modify it under the terms of the GNU General Public License\n"+
-							"* version 2 as published by the Free Software Foundation.\n"+
-							"*\n"+
-							"* This program is distributed in the hope that it will be useful,\n"+
-							"* but WITHOUT ANY WARRANTY; without even the implied warranty of\n"+
-							"* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"+
-							"* GNU General Public License for more details.\n"+
-							"*\n"+
-							"* You should have received a copy of the GNU General Public License\n"+
-							"* along with this program; if not, write to the Free Software\n"+
-							"* Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,\n"+
-							"* USA.\n"+
-							"*/\n\n"+
-							
-							"#include \""+h.cFile.getName()+"\"\n\n"+
-				
-							"#include <sstream>\n\n");
-							for(String p: fileinfo.getPackageToNamespace()){
-								cpp.write("namespace "+p+" {\n");
-							}
-							cpp.write("\n\n");
+			"/* Object-Oriented Programming\n"+
+			"* Copyright (C) 2010 Robert Grimm\n"+
+			"*\n"+
+			"* This program is free software; you can redistribute it and/or\n"+
+			"* modify it under the terms of the GNU General Public License\n"+
+			"* version 2 as published by the Free Software Foundation.\n"+
+			"*\n"+
+			"* This program is distributed in the hope that it will be useful,\n"+
+			"* but WITHOUT ANY WARRANTY; without even the implied warranty of\n"+
+			"* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"+
+			"* GNU General Public License for more details.\n"+
+			"*\n"+
+			"* You should have received a copy of the GNU General Public License\n"+
+			"* along with this program; if not, write to the Free Software\n"+
+			"* Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,\n"+
+			"* USA.\n"+
+			"*/\n\n"+
+			
+			"#include \""+h.cFile.getName()+"\"\n\n"+
+
+			"#include <sstream>\n\n");
+		for(String p: fileinfo.getPackageToNamespace()){
+					cpp.write("namespace "+p+" {\n");
+		}
+		cpp.write("\n\n");
 
 	}//end of constructor
 	/*
@@ -122,12 +115,11 @@ public class CppFileBuilder{
 		h.write("//data layout for "+fileinfo.getPackageName()+ClassName);
 		h.write(/* CLASS STRUCT DECLARATION*/
 				"\n\tstruct __"+ClassName+"{ \n"+
-				"\t\t__"+ClassName+"_VT* __vptr;\n"+
-                                "\t\t"+ClassName+"* __this;\n");//vtable ptr
+				"\t\t__"+ClassName+"_VT* __vptr;\n");
 
-						 
 				/* FEILDS ---> ex: int x;  */
 		        write_all_feilds(t); h.write("\n\n");
+
 				
 				/*CONSTRUCTOR(S)*/
 				write_all_constructors(t); 
@@ -178,6 +170,8 @@ public class CppFileBuilder{
                 }
                 h.write("\t\t"+(f.type)+" "+f.var_name+";\n");//do not assign the value!!!
             }
+		h.write("\t\t"+t.className+" __this;\n");//global THIS for local virutal methods
+
 	}
 	
 	/**
@@ -196,7 +190,9 @@ public class CppFileBuilder{
 			for (InstanceField f : t.fields) {
 				h.write(","+f.var_name+"("+f.var_name+")");
 			}
-			h.write("{};\n\n");
+			h.write("{};\n\n"+
+					"\t\tvoid init("+t.className+" __passedthis){\n\t\t\t"+
+					"__this = __passedthis;\n\t\t};");
 		
 		}
 		else{
@@ -236,13 +232,13 @@ public class CppFileBuilder{
                 }
                 h.write("{");//3 tabs for Ewalk
                 h.write("//empty constructor. All work done in init");
-                h.write("\n\t   };\n\n");
+                h.write("\n\t   }\n\n");
 
                 // create init() method
                 h.write("\t\tvoid init");
                 if(constr.overloadNum!=0)
                     h.write("_"+constr.overloadNum);
-                h.write("("+t.className+"* __passedthis");
+                h.write("("+t.className+" __passedthis");
 
                 // create init's formal parameters
                 for (int i=0;i<constr.params.size();i++) {
@@ -258,7 +254,7 @@ public class CppFileBuilder{
                 }
 
                 h.write(") {\n"+
-                    "\t\t\t__"+t.className+"::__this = const_cast<"+t.className+"*> (__passedthis);\n");
+                    "\t\t\t__this = __passedthis;\n");
 
                 //**  EWalk is called on constructor's block node  **//
                 EWalk changes = new EWalk(t,constr,constr.bnode);
@@ -336,6 +332,7 @@ public class CppFileBuilder{
 						 mainWriter.write("\n\n\n"
 						 +"int32_t main(int32_t argc, char *argv[]){\n\n\t"
 						 +n.ownerClass+" forward_main = new __"+n.ownerClass+"();\n\t"
+					     +"forward_main->init(forward_main);\n\t"
 						 +"forward_main->main");
 						if(n.overloadNum!=0)
 							mainWriter.write("_"+n.overloadNum);
@@ -493,16 +490,17 @@ public class CppFileBuilder{
 		//open up java::lang to write template for Array<__className>
 		cpp.write("namespace java {\n\tnamespace lang {");
 		//writes the template<> ... __Array<classname>::__class() method
-		cpp.write("template<>\n"+
+		cpp.write("\n\ttemplate<>\n"+
 							"\tClass __Array<"+t.getCppPkg()+t.className+">::__class() {\n"+
 							"\t\tstatic Class k = new __Class(__rt::stringify(\"[L"+fileinfo.getPackageName()+"."+t.className+"\"),\n"+
 							"\t\t\t\t\t\t\t\t__Array<"+t.superclass.getCppPkg()+t.superclass.className+">::__class(),\n"+
 							"\t\t\t\t\t\t\t\t"+t.getCppPkg()+"__"+t.className+"::__class());\n"+
 							"\t\treturn k;\n"+
-							"\t}\n\n"+
-							"\t//===========================================================================\n\n");
+							"\t}\n\n");
+							
 		//close java::lang
-		cpp.write("\t}\n}");
+		cpp.write("\t}\n} // closing java::lang for arrays\n"+
+				  "\t//===========================================================================\n\n");
 		
 		//reopen current package
 		for(String p: fileinfo.getPackageToNamespace()){

@@ -14,7 +14,13 @@ public class InstanceField extends Variable{
 	InstanceField(String pkg,ArrayList<String> mods,String typ,String name,String val){
 		super(pkg,typ,name);
 		this.modifiers = mods;
-		value=val;
+		this.value=val;
+		if (this.value.equals("")){//default values for primitive types
+			if(this.type.equals("int32_t"))this.value ="0";
+			if(this.type.equals(""))this.value ="";
+			if(this.type.equals(""))this.value ="";
+
+		}
 	}
 	
 }

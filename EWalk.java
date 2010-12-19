@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true; //debugging boolean
+	boolean VERBOSE = false; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -164,7 +164,7 @@ public class EWalk //extends Visitor
 				//new method name to override in the tree
 				String newMethod= methodArray[1];
 				savedReturnType = methodArray[0];
-				System.out.println("THE RETURN TYPE" +savedReturnType );
+				if(VERBOSE)System.out.println("THE RETURN TYPE" +savedReturnType );
 				//replace the AST methodName with the given name
 				if(newMethod!=null)
 					n.set(2,newMethod);
@@ -458,7 +458,7 @@ public class EWalk //extends Visitor
 					String packages = "";
 					String FullName = "";
 					//currently not supporting classes outside of the current methdo
-					System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
+					if(VERBOSE)System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
 					if(!packages.equals(""))FullName = packages+"."+Identifier;
 					else FullName =Identifier;
                                         

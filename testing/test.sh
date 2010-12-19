@@ -44,7 +44,7 @@ if [ $D ]; then
 			cp ../java_lang.h $directory
 			cp ../ptr.h $directory
 	done
-	make -f ../Makefile PRE=$P TFLAGS='-verbose'
+	make -f ../Makefile PRE=$P TFLAGS=''
 	if [ $? -eq '0' ] # made successfully!
 	then
 	   	echo "Comparing output files:"

@@ -41,7 +41,7 @@ public class CppPrinter extends Visitor
 {
 	private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("CppPrinterLog");
 	private StringBuilder printer; //a StringBuilder that stores the code translated by the print
-	private boolean DEBUG = true;
+	private boolean DEBUG = false;
 	/*A global boolean that keeps track of the current modifier status*/
 	private boolean isPrivate; 	
 	private boolean isArguments; //checks to see if we're currently in an argument subtree
