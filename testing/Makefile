@@ -30,6 +30,6 @@ ex:	compile
 	./$(PRE).out > cpp.out.txt
 
 javac: $(PRE).java
-	#javac $(PRE).java
-	#java -cp . $(PRE) > java.out.txt
+	javac $(PRE).java
+	java -cp . $(PRE) > java.out.txt
 
