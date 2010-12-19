@@ -170,21 +170,18 @@ public class DependencyFinder {
                     if (fileName.endsWith(".java")) {
                         //addPath(dirPath + '/' + fileName, origin);
                         addPath((new File(dir, fileName)).getCanonicalPath(), origin);
-                    } else if (!fileName.contains(".")) { // support for recursively calling subdirectories
+                    } /* else if (origin != DependencyOrigin.CURRENTDIRECTORY && // AK 12/18/10 8:00 don't recurse directories
+                            !fileName.contains(".")) { // support for recursively calling subdirectories
                         try {
+                            fileName = fileName.replaceAll("\\s", "\\ "); // escape all spaces so we don't make a bunch of new directories
                             File subDir = new File(dir, fileName);
                             if (subDir.isDirectory()) {
                                 gatherDirectoryFiles(subDir.getCanonicalPath(), origin);
                             }
-                            /*
-                            dirFiles = Arrays.copyOf(dirFiles, dirFiles.length + subDir.length);
-                            System.arraycopy(subDir, 0, dirFiles, dirFiles.length, subDir.length);
-                             */
-                        } catch (NullPointerException e) {
-                        }
-                    }
-                } catch (IOException i) {
-                }
+                                } catch (NullPointerException e) {
+                                }
+                            } */
+                } catch (IOException i) { }
             }
         }
     }
@@ -294,16 +291,23 @@ public class DependencyFinder {
 
         /** Get dependices sorted by specific origin (i.e. get just package
                 * imports or just includes) */
-        public ArrayList<String> getCppIncludeDecs(ArrayList<ClassStruct> allClasses, DependencyOrigin origin) {
+        public ArrayList<String> getCppIncludeDecs(ArrayList<ClassStruct> allClasses, DependencyOrigin importorigin) {
 
             ArrayList<String> files = new ArrayList<String>();
+
+            if (origin != DependencyOrigin.ROOTFILE) { // add java_lang.h to all except origin file
+                files.add("#include \"java_lang.h\"");
+            }
+
             for (FileDependency d : fileDependencies) {
-                /*if (d.origin == origin) {
+                /*if (d.importorigin == importorigin) {
                     switch (origin) {
                         case IMPORT:
                         case IMPORTEDPACKAGE: // we're importing all files in directory now, so these two checks not needed until we update Inheritancebuilder to handle implicit imports
                         case CURRENTPACKAGE: */
-                            files.add("#include \"" + hFileName(allClasses, d.fullPath) + "\"");
+                if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // AK 12-18-10 8:00 problems with current directory finding.
+                    files.add("#include \"" + hFileName(allClasses, d.fullPath) + "\"");
+                }
                     /*        break;
                         /*case IMPORTEDPACKAGE:
 	                          files.add("using " + currentPackage.replaceAll("\\.", "::") + ";");
@@ -320,6 +324,10 @@ public class DependencyFinder {
                 } */
             }
 
+            if (files.size() == 0) { // if root file and no imports
+                files.add("#include \"java_lang.h\"");
+            }
+
             return files;
         }
 
@@ -329,7 +337,7 @@ public class DependencyFinder {
 
             ArrayList<String> files = new ArrayList<String>();
 
-            if (origin == DependencyOrigin.ROOTFILE) {
+            if (origin != DependencyOrigin.ROOTFILE) {
                 files.add("using java::lang::Object;");
                 files.add("using java::lang::__Object;");
                 files.add("using java::lang::Class;");
@@ -340,12 +348,18 @@ public class DependencyFinder {
                 files.add("using java::lang::ArrayOfInt;");
                 files.add("using java::lang::ArrayOfObject;");
                 files.add("using java::lang::ArrayOfClass;");
+            } else {
+                System.out.println("do something different for origin file?");
             }
 
             for (FileDependency d : fileDependencies) {
-                //if (d.origin == DependencyOrigin.IMPORT) { // we're importing all files in directory now, so this check not needed until we update Inheritancebuilder to handle implicit imports
-                    files.add("using " + qualifiedName(allClasses, d.fullPath) + ";");
-                //}
+                if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // for now, don't import from CURRENTDIRECTORY
+                    // only add using if from different namespaces
+                    if (!this.currentPackage.equals(getNamespace(allClasses, d.fullPath))) {
+                        files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
+                        files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
+                    }
+                }
             }
 
             return files;
@@ -382,11 +396,13 @@ public class DependencyFinder {
                 * @return "xtc.oop.Foo" --> ArrayList of "xtc", "oop", "Foo"
                 */
         public ArrayList<String> getPackageToNamespace() {	
-			
-            ArrayList<String> pack= new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
-			if (pack.get(0).equals("")){pack.remove(0);}//test for empty string element!!!
-			return pack;
-		}
+
+            ArrayList<String> pack = new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
+            if (pack.get(0).equals("")) {
+                pack.remove(0);
+            }//test for empty string element!!!
+            return pack;
+        }
 
         /** allows us to use Set .contains() method, compare by file path only */
         @Override
@@ -430,10 +446,13 @@ public class DependencyFinder {
             else
                 return directory + "/" + basename;
         }
-        public static String qualifiedName(ArrayList<ClassStruct> c, String fullPath) {
+        public static String qualifiedName(ArrayList<ClassStruct> c, String fullPath, boolean useunderscores) {
             String namespace = getNamespace(c, fullPath);
             String basename = javaFileName(fullPath).replace(".java","");
-            return namespace + "::" + basename;
+            if (useunderscores)
+                return namespace + "::__" + basename;
+            else
+                return namespace + "::" + basename;
         }
 
         /** @return classes belonging to packname */
@@ -461,18 +480,23 @@ public class DependencyFinder {
             }
             return imports;
         }
-        
+
+        /** @return the package name for a specific file */
+        public static String getPackageName(ArrayList<ClassStruct> classes, String filename) {
+            for (ClassStruct c : classes) {
+                if (c.filePath.equals(filename)) {
+                    return c.packageName;
+                }
+            }
+            throw new RuntimeException("no namespace found for " + filename);
+        }
+
        /**
                * @return package name as using directive
                * i.e. package xtc.oop.B; becomes using namespace xtc::oop::B;
                */
         public static String getNamespace(ArrayList<ClassStruct> classes, String filename) {
-            for (ClassStruct c : classes) {
-                if (c.filePath.equals(filename)) {
-                    return c.packageName.replaceAll("\\.", "::");
-                }
-            }
-            throw new RuntimeException("no namespace found for " + filename);
+            return getPackageName(classes,filename).replaceAll("\\.", "::");
         }
 
         /**
@@ -484,24 +508,10 @@ public class DependencyFinder {
             for (ClassStruct c : classes) {
                 if (c.filePath.equals(filename)) {
                     String r = c.packageName.replaceAll("\\.", "/");
-                    r = r.replace(c.rootPackage, "");
-                    if (r.startsWith("/"))
-                        r = r.substring(1,r.length());
+                    r = r.replace(c.rootPackage + "/", "");
                     return r;
                 }
             }
             throw new RuntimeException("no namespace found for " + filename);
-        }
-
-        public static ArrayList<String> getUsingDeclarations(ArrayList<ClassStruct> classes, String filename) {
-            ArrayList<String> usings = new ArrayList<String>();
-
-            for (ClassStruct c : classes) {
-                if (c.filePath.equals(filename)) {
-                    usings.add( c.packageName.replaceAll("\\.", "::")
-                            + "::" + c.className + ";" );
-                }
-            }
-            return usings;
         }
 }

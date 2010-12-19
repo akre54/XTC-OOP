@@ -50,14 +50,14 @@ public class CppFileBuilder{
               "* USA.\n"+
               "*/\n\n"+
 
-             "#pragma once\n\n"+
-            //get rid of these calls and have them added to dependentFiles for base file
-             "#include \"java_lang.h\"\n");
+             "#pragma once\n\n");
 
             // #includes all files its dependent on, then using declares them
             for (String importDeclaration : fileinfo.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
                     h.write(importDeclaration+"\n");
             }
+            
+            h.write("\n");
 
             for (String usingDeclaration : fileinfo.getCppUsingDeclarations(allClasses)) {
                 h.write(usingDeclaration+"\n");
@@ -449,7 +449,7 @@ public class CppFileBuilder{
 
                     //**  cppBlock is called on method's block node  **//
                     //cppMethod mblock = new cppMethod(t.local.get(index).mnode);
-                    EWalk changes = new EWalk(t,method,method.bnode);
+                    //EWalk changes = new EWalk(t,method,method.bnode);
                     CppPrinter mblock=new CppPrinter(method.bnode);
                     cpp.write(mblock.getString().toString());//write body of the method
                     cpp.write("\n\t}\n\n");
