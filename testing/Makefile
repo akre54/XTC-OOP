@@ -11,7 +11,7 @@ DEBUG = -g
 FLAGS = $(DEBUG)
 TFLAGS = #-verbose -printJavaAST
 
-all : javac ex
+all : ex javac
 
 #Compile the translated code
 compile : translate
@@ -30,6 +30,6 @@ ex:	compile
 	./$(PRE).out > cpp.out.txt
 
 javac: $(PRE).java
-	#javac $(PRE).java
-	#java -cp . $(PRE) > java.out.txt
+	javac $(PRE).java
+	java -cp . $(PRE) > java.out.txt
 

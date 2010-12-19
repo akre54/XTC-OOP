@@ -17,7 +17,6 @@
  * USA.
  */
 
-
 public class Test {
 
   public static final Object R1 = new Object();

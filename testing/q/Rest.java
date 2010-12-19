@@ -17,7 +17,6 @@
  * USA.
  */
 
-
 public class Rest extends Test {
 
   public int round;

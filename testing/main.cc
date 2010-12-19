@@ -82,6 +82,18 @@ int main(void) {
     std::cout << "! (o instanceof k)" << std::endl;
   }
 
+  // k instacneof String
+  
+  if ( ({__rt::checkNotNull(k);
+		Class name = __Object::__class();
+		k->__vptr->isInstance(k,name);}) )
+	
+
+
+	std::cout<<"yay it worked"<<std::endl;
+  else std::cout<<"no";
+
+
   // if (l.isInstance(o)) {
   __rt::checkNotNull(l);
   if (l->__vptr->isInstance(l, o)) {
