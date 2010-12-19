@@ -4,7 +4,8 @@ SHELL = /bin/sh
 .SUFFIXES: .c .o .h .cpp
 
 PRE = demo
-TARGETS = main.cpp *_methoddef.cpp  java_lang.cpp
+METHODDEFS = $(wildcard */*_methoddef.cpp)
+TARGETS = main.cpp *_methoddef.cpp $(METHODDEFS) java_lang.cpp
 CC = g++
 DEBUG = -g
 FLAGS = $(DEBUG)
