@@ -260,7 +260,10 @@ public class Translator extends Tool {
 							try{cppfiles.close();}
 							catch(Exception e){}
 						}//end of outer for loop
-						
+						if(runtime.test("printAST")) {
+							//print the ast
+							runtime.console().format(node).pln().flush();
+						}
 		}//end of runtime.test("translate") test
 //-----------------------------------------------------------------------
 		/**
