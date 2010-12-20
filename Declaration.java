@@ -74,8 +74,9 @@ public class Declaration{
 	 *
 	 */
 	public String[] search_for_type(String name){
+		System.out.println("looking for "+name+" variables in "+this.ownerClass+"::"+this.name);
 		if(StaticClassTypes.contains(name)) return new String[]{"",name};//calling statically
-		
+		System.out.println("\t# variables:"+variables.size());
             for (Variable i : variables) {
                 if(name.equals(i.var_name)){
                     return new String[]{i.packages,i.type};
@@ -159,6 +160,9 @@ class Fparam {
 				this.type = type.substring(type.indexOf(".");
 			}*/
         }
+	public String toString(){
+		return this.type;
+	}
 	Fparam(ArrayList<String> mods, String type, String var_name) {
             this(type, var_name);
             this.modifiers = mods;   

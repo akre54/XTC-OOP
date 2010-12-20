@@ -24,7 +24,7 @@ public class InheritanceTree{
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
 	
-	boolean VERBOSE = false;
+	boolean VERBOSE = true;
 	
 
 	/**
@@ -647,16 +647,19 @@ public class InheritanceTree{
 
 		//method is not being classed Staticly so search in Vt_ptrs
 		if(!Declaration.StaticClassTypes.contains(method_name)){
-		
+			System.out.println("checking in VT_ptrs in "+this.className);
 			//-----ACCESSABLE/SAME NAME/SAME #PARAMS CHECK
 			//looks in local(non virtual, non-private[if on_instance])and VT_ptrs 
 			//for same named methods and same number of parameters
 			for (Declaration j : Vt_ptrs) {
+				if(j.name.equals(method_name))System.out.println("params: "+j.params);
+				System.out.println("method?: "+j.name);
 				if ((j.name.equals(method_name)) && ((j.params.size()-1) == paramtyps.size()))
 					possible.add(j);
 			}
 		}
 		//look in local non-virtual cannot be both on-instance and private
+		System.out.println("checking in local "+this.className);
 		for (Declaration l : local ) {
 			if ((l.name.equals(method_name)) && (!l.isVirtual)&&(!((on_instance)&&(l.isprivate())))&&
 				 (l.params.size() == paramtyps.size())) 
@@ -761,7 +764,7 @@ public class InheritanceTree{
 		if		((on_instance)&&(d.isVirtual))//b.m1() *public
 			result="->__vptr->"+result+"("+instance;
 		else if ((on_instance) && (!d.isVirtual))//staticly!!!???
-			result="."+result+"(";
+			result="::"+result+"(";
 		else if ((!on_instance) && (d.isVirtual))// m1() *public
 			result += "("+instance;
 		else if ((!on_instance) && (!d.isVirtual))//m1() *private

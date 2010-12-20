@@ -12,7 +12,7 @@ import java.util.*;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true; //debugging boolean
+	boolean VERBOSE = false; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -696,7 +696,7 @@ public class EWalk //extends Visitor
 				
 				//update the type of the variable in the Declarator
 				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
-
+				System.out.println(name+"-> "+newtype);
 				method.update_type(name,currentPackage[0], newtype);
 				if (n.getNode(1).getNode(1) !=null ) {
 				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
@@ -740,9 +740,14 @@ public class EWalk //extends Visitor
 				if(isInstance && chainCounter==0)
 					{
 						if(VERBOSE)System.out.println("****************INSTANCE***********");
+						
 						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
 						if (VERBOSE)System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
+<<<<<<< HEAD
 						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
+=======
+						System.out.println("identifier of type= "+qualities[1]);
+>>>>>>> 69f5fcdd091559d5c0153037c179cdc9a5274dd9
 						//remove the last value from the arrayList (thats always the class name
 						String className =(String)qualities[1];
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
@@ -787,12 +792,13 @@ public class EWalk //extends Visitor
 				System.out.println("null------------------------!\n");
 				System.exit(2);
 				}
+				System.out.println("sending: --"+Identifier+" "+isInstance+" "+argumentList+" "+name+" \n\tchain:"+chainCounter);
+
 				//returns an array of string 0= return type and 1=new method string
 				if(b.search_for_method(Identifier,isInstance,argumentList,name)==null){
 					System.out.println("No info found from search_for_method");
 					System.exit(1);
 				}
-				System.out.println("sending: --"+Identifier+" "+isInstance+" "+argumentList+" "+name+" \n\tchain:"+chainCounter);
 				return b.search_for_method(Identifier,isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
