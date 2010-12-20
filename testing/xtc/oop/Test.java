@@ -49,7 +49,7 @@ public class Test {
     return this;
   }
 
-  public Test m5(Test t) {
+   public Test m5(Test t) {
     return t.m3().m4();
   }
 
@@ -195,7 +195,7 @@ public class Test {
 
     // -----------------------------------------------------------------------
 
-    o = Rest.m2();
+   	o = Rest.m2();
 
     if (R4 == o) {
       System.out.println("PASS Rest.m2()");
@@ -266,6 +266,7 @@ public class Test {
       System.out.println("FAIL t != r");
     }
     test++;
+	 
 
     // -----------------------------------------------------------------------
 
@@ -279,7 +280,7 @@ public class Test {
 
     // -----------------------------------------------------------------------
 
-    s1 = t.toString();
+   s1 = t.toString();
 
     if (! s1.equals(s2)) {
       System.out.println("PASS ! t.toString().equals(r.toString())");
@@ -312,6 +313,7 @@ public class Test {
       System.out.println("FAIL o instanceof Test");
     }
     test++;
+	
 
     // -----------------------------------------------------------------------
 
@@ -335,7 +337,7 @@ public class Test {
 
     // -----------------------------------------------------------------------
 
-    o = ((Test)o).m1();
+   o = ((Test)o).m1();
 
     if (R1 == o) {
       System.out.println("PASS (Test)o");
@@ -402,7 +404,6 @@ public class Test {
     test++;
 
     // -----------------------------------------------------------------------
-
     t.count = 0;
     t.m5(t).m3().m4();
 
@@ -662,13 +663,16 @@ public class Test {
 
     // -----------------------------------------------------------------------
 
-    if (k1.getName().equals("xtc.oop.Test")) {
+    
+	 if (k1.getName().equals("xtc.oop.Test")) {
       System.out.println("PASS k1.getName().equals(\"xtc.oop.Test\")");
       success++;
     } else {
       System.out.println("FAIL k1.getName().equals(\"xtc.oop.Test\")");
     }
     test++;
+	 
+	 
 
     // -----------------------------------------------------------------------
 

@@ -210,8 +210,7 @@ public class CppFileBuilder{
                 }
                 //write className
                 h.write("__"+t.className);
-                if(constr.overloadNum!=0)
-                        h.write("_"+constr.overloadNum);
+
                 h.write("(");
 
                 //loop through formal parameter
@@ -436,8 +435,6 @@ public class CppFileBuilder{
 		for(Declaration constr: t.constructors){
 			// create init() method
 			cpp.write("\t\tvoid __"+t.className+"::init");
-			if(constr.overloadNum!=0)
-				cpp.write("_"+constr.overloadNum);
 			cpp.write("("+t.className+" __passedthis");
 		
 			// create init's formal parameters
