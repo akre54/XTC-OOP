@@ -525,7 +525,7 @@ public class CppPrinter extends Visitor
 					//visit the arguments
 				//	print("(");  NOW HANDLED IN EWALK
 					if(hasReciever){ //check to see if there is a reciever b.m1()
-						print(primaryid);
+						//print(primaryid);
 						//if there are any arguments make sure to print a comma
 						if(n.getNode(3).size()>0)//arguments Node
 						{
