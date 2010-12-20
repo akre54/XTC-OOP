@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true; //debugging boolean
+	boolean VERBOSE = false; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -196,7 +196,9 @@ public class EWalk //extends Visitor
 				//reset flags
 				if(isMethodChaining) {
 					//set args of this call expression to the chainGang
-					n.getNode(3).add(0,newMethod);
+				//	n.getNode(3).add(0,newMethod);
+                                        System.out.println("fix method chaining");
+					//n.getNode(3).add(0,newMethod);
 					if(VERBOSE)System.out.println("Added "+newMethod+" to arguments");
 				}
 				else
@@ -488,9 +490,10 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-                                                String FullName = qualities[0]+"."+qualities[1];
-                                                
+                                                String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
+						System.out.println(FullName);
 						b =tree.root.search(FullName);
+                                                System.out.println(FullName);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isMethodChaining)
@@ -510,7 +513,7 @@ public class EWalk //extends Visitor
 						b = tree.superclass;
 					}
 				else {
-					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +","+argumentList+","+name);}
+					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +", "+argumentList+","+name);}
 					b=tree; //set be = to the current tree
 				}
 				if (b==null) {

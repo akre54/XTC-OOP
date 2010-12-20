@@ -93,11 +93,11 @@ public class Declaration{
                     found = true;
                     v.type = newtype;
                     v.packages = newpack;
-					System.out.println("\tUPDATE TYPE"+ newpack+newtype+""+name);
+					//System.out.println("\tUPDATE TYPE"+ newpack+newtype+""+name);
                 }
             }
             if (!found) {
-				System.out.println("\tUPDATE TYPE"+ newpack+newtype+""+name);
+				//System.out.println("\tUPDATE TYPE"+ newpack+newtype+""+name);
                 variables.add(new Variable(newpack,newtype,name));
             }
 	}
