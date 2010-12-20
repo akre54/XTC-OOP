@@ -50,7 +50,7 @@ public class Translator extends Tool {
 
 	File inputFile = null;
         HashMap<FileDependency,Boolean> allDependencies;
-        HashMap<ClassStruct,Boolean> classes;
+        static HashMap<ClassStruct,Boolean> classes;
         String rootPackage;
 
 	/** Create a new translator. */

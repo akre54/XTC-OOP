@@ -30,7 +30,7 @@ namespace find {
 	}
 		void __Bar::init(Bar __passedthis) {
 			__passedthis->__this = __passedthis;
-Foo::m1();
+__Foo::m1();
 				}
 
 	depend::find::Foo __Bar::m2(){

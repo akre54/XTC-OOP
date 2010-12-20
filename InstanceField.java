@@ -22,5 +22,17 @@ public class InstanceField extends Variable{
 
 		}
 	}
+	public boolean isStatic(){
+		for(String m: modifiers){
+			if(m.equals("static") )return true;
+		}
+		return false;
+	}
+	public boolean isconst(){
+		for(String m: modifiers){
+			if(m.equals("const") )return true;
+		}
+		return false;
+	}
 	
 }
