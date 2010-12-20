@@ -465,7 +465,7 @@ public class CppPrinter extends Visitor
 			
 		}
 		//make sure its not an instanceof Object, String or Class
-		if(!(classType.equals("String") || classType.equals("Object") || classType.equals("Class"))){
+		if(!((classType.equals("String") || classType.equals("Object") || classType.equals("Class")))){
 			//close the brackets print a new line and then print the init
 			print(";\n");
 			//  b->init(b,8,"string");
