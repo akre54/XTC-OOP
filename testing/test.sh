@@ -51,8 +51,8 @@ if [ $D ]; then
 			cp ../ptr.h $directory
 	done
 
-	#echo $P.java:
-	#cat $P.java | nl
+	echo $P.java:
+	cat $P.java | nl
 	echo "pkg name:"
 	echo $(grep -e ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1
 	#PACKAGE = `file "$arg" | grep -e ^package`
@@ -73,6 +73,8 @@ if [ $D ]; then
 		sdiff java.out.txt cpp.out.txt
 		echo
 		echo "DONE"
+		else
+		echo "something went wrong"
 	fi
 	echo
 	echo

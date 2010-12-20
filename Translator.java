@@ -255,8 +255,9 @@ public class Translator extends Tool {
 									}//end of for loop
 								
 							}//end of while
-							try{cppfiles.close();}
-							catch(Exception e){}
+							System.out.println("outside while loop");
+							try{cppfiles.close();System.out.println("closing file");}
+							catch(Exception e){System.out.println("closing failed");}
 						}//end of outer for loop
 						if(runtime.test("printAST")) {
 							//print the ast
