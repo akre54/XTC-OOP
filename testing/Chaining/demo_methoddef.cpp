@@ -29,8 +29,8 @@
 	int32_t __demo::main(int32_t argc,char** args){
 beta b=new __beta();
 b->init(b);
-String a=({beta a=bm1(b);
- am2(a);});
+String a=({beta a=b->__vptr->m1(b);
+ a->__vptr->m2(a);});
 std::cout<<<<std::endl;
 
 	}
