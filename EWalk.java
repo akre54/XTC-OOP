@@ -112,7 +112,8 @@ public class EWalk //extends Visitor
 			{
 				String instanceName = n.getString(0);//gets the primary ID
 				Node castex = n.getNode(2);//get the third node
-				if(castex.getName().equals("CastExpression")) {//see if its a castexpression ?seems like cast expresions could appear in more places than this
+				
+				if((castex!=null)&&(castex.getName().equals("CastExpression")) ){//see if its a castexpression ?seems like cast expresions could appear in more places than this
 					n.set(2,visitCastExpression(castex,instanceName));
 				}
 				visit(n);
@@ -124,7 +125,7 @@ public class EWalk //extends Visitor
 				Node targetTypeNode;
 				targetTypeNode = GNode.create("PrimaryIdentifier",sourceVariable); //node to send to send to getType();
 				String type = getType(targetTypeNode); //source type
-				if(VERBOSE)System.out.printypetln("Casting variable "+sourceVariable+" to type "+type+" and assigning to variable "+targetVariableName+" of type "+type);
+				if(VERBOSE)System.out.println("Casting variable "+sourceVariable+" to type "+type+" and assigning to variable "+targetVariableName+" of type "+type);
 				if(!type.equals("int")&&
 				   !type.equals("double")&&
 				   !type.equals("long")&&
@@ -521,11 +522,12 @@ public class EWalk //extends Visitor
 				System.exit(2);
 				}
 				//returns an array of string 0= return type and 1=new method string
-				if(b.search_for_method(isInstance,argumentList,name)==null){
+				if(b.search_for_method(Identifier,isInstance,argumentList,name)==null){
 					System.out.println("No info found from search_for_method");
 					System.exit(1);
 				}
-				return b.search_for_method(isInstance,argumentList,name);
+				System.out.println(Identifier+"INSTANCE???");
+				return b.search_for_method(Identifier,isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
 			   is currently used when get the types for values in an argument
