@@ -743,11 +743,8 @@ public class EWalk //extends Visitor
 						
 						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
 						if (VERBOSE)System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
-<<<<<<< HEAD
 						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
-=======
 						System.out.println("identifier of type= "+qualities[1]);
->>>>>>> 69f5fcdd091559d5c0153037c179cdc9a5274dd9
 						//remove the last value from the arrayList (thats always the class name
 						String className =(String)qualities[1];
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
