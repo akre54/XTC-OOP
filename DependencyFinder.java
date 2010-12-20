@@ -363,7 +363,8 @@ public class DependencyFinder {
                     if (!this.currentPackage.equals(getPackageName(allClasses, d.fullPath))) {
                         files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
                         files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
-
+                       files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
+                       files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
                     }
                 }
             }

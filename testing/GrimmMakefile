@@ -3,8 +3,7 @@ SHELL = /bin/sh
 .SUFFIXES:
 .SUFFIXES: .c .o .h .cpp
 
-PRE = demo
-PACKAGE = 
+PRE = Test
 METHODDEFS = $(wildcard */*_methoddef.cpp)
 TARGETS = main.cpp *_methoddef.cpp $(METHODDEFS) java_lang.cpp
 CC = g++
@@ -34,10 +33,5 @@ ex:	compile
 	./$(PRE).out > cpp.out.txt
 
 javac: $(PRE).java
-ifeq ($(strip $(PACKAGE)),) # if no package
-	javac -cp . $(PRE).java
-	java -cp . $(PRE) > java.out.txt
-else
-	javac -cp .. $(PRE).java
-	java -cp .. $(PACKAGE).$(PRE) > java.out.txt
-endif
+	javac -cp ../.. $(PRE).java
+	java -cp ../.. xtc.oop.$(PRE) > java.out.txt

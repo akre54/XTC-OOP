@@ -49,7 +49,11 @@ namespace find {
 	struct __Foo{ 
 		__Foo_VT* __vptr;
 		String var;
+<<<<<<< HEAD
 		Object R;
+=======
+		const static Object R; //=__Object();
+>>>>>>> 74802605a914dfc021fa5d5c61c8067369a3841f
 		Foo __this;
 
 

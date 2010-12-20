@@ -120,6 +120,7 @@ public class CppPrinter extends Visitor
 	public void visitLogicalNegationExpression(GNode n)
 	{
 		print("!");
+		dispatch(n.getNode(0));
 	}
 	/**visit cast expression on primitive types and print the c++ equivalent */
 	public void visitBasicCastExpression(GNode n)
@@ -466,7 +467,7 @@ public class CppPrinter extends Visitor
 			
 		}
 		//make sure its not an instanceof Object, String or Class
-		System.out.println("::::::::::::::::::::::"+classType);
+		if(DEBUG) System.out.println("::::::::::::::::::::::"+classType);
 		if(!((classType.equals("String") || classType.equals("Object") || classType.equals("Class")))){
 			//close the brackets print a new line and then print the init
 			print(";\n");
@@ -568,8 +569,11 @@ public class CppPrinter extends Visitor
 					isPrint=true;
 					//print 2
 					print(thirds);
-					//print Arguments
-					visitChildren(n,3,n.size(),"<<");
+					//if arguments has no children print an empty string instead
+					if(n.getNode(3).size()==0)
+						print("\" \"");
+					else//print Arguments
+						visitChildren(n,3,n.size(),"<<");
 					//print 1
 					print(n.getString(1));
 				}
@@ -578,7 +582,7 @@ public class CppPrinter extends Visitor
 					boolean hasReciever=false; //boolean flag of recievers i.e. b.m1()
 					String primaryid =""; //reciever stored as a string
 					visitChildren(n,0,1,"");
-					System.out.print(n.toString());
+					if(DEBUG) System.out.print(n.toString());
 					if(n.get(0)!=null){
 						if(n.get(0) instanceof Node )
 						   {

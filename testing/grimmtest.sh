@@ -31,7 +31,7 @@ cp ../../ptr.h .
 
 #echo Test.java:
 #cat Test.java | nl
-make -f ../../Makefile PRE=Test TFLAGS='-verbose' PACKAGE=xtc.oop
+make -f ../../GrimmMakefile PRE=Test TFLAGS='-verbose'
 if [ $? -eq '0' ] # made successfully!
 	then
   echo "Comparing output files:"

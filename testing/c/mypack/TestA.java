@@ -5,4 +5,7 @@ public class TestA
   public TestA (int arg1) { 
     i = arg1;
   }
+	public TestA() {
+		i = 5;
+	}
 }

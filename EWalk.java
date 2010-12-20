@@ -12,7 +12,7 @@ import java.util.*;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true; //debugging boolean
+	boolean VERBOSE = false; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -62,8 +62,8 @@ public class EWalk //extends Visitor
 			public String visitExpression(GNode n) {
 				if(VERBOSE)System.out.println(n.getName());
 				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
-					System.out.println(n.toString());
-					System.out.println(n.getNode(0).getName());
+					//System.out.println(n.toString());
+					//System.out.println(n.getNode(0).getName());
 					
 					/*CHECK THIS CODE
 					z*/if(n.get(0)!=null){//THROWING NOT A CLASS EXCEPTION
@@ -353,7 +353,7 @@ public class EWalk //extends Visitor
 						}
 
 						chainCounter++;
-						System.out.println(chainCounter+"--------INNTER----" +savedReturnType);
+					//System.out.println(chainCounter+"--------INNTER----" +savedReturnType);
 						   
 						//newMethod+=")";
 						//newMethod+=";\n";
@@ -544,7 +544,7 @@ public class EWalk //extends Visitor
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				methodArray = getMethodInfo(n,primaryIdentifier,fcNameList, methodName,argumentTypes);
-				System.out.println("++++++++++++++++"+methodArray[1]);
+				if(VERBOSE)System.out.println("++++++++++++++++"+methodArray[1]);
 				return methodArray;
 			}
 			/**Helper method returns the types ofarguments in an array list
@@ -594,7 +594,7 @@ public class EWalk //extends Visitor
 						   //append endl to keep the newLine behavior of System.out.println
 						   n.set(0, null);
 						   n.set(2,fcName.toString());
-						   n.set(1,"<<std::endl");
+						   n.set(1," <<std::endl");
 						   isPrint=true;
 						isPrintln=true;
 					}
@@ -696,7 +696,7 @@ public class EWalk //extends Visitor
 				
 				//update the type of the variable in the Declarator
 				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
-				System.out.println(name+"-> "+newtype);
+				if(VERBOSE) System.out.println(name+"-> "+newtype);
 				method.update_type(name,currentPackage[0], newtype);
 				if (n.getNode(1).getNode(1) !=null ) {
 				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
@@ -742,10 +742,12 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("****************INSTANCE***********");
 						
 						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
-						if (VERBOSE)System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
 
+						if (VERBOSE) {System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
 						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
 						System.out.println("identifier of type= "+qualities[1]);
+						}
+
 						//remove the last value from the arrayList (thats always the class name
 						String className =(String)qualities[1];
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
@@ -788,14 +790,14 @@ public class EWalk //extends Visitor
 					if(b!=null)System.out.println("search found in ELSE");
 				}
 				if (b==null) {
-				System.out.println("null------------------------!\n");
+				if(VERBOSE) System.out.println("null------------------------!\n");
 				System.exit(2);
 				}
-				System.out.println("sending: --"+Identifier+" "+isInstance+" "+argumentList+" "+name+" \n\tchain:"+chainCounter);
+				if(VERBOSE) System.out.println("sending: --"+Identifier+" "+isInstance+" "+argumentList+" "+name+" \n\tchain:"+chainCounter);
 
 				//returns an array of string 0= return type and 1=new method string
 				if(b.search_for_method(Identifier,isInstance,argumentList,name)==null){
-					System.out.println("No info found from search_for_method");
+					if(VERBOSE) System.out.println("No info found from search_for_method");
 					System.exit(1);
 				}
 				return b.search_for_method(Identifier,isInstance,argumentList,name);
