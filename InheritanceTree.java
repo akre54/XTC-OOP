@@ -757,12 +757,15 @@ public class InheritanceTree{
 		if(d.overloadNum==0);
 		else result+= "_"+d.overloadNum;
 		if((instance.equals(""))||(instance.equals(" "))) instance ="__this";
-		if (d.isVirtual)
-                    result= instance+"->__vptr->"+result+"("+instance;
-		else if ((on_instance) && (!d.isVirtual))
-                    result=instance+"."+result+"(";
-		else if((!on_instance) && (!d.isVirtual))
-                    result+= "(";
+		
+		if		((on_instance)&&(d.isVirtual))//b.m1() *public
+			result="->__vptr->"+result+"("+instance;
+		else if ((on_instance) && (!d.isVirtual))//staticly!!!???
+			result="."+result+"(";
+		else if ((!on_instance) && (d.isVirtual))// m1() *public
+			result += "("+instance;
+		else if ((!on_instance) && (!d.isVirtual))//m1() *private
+			result+= "(";
 		else System.out.println("method didnt meet make_name requirements");
 		return result;
 	}
