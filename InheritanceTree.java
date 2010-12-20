@@ -623,7 +623,7 @@ public class InheritanceTree{
 	/**
 	 * method used to retrieve the corret overloaded method and append its overloaded number
 	 */
-	public String[] search_for_method(boolean on_instance,ArrayList<String> paramtyps, 
+	public String[] search_for_method(String instance ,boolean on_instance,ArrayList<String> paramtyps, 
 																String method_name){
 		if(method_name.equals("super")){System.out.println("searching for super method WRONG");}
 		if(method_name.equals("this")){System.out.println("searching for this method WRONG");}
@@ -646,7 +646,7 @@ public class InheritanceTree{
 		//RETURN [returntype,accessor+NAME+_number]
 		if (possible.size()==1) {
 			Declaration choosen = possible.get(0);
-			return new String[]{choosen.returntype, make_name(on_instance, choosen)};
+			return new String[]{choosen.returntype, make_name(instance,on_instance, choosen)};
 		}
 		//----SPECIFICITY CHECK
 		//need to zero out specificity for next check
@@ -673,7 +673,7 @@ public class InheritanceTree{
                         min=n;
 		}
 		//RETURN [returntype,accessor+NAME+_number]
-		return new String[]{min.returntype, make_name(on_instance,min)};
+		return new String[]{min.returntype, make_name(instance,on_instance,min)};
 	}
 	/**
 	 * helper method finds how specific the casting is 
@@ -731,17 +731,19 @@ public class InheritanceTree{
 	 * helper method for search_for_method returns proper method call
 	 * 
 	 */
-	private String make_name(boolean on_instance,Declaration d){
-		String result="";
-		if ((on_instance) && (d.isVirtual))
-                    result= "->__vptr->";
-		else if ((on_instance) && (!d.isVirtual))
-                    result=".";
-		else
-                    result= "";
-		result+= d.name;
+	private String make_name(String instance,boolean on_instance,Declaration d){
+		String result= d.name;
 		if(d.overloadNum==0)return result;
-		else return result+"_"+d.overloadNum;
+		else result+= "_"+d.overloadNum;
+		
+		if ((on_instance) && (d.isVirtual))
+                    result= "->__vptr->"+result+"("+instance;
+		else if ((on_instance) && (!d.isVirtual))
+                    result="."+result+"(";
+		else if((!on_instance) && (!d.isVirtual))
+                    result+= "(";
+		else;
+		return result;
 	}
 	/** will return packageName in cpp syntax "::"
 	 */

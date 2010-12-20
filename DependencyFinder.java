@@ -9,6 +9,7 @@ package xtc.oop;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.io.File;
 import java.io.IOException;
 							
@@ -18,7 +19,7 @@ import xtc.tree.Visitor;
 
 public class DependencyFinder {
 
-    public boolean verbose = false;
+    public boolean verbose = true;
 
    /**
        *  filePaths holds canonical paths to file's dependencies
@@ -26,19 +27,19 @@ public class DependencyFinder {
        */
     private ArrayList<FileDependency> fileDependencies = new ArrayList<FileDependency>();
     private ArrayList<ClassStruct> fileClasses = new ArrayList<ClassStruct>();
-    private String currentPackage, currentSuperClass, currentFilePath, currentParentDirectory;
+    private String currentPackage, currentSuperClass, currentFilePath, rootDirectory;
     private DependencyOrigin origin;
     private Node fileNode;
 
     // ignores all dependencies from following top-level superpackages:
-    private final java.util.List<String> excludedPackages = java.util.Arrays.asList(new String[]
+    private final java.util.List<String> excludedPackages = Arrays.asList(new String[]
                     {"java","javax"});
 
 
     public DependencyFinder(Node n, String filePath) {
 
         currentFilePath = filePath;
-        currentParentDirectory = (new File ((new File(currentFilePath)).getParent())).getParent(); // all dependencies are relative to the translated file
+        rootDirectory = (new File(currentFilePath)).getParent(); // all dependencies are relative to the translated file
         fileNode = n;
         currentPackage = "";
         currentSuperClass = "";
@@ -49,7 +50,6 @@ public class DependencyFinder {
             public void visitPackageDeclaration(GNode g) {
 
                 // list all files in the directory, and add them to our paths list
-
                 Node n = g.getNode(1);
 
                 StringBuilder pathbuilder = new StringBuilder();
@@ -68,10 +68,11 @@ public class DependencyFinder {
                 currentPackage = path.replace("/",".");
 
                 try {
-                    if (!currentPackage.equals("")) { // don't import if empty package
-                        String fullPath = (new File(currentParentDirectory, path)).getCanonicalPath();
-                        gatherDirectoryFiles(fullPath, DependencyOrigin.CURRENTPACKAGE);
+                    for (int i=0; i<n.size(); i++) { // get ancestor directory until matches with package classpath
+                        rootDirectory = (new File(rootDirectory)).getParent();
                     }
+                    String fullPath = (new File(rootDirectory, path)).getCanonicalPath();
+                    gatherDirectoryFiles(fullPath, DependencyOrigin.CURRENTPACKAGE);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -103,7 +104,7 @@ public class DependencyFinder {
                         // e.g. import A.B.*;
                         if (null != g.get(2) && g.getString(2).equals("*")) {
                             try {
-                                String fullPath = (new File(currentParentDirectory, pathbuilder.toString())).getCanonicalPath();
+                                String fullPath = (new File(rootDirectory, pathbuilder.toString())).getCanonicalPath();
                                 gatherDirectoryFiles(fullPath, DependencyOrigin.IMPORTEDPACKAGE);
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -401,7 +402,7 @@ public class DependencyFinder {
                 */
         public ArrayList<String> getPackageToNamespace() {	
 
-            ArrayList<String> pack = new ArrayList<String>(java.util.Arrays.asList(currentPackage.split("\\.")));
+            ArrayList<String> pack = new ArrayList<String>(Arrays.asList(currentPackage.split("\\.")));
             if (pack.get(0).equals("")) {
                 pack.remove(0);
             }//test for empty string element!!!
