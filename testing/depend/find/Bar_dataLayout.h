@@ -43,14 +43,17 @@ namespace find {
 //data layout for depend.findBar
 	struct __Bar{ 
 		__Bar_VT* __vptr;
+		String var;
+		static Object R;
 		Bar __this;
 
 
-		__Bar():__vptr(&__vtable){
+		__Bar():__vptr(&__vtable),var(new __String("")),R(new __Object()){
 		//empty constructor. All work done in init
 	   }
 
-		void init(Bar);		static Class __class();
+		void init(Bar);
+		static Class __class();
 		static depend::find::Foo m2();
 
 		static __Bar_VT __vtable;

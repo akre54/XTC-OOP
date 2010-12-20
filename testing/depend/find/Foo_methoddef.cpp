@@ -38,7 +38,8 @@ b->init(b);
 
 	}
 
-	void __Foo::m1(){
+	java::lang::String __Foo::m1(){
+return __this->var; 
 
 	}
 

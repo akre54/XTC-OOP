@@ -983,6 +983,15 @@ public class EWalk //extends Visitor
 
 				visit(n);
 			}
+			public void visitPrimaryIdentifier(GNode n){
+				String variable =n.getString(0);
+				for(InstanceField i:tree.fields){
+					if(i.var_name.equals(variable)) {
+						if(i.isStatic())n.set(0,"__"+tree.className+"::"+variable);
+						else n.set(0,"__this->"+variable);
+					}
+				}
+			}
 			public void visitModifier (GNode n) {
 				String temp = n.getString(0);
 				if (temp.equals("final")) n.set(0,"const");

@@ -42,16 +42,19 @@ namespace find {
 //data layout for depend.findFoo
 	struct __Foo{ 
 		__Foo_VT* __vptr;
+		String var;
+		static Object R;
 		Foo __this;
 
 
-		__Foo():__vptr(&__vtable){
+		__Foo():__vptr(&__vtable),var(new __String("")),R(new __Object()){
 		//empty constructor. All work done in init
 	   }
 
-		void init(Foo);		static Class __class();
+		void init(Foo);
+		static Class __class();
 		static int32_t main(int32_t, char**);
-		static void m1();
+		static java::lang::String m1();
 
 		static __Foo_VT __vtable;
 	};
