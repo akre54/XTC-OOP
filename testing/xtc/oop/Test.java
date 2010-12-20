@@ -338,7 +338,7 @@ public class Test {
 
     // -----------------------------------------------------------------------
 
-/*    o = ((Test)o).m1();
+   o = ((Test)o).m1();
 
     if (R1 == o) {
       System.out.println("PASS (Test)o");
@@ -347,10 +347,10 @@ public class Test {
       System.out.println("FAIL (Test)o");
     }
     test++;
-*/
+
     // -----------------------------------------------------------------------
 
-  /*  o = t.m2();
+    o = t.m2();
 
     if (R3 == o) {
       System.out.println("PASS t.m2()");
@@ -358,7 +358,7 @@ public class Test {
     } else {
       System.out.println("FAIL t.m2()");
     }
-    test++;*/
+    test++;
 
     // -----------------------------------------------------------------------
 
@@ -405,7 +405,7 @@ public class Test {
     test++;
 
     // -----------------------------------------------------------------------
-/* LOOK INTO Inner Portion of Method Chaining
+	  //LOOK INTO Inner Portion of Method Chaining
     t.count = 0;
     t.m5(t).m3().m4();
 
@@ -445,7 +445,7 @@ public class Test {
       System.out.println("FAIL r.m5(t).m3().m4()");
     }
     test++;
-*/
+
     // -----------------------------------------------------------------------
 
     o = t.m6(t);
@@ -665,7 +665,7 @@ public class Test {
 
     // -----------------------------------------------------------------------
 
-    /*More Method Chaining
+    
 	 if (k1.getName().equals("xtc.oop.Test")) {
       System.out.println("PASS k1.getName().equals(\"xtc.oop.Test\")");
       success++;
@@ -673,7 +673,7 @@ public class Test {
       System.out.println("FAIL k1.getName().equals(\"xtc.oop.Test\")");
     }
     test++;
-	 */
+	 
 
     // -----------------------------------------------------------------------
 

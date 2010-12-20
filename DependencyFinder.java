@@ -360,9 +360,11 @@ public class DependencyFinder {
             for (FileDependency d : fileDependencies) {
                 if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // for now, don't import from CURRENTDIRECTORY
                     // only add using if from different namespaces
-                    if (!this.currentPackage.equals(getNamespace(allClasses, d.fullPath))) {
-                       // files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
-                        //files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
+                    if (!this.currentPackage.equals(getPackageName(allClasses, d.fullPath))) {
+                        files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
+                        files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
+                       files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
+                       files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
                     }
                 }
             }
@@ -463,12 +465,18 @@ public class DependencyFinder {
         /** @return classes belonging to packname */
         public static ArrayList<ClassStruct> getAllClassesInPackage(ArrayList<ClassStruct> classes, String packname) {
             ArrayList<ClassStruct> packageClasses = new ArrayList<ClassStruct>();
-
-            for (ClassStruct c : classes) {
-                if (c.packageName.equals(packname))
-                    packageClasses.add(c);
-            }
-
+			if(classes ==null){
+				for (ClassStruct c : Translator.classes.keySet()) {
+					if (c.packageName.equals(packname))
+						packageClasses.add(c);
+				}
+			}
+			else{
+				for (ClassStruct c : classes) {
+					if (c.packageName.equals(packname))
+						packageClasses.add(c);
+				}
+			}
             return packageClasses;
         }
 

@@ -540,6 +540,7 @@ public class InheritanceTree{
 				
 				String s =field.getString().toString();
 				s=s.replaceAll("\n","");
+				if(s.contains(";"))s=s.substring(0,s.indexOf(";"));
 				if(VERBOSE)System.out.println("EWALK= "+s);
 				ArrayList<String> mods = new ArrayList<String>(0);
 				String value, modsAndNames;//variables to be filled with info

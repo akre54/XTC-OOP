@@ -1,7 +1,8 @@
 package depend.find;
 
 public class Foo{
-
+String var="";
+	final static Object R= new Object();
 	Foo(){
 	
 	}
@@ -11,6 +12,7 @@ public class Foo{
 		
 	
 	}
-	public static void m1(){
+	public static String m1(){
+		return var;
 	}
 }
