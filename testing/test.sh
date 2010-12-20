@@ -50,18 +50,15 @@ if [ $D ]; then
 			cp ../java_lang.h $directory
 			cp ../ptr.h $directory
 	done
-
-	echo $P.java:
-	cat $P.java | nl
-	echo "pkg name:"
-	echo $(grep -e ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1
+	#echo $P.java:
+	#cat $P.java | nl
+	echo pkg name: $(grep -e ^package $P.java | cut -d ' ' -f2 | cut -d ';' -f1)
 	#PACKAGE = `file "$arg" | grep -e ^package`
-	#PACKAGE = `$(egrep ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1` # get root file's package, used for classpaths
+	PACKAGE = `$(egrep ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1` # get root file's package, used for classpaths
 	#echo $PACKAGE
-	file $P.java | grep -e ^package
 	if [ "$?" -eq "0" ]
 		then
-		make -f ../Makefile PRE=$P TFLAGS='-verbose' PACKAGE=$D
+		make -f ../Makefile PRE=$P TFLAGS='-verbose' PACKAGE=$PACKAGE
 	else
 		make -f ../Makefile PRE=$P TFLAGS='-verbose'
 	fi
