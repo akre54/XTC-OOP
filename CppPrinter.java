@@ -120,6 +120,7 @@ public class CppPrinter extends Visitor
 	public void visitLogicalNegationExpression(GNode n)
 	{
 		print("!");
+		dispatch(n.getNode(0));
 	}
 	/**visit cast expression on primitive types and print the c++ equivalent */
 	public void visitBasicCastExpression(GNode n)
@@ -568,8 +569,11 @@ public class CppPrinter extends Visitor
 					isPrint=true;
 					//print 2
 					print(thirds);
-					//print Arguments
-					visitChildren(n,3,n.size(),"<<");
+					//if arguments has no children print an empty string instead
+					if(n.getNode(3).size()==0)
+						print("\" \"");
+					else//print Arguments
+						visitChildren(n,3,n.size(),"<<");
 					//print 1
 					print(n.getString(1));
 				}
