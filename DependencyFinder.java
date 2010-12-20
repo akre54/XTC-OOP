@@ -311,7 +311,7 @@ public class DependencyFinder {
                         case IMPORTEDPACKAGE: // we're importing all files in directory now, so these two checks not needed until we update Inheritancebuilder to handle implicit imports
                         case CURRENTPACKAGE: */
                 if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // AK 12-18-10 8:00 problems with current directory finding.
-                    files.add("#include \"" + hFileName(allClasses, d.fullPath) + "\"");
+                    files.add("#include \"" + hFileName(allClasses, d.fullPath, currentPackage) + "\"");
                 }
                     /*        break;
                         /*case IMPORTEDPACKAGE:
@@ -433,8 +433,8 @@ public class DependencyFinder {
 
         /** @return just name of file (ie ImportFile from ImportFile.java,
                       * used for cpp import headers */
-        public String cppFileName(ArrayList<ClassStruct> c, String fullPath) {
-            String directory = getNamespaceDirectory(c, fullPath);
+        public static String cppFileName(ArrayList<ClassStruct> c, String fullPath, String currentPackage) {
+            String directory = getNamespaceDirectory(c, fullPath, currentPackage);
             String basename = javaFileName(fullPath).replace(".java",".cpp");
 
             if (directory.equals(""))
@@ -442,8 +442,8 @@ public class DependencyFinder {
             else
                 return directory + "/" + basename;
         }
-        public static String hFileName(ArrayList<ClassStruct> c, String fullPath) {
-            String directory = getNamespaceDirectory(c, fullPath);
+        public static String hFileName(ArrayList<ClassStruct> c, String fullPath, String currentPackage) {
+            String directory = getNamespaceDirectory(c, fullPath, currentPackage);
             String basename = javaFileName(fullPath).replace(".java","_dataLayout.h");
 
             if (directory.equals(""))
@@ -509,11 +509,14 @@ public class DependencyFinder {
                * i.e. package xtc.oop.B; becomes xtc/oop/B;,
                * or if e.g. xtc is rootPackage, becomes oop/B
                */
-        public static String getNamespaceDirectory(ArrayList<ClassStruct> classes, String filename) {
+        public static String getNamespaceDirectory(ArrayList<ClassStruct> classes, String filename, String currentPackage) {
             for (ClassStruct c : classes) {
                 if (c.filePath.equals(filename)) {
-                    String r = c.packageName.replaceAll("\\.", "/");
-                    r = r.replace(c.rootPackage + "/", "");
+                    String r = "";
+                    if (!c.packageName.equals(currentPackage)) {
+                        r = c.packageName.replaceAll("\\.", "/");
+                        r = r.replace(c.rootPackage + "/", "");
+                    }
                     return r;
                 }
             }
