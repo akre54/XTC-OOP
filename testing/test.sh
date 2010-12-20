@@ -34,7 +34,7 @@ if [ $D ]; then
 	cd $D
 	if [ $? -ne '0' ]
 	then
-			echo "bad path name"
+		echo "bad path name"
 	   	exit $?
 	fi
 
@@ -52,14 +52,13 @@ if [ $D ]; then
 	done
 	#echo $P.java:
 	#cat $P.java | nl
-	echo pkg name: $(grep -e ^package $P.java | cut -d ' ' -f2 | cut -d ';' -f1)
-	#PACKAGE = `file "$arg" | grep -e ^package`
-	PACKAGE = `$(egrep ^package $P.java) | cut -d ' ' -f2 | cut -d ';' -f1` # get root file's package, used for classpaths
-	#echo $PACKAGE
+	PACKAGE=$(egrep ^package $P.java | cut -d ' ' -f2 | cut -d ';' -f1) # get root file's package, used for classpaths
 	if [ "$?" -eq "0" ]
 		then
+		echo pkg name: $PACKAGE
 		make -f ../Makefile PRE=$P TFLAGS='-verbose' PACKAGE=$PACKAGE
 	else
+		echo no package
 		make -f ../Makefile PRE=$P TFLAGS='-verbose'
 	fi
 	if [ $? -eq '0' ] # made successfully!
@@ -70,8 +69,6 @@ if [ $D ]; then
 		sdiff java.out.txt cpp.out.txt
 		echo
 		echo "DONE"
-		else
-		echo "something went wrong"
 	fi
 	echo
 	echo
