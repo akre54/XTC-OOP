@@ -30,6 +30,8 @@ namespace find {
 	}
 		void __Foo::init(Foo __passedthis) {
 			__passedthis->__this = __passedthis;
+			const Object o = new __Object();
+			__Foo::R=(o&);
 		}
 
 	int32_t __Foo::main(int32_t argc,char** args){

@@ -49,11 +49,11 @@ namespace find {
 	struct __Foo{ 
 		__Foo_VT* __vptr;
 		String var;
-		Object R;
+		const static Object R;
 		Foo __this;
 
 
-		__Foo():__vptr(&__vtable),var(new __String("")),R(new __Object()){
+		__Foo():__vptr(&__vtable),var(new __String("")){
 		//empty constructor. All work done in init
 	   }
 
