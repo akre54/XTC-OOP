@@ -27,7 +27,6 @@
 		return k;
 	}
 	int32_t __demo::main(int32_t argc,char** args){
-<<<<<<< HEAD
 beta lmao=new __beta();
 lmao->init(lmao);
 lmao->__vptr->m3(lmao);
@@ -40,28 +39,21 @@ beta b=a->__vptr->m2(a);
  b->__vptr->m3(b);
 });
 std::cout<<r<<std::endl;
-=======
-beta b=new __beta();
-b->init(b);
-String a=({beta a=b->__vptr->m1(b);
- a->__vptr->m2(a);});
-std::cout<<a<<std::endl;
->>>>>>> 69f5fcdd091559d5c0153037c179cdc9a5274dd9
 
 	}
 
 	__demo_VT __demo::__vtable;
 
-//end demo
-namespace java {
-namespace lang {
+//close demo
+	namespace java {
+	namespace lang {
 		template<>
-	Class __Array<demo>::__class() {
-		static Class k = new __Class(__rt::stringify("[L.demo"),
-								__Array<java::lang::Object>::__class(),
-								__demo::__class());
-		return k;
-	}
+		Class __Array<demo>::__class() {
+			static Class k = new __Class(__rt::stringify("[L.demo"),
+									__Array<java::lang::Object>::__class(),
+									__demo::__class());
+			return k;
+		}
 
 	}
 	} // closing java::lang for arrays
@@ -71,6 +63,10 @@ namespace lang {
 		static Class k = new __Class(__rt::stringify("beta"),__rt::null());
 		return k;
 	}
+		void __beta::init(beta __passedthis) {
+			__passedthis->__this = __passedthis;
+		}
+
 	beta __beta::m1(beta __this){
 beta a=new __beta();
 a->init(a);
@@ -92,16 +88,16 @@ return new __String("thisssss");
 
 	__beta_VT __beta::__vtable;
 
-//end beta
-namespace java {
-namespace lang {
+//close beta
+	namespace java {
+	namespace lang {
 		template<>
-	Class __Array<beta>::__class() {
-		static Class k = new __Class(__rt::stringify("[L.beta"),
-								__Array<java::lang::Object>::__class(),
-								__beta::__class());
-		return k;
-	}
+		Class __Array<beta>::__class() {
+			static Class k = new __Class(__rt::stringify("[L.beta"),
+									__Array<java::lang::Object>::__class(),
+									__beta::__class());
+			return k;
+		}
 
 	}
 	} // closing java::lang for arrays
