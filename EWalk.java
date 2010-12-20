@@ -734,7 +734,7 @@ public class EWalk //extends Visitor
 			   puts in check for isSuper flag and isInstance Flag*/
 			public String[] getMethodInfo(Node n,String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
-				if (VERBOSE) System.out.println("\t\t Method Chaining?"+isMethodChaining);
+				if (true) System.out.println("\t\t Method Chaining?"+isMethodChaining+"  isinstance"+isInstance);
 				//method .search for type with packages if you dont send a package its the package you're in
 				InheritanceTree b; //will be current Class, the superclass or the instance's class
 				if(isInstance && chainCounter==0)
@@ -743,16 +743,9 @@ public class EWalk //extends Visitor
 						
 						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
 						if (VERBOSE)System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
-<<<<<<< HEAD
-//<<<<<<< HEAD
-						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
-//=======
-						System.out.println("identifier of type= "+qualities[1]);
-//>>>>>>> 69f5fcdd091559d5c0153037c179cdc9a5274dd9
-=======
+
 						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
 						System.out.println("identifier of type= "+qualities[1]);
->>>>>>> 70a396f145f8ba4d8eb99de0d00f126b9f0c60a2
 						//remove the last value from the arrayList (thats always the class name
 						String className =(String)qualities[1];
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
@@ -760,7 +753,7 @@ public class EWalk //extends Visitor
 						//set the inheritance tree based on the found class in the package
 						String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
 						if(VERBOSE)System.out.println("THIS IS THE FCNAME" + qualities.toString());
-						b =tree.root.search(FullName);
+						b =tree.root.search(FullName);if(b!=null)System.out.println("search found in on instance chain==0");
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 						//isInstance=false;
 					}
@@ -782,7 +775,7 @@ public class EWalk //extends Visitor
 					if(!packages.equals(""))FullName = packages+"."+savedReturnType;
 					else FullName =savedReturnType;
 					if(VERBOSE)System.out.println("Is Method Chaining: b=tree.root.search("+FullName+")");
-					b=tree.root.search(FullName);
+					b=tree.root.search(FullName);if(b!=null)System.out.println("search found in IS METHODCHAINGN");
 					//what do i do to get the full package name?
 				}
 				else if (isSuper) 
@@ -792,6 +785,7 @@ public class EWalk //extends Visitor
 				else {
 					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +", "+argumentList+","+name);}
 					b=tree; //set be = to the current tree
+					if(b!=null)System.out.println("search found in ELSE");
 				}
 				if (b==null) {
 				System.out.println("null------------------------!\n");

@@ -430,7 +430,7 @@ public class CppFileBuilder{
 		//writes the __class() method
 		cpp.write("\t"+t.local.get(0).returntype+" __"+t.className+
 							"::"+t.local.get(0).name+"(){"+
-							"\n\t\tstatic Class k = new __Class(__rt::stringify(\""+fileinfo.getPackageName()+t.className+"\"),__rt::null());"+
+							"\n\t\tstatic Class k = new __Class(__rt::stringify(\""+fileinfo.getPackageName()+"."+t.className+"\"),__rt::null());"+
 							"\n\t\treturn k;\n\t"+
 							"}\n");
 		for(Declaration constr: t.constructors){

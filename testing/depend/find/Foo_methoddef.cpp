@@ -25,13 +25,11 @@ namespace find {
 
 
 	Class __Foo::__class(){
-		static Class k = new __Class(__rt::stringify("depend.findFoo"),__rt::null());
+		static Class k = new __Class(__rt::stringify("depend.find.Foo"),__rt::null());
 		return k;
 	}
 		void __Foo::init(Foo __passedthis) {
 			__passedthis->__this = __passedthis;
-			const Object o = new __Object();
-			__Foo::R=(o&);
 		}
 
 	int32_t __Foo::main(int32_t argc,char** args){
@@ -55,6 +53,41 @@ return __this->var;
 			static Class k = new __Class(__rt::stringify("[Ldepend.find.Foo"),
 									__Array<java::lang::Object>::__class(),
 									depend::find::__Foo::__class());
+			return k;
+		}
+
+	}
+	} // closing java::lang for arrays
+	//===========================================================================
+
+namespace depend {
+namespace find {
+	Class __Bar::__class(){
+		static Class k = new __Class(__rt::stringify("depend.find.Bar"),__rt::null());
+		return k;
+	}
+		void __Bar::init(Bar __passedthis) {
+			__passedthis->__this = __passedthis;
+Foo::m1();
+				}
+
+	depend::find::Foo __Bar::m2(){
+Foo f=new __Foo();
+f->init(f);
+return f; 
+
+	}
+
+	__Bar_VT __Bar::__vtable;
+
+}}//close depend::find::Bar
+	namespace java {
+	namespace lang {
+		template<>
+		Class __Array<depend::find::Bar>::__class() {
+			static Class k = new __Class(__rt::stringify("[Ldepend.find.Bar"),
+									__Array<depend::find::Foo>::__class(),
+									depend::find::__Bar::__class());
 			return k;
 		}
 
