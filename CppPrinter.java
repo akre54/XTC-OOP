@@ -488,6 +488,7 @@ public class CppPrinter extends Visitor
 	}
 	public void visitPrimaryIdentifier(GNode n)
 	{
+		if (!isMethodChaining)
 			print(n.getString(0));
 	}
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
@@ -506,6 +507,7 @@ public class CppPrinter extends Visitor
 					isMethodChaining=false;
 				}
 				else {
+					print("({");
 					isMethodChaining =true;
 				}
 			}
@@ -561,7 +563,12 @@ public class CppPrinter extends Visitor
 					print(")");
 					if(isMethodChaining)
 					{
-						print("})");
+						if(n.get(0)!=null){
+							if((n.getNode(0).getName().equals("CallExpression")))
+							{
+								print(";})");							}
+						}
+						
 					}
 				}
 				

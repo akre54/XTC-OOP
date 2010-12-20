@@ -3,7 +3,7 @@ package xtc.oop;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Does all the smart Translating, visits every node inside a method's block, 
@@ -285,7 +285,7 @@ public class EWalk //extends Visitor
 						String primaryIdentifier="";
 						//this is the start of the print so you need to do a starting point print
 						//get the new method name and the current method return type
-						newMethod="({";
+						//newMethod="({";
 						if(n.getNode(0).getName().equals("PrimaryIdentifier"))
 						{
 							hasReciever=true;
@@ -315,8 +315,8 @@ public class EWalk //extends Visitor
 						CppPrinter arguments = new CppPrinter((GNode)n.getNode(3));
 						if(VERBOSE) System.out.println("|||||||||||||Printing Arguments|||||||||||"+n.getNode(3).getName());
 						newMethod+=arguments.getString();
-						newMethod+=")";
-						newMethod+=";\n";
+						//newMethod+=")";
+						//newMethod+=";\n";
 						   chainCounter++;
 						if(VERBOSE)System.out.println("--------------END BOTTOM METHOD CHAINING---------------");
 
@@ -337,7 +337,8 @@ public class EWalk //extends Visitor
 							
 						}
 						   
-
+						newMethod+=")";
+						newMethod+=";\n";
 						   /*create a string array to store the return type and newMethod name of the 
 							return method get the String array from the setMethodInfo method*/
 						   String[] methodArray=setMethodInfo(n);
@@ -393,6 +394,8 @@ public class EWalk //extends Visitor
 					   //new method name to override in the tree
 					   String rightMethod= methodArray[1];
 					   savedReturnType = methodArray[0];
+					//newMethod+=")";
+					newMethod+=";\n";
 						String character = ""+(char)(chainCounter+(97-1));
 					   newMethod= newMethod+" "+character;
 					   //if the first child is a PrimaryExpression append primaryIdentifier
@@ -402,8 +405,15 @@ public class EWalk //extends Visitor
 						   newMethod= newMethod+primaryIdentifier;
 					   }
 					   // else {
-					newMethod=newMethod+rightMethod; /*+"})";*/
-					if(VERBOSE)System.out.println("--------------END TRIGGER--------------");
+					
+					//string tokenize rightmethod to getride of the current object and replace it with character
+					StringTokenizer st = new StringTokenizer(rightMethod, "(");
+					
+					String newRightMethod = st.nextToken();
+										
+					
+					newMethod=newMethod+newRightMethod+"("+character; /*+"})";*/
+					if(VERBOSE)System.out.println("--------------END TRIGGER--------------" +newRightMethod);
 					if(VERBOSE)System.out.println(n.toString());
 					/*PAT
 					 //put in code here to change 
