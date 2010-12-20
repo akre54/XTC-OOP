@@ -31,7 +31,11 @@ beta b=new __beta();
 b->init(b);
 String a=({beta a=b->__vptr->m1(b);
  a->__vptr->m2(a);});
+<<<<<<< HEAD
+std::cout<<std::endl;
+=======
 std::cout<<a<<std::endl;
+>>>>>>> 64bb5e00adab45a1a45c75ccbe7bffa86accc09d
 
 	}
 
