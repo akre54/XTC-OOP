@@ -487,6 +487,7 @@ public class EWalk //extends Visitor
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				methodArray = getMethodInfo(n,primaryIdentifier,fcNameList, methodName,argumentTypes);
+				System.out.println("++++++++++++++++"+methodArray[1]);
 				return methodArray;
 			}
 			/**Helper method returns the types ofarguments in an array list
