@@ -754,16 +754,16 @@ public class InheritanceTree{
 	 */
 	private String make_name(String instance,boolean on_instance,Declaration d){
 		String result= d.name;
-		if(d.overloadNum==0)return result;
+		if(d.overloadNum==0);
 		else result+= "_"+d.overloadNum;
 		
-		if ((on_instance) && (d.isVirtual))
+		if (d.isVirtual)
                     result= "->__vptr->"+result+"("+instance;
 		else if ((on_instance) && (!d.isVirtual))
                     result="."+result+"(";
 		else if((!on_instance) && (!d.isVirtual))
                     result+= "(";
-		else;
+		else System.out.println("method didnt meet make_name requirements");
 		return result;
 	}
 	/** will return packageName in cpp syntax "::"

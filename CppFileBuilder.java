@@ -493,7 +493,7 @@ public class CppFileBuilder{
 		for(String p: fileinfo.getPackageToNamespace()){
 			cpp.write("}\n");
 		}
-		cpp.write("//end "+t.getCppPkg()+t.className);
+		cpp.write("//end "+t.getCppPkg()+t.className+"\n");
 		//open up java::lang to write template for Array<__className>
 		cpp.write("namespace java {\nnamespace lang {");
 		//writes the template<> ... __Array<classname>::__class() method
