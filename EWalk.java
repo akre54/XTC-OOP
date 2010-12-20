@@ -12,7 +12,7 @@ import java.util.*;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true; //debugging boolean
+	boolean VERBOSE = false; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -66,7 +66,7 @@ public class EWalk //extends Visitor
 					System.out.println(n.getNode(0).getName());
 					
 					/*CHECK THIS CODE
-					*/if(n.get(0)!=null){//THROWING NOT A CLASS EXCEPTION
+					z*/if(n.get(0)!=null){//THROWING NOT A CLASS EXCEPTION
 						if(n.getNode(0).get(0) instanceof Node)///
 						{
 							String instanceName = n.getNode(0).getNode(0).getString(0);//gets the primary ID
@@ -206,6 +206,7 @@ public class EWalk //extends Visitor
 			 *  should have a check for superExpression*/
 			public void visitCallExpression (GNode n) {
 				String newMethod="";
+				boolean hasReciever= false;
 				/*
 				 Global Variables
 				 isMethodChaining (intialize to false)
@@ -258,6 +259,31 @@ public class EWalk //extends Visitor
 						if (n.getNode(0).getName().equals("CallExpression")) {
 							if(VERBOSE)System.out.println("--------------TRIGGER METHOD CHAINING---------------");
 							isMethodChaining=true;
+							/*create a string array to store the return type and newMethod name of the 
+							 return method get the String array from the setMethodInfo method*/
+							String[] methodArray=setMethodInfo(n);
+							//new method name to override in the tree
+							String rightMethod= methodArray[1];
+							savedReturnType = methodArray[0];
+							//newMethod+=")";
+							newMethod+=";\n";
+							String character = ""+(char)(chainCounter+(97-1));
+							newMethod= newMethod+" "+character;
+							//if the first child is a PrimaryExpression append primaryIdentifier
+							
+							//if(hasReciever)
+							//{
+						//		newMethod= newMethod+primaryIdentifier;
+						//	}
+							// else {
+							
+							//string tokenize rightmethod to getride of the current object and replace it with character
+							StringTokenizer st = new StringTokenizer(rightMethod, "(");
+							
+							String newRightMethod = st.nextToken();
+							
+							
+							newMethod=newMethod+newRightMethod+"("+character; /*+"})";*/
 						dispatch(n.getNode(0));//visit down the call Expression tree until you get to the beginning
 						isEnd=true;//set the isEnd Flag in our current Call Expression
 					
@@ -290,7 +316,7 @@ public class EWalk //extends Visitor
 					if(!n.getNode(0).getName().equals("CallExpression"))
 					{
 						if(VERBOSE)System.out.println("--------------Bottom Method Chaining---------------");
-						boolean hasReciever= false;
+						hasReciever= false;
 						String primaryIdentifier="";
 						//this is the start of the print so you need to do a starting point print
 						//get the new method name and the current method return type
@@ -313,7 +339,7 @@ public class EWalk //extends Visitor
 						newMethod= newMethod+ savedReturnType+" " +character+ "=";
 						   //if the first child is a PrimaryExpression append primaryIdentifier
 
-						   if(hasReciever)
+						// if(hasReciever)
 						   {
 							   newMethod= newMethod+primaryIdentifier;//+rightMethod
 						   }
@@ -334,7 +360,7 @@ public class EWalk //extends Visitor
 					}
 					else {//this is an inner so you need to do an inner print
 						if(VERBOSE)System.out.println("--------------INNER METHOD CHAINING---------------");
-						boolean hasReciever= false;
+						hasReciever= false;
 						String primaryIdentifier="";
 						//this is the start of the print so you need to do a starting point print
 						//get the new method name and the current method return type
@@ -345,6 +371,8 @@ public class EWalk //extends Visitor
 							primaryIdentifier=n.getNode(0).getString(0);
 							
 						}
+						chainCounter++;
+						System.out.println(chainCounter+"--------INNTER----" +savedReturnType);
 						   
 						newMethod+=")";
 						newMethod+=";\n";
@@ -354,6 +382,7 @@ public class EWalk //extends Visitor
 						   //new method name to override in the tree
 						   String rightMethod= methodArray[1];
 						   savedReturnType = methodArray[0];
+						
 						   //String character = ""+((char)chainCounter+(97-1));
 						   String character = ""+(char)(chainCounter+(97-1));
 						   newMethod= newMethod+ savedReturnType+" "+ character +"=";
@@ -379,13 +408,14 @@ public class EWalk //extends Visitor
 						//// append returnType(m2) +char(counter+97) +"="+ char(counter+97)-1 + rightMethodName + "char(counter+97-1)+ ARGUMENTS
 						//get the current return type, create a new variable from the counter
 						//counter ++
-						   chainCounter++;
+						  // chainCounter++;
 					}
 
 				}
 				if(isMethodChaining && isEnd)
 				{
-					boolean hasReciever= false;
+					
+					hasReciever= false;
 					String primaryIdentifier="";
 					//this is the start of the print so you need to do a starting point print
 					//get the new method name and the current method return type
@@ -397,33 +427,9 @@ public class EWalk //extends Visitor
 						primaryIdentifier=n.getNode(0).getString(0);
 						
 					}
-					   /*create a string array to store the return type and newMethod name of the 
-						return method get the String array from the setMethodInfo method*/
-					   String[] methodArray=setMethodInfo(n);
-					   //new method name to override in the tree
-					   String rightMethod= methodArray[1];
-					   savedReturnType = methodArray[0];
-					//newMethod+=")";
-					newMethod+=";\n";
-						String character = ""+(char)(chainCounter+(97-1));
-					   newMethod= newMethod+" "+character;
-					   //if the first child is a PrimaryExpression append primaryIdentifier
-					   
-					   if(hasReciever)
-					   {
-						   newMethod= newMethod+primaryIdentifier;
-					   }
-					   // else {
-					
-					//string tokenize rightmethod to getride of the current object and replace it with character
-					StringTokenizer st = new StringTokenizer(rightMethod, "(");
-					
-					String newRightMethod = st.nextToken();
-										
-					
-					newMethod=newMethod+newRightMethod+"("+character; /*+"})";*/
-					if(VERBOSE)System.out.println("--------------END TRIGGER--------------" +newRightMethod);
-					if(VERBOSE)System.out.println(n.toString());
+					 
+					//if(VERBOSE)System.out.println("--------------END TRIGGER--------------" +newRightMethod);
+					//if(VERBOSE)System.out.println(n.toString());
 					/*PAT
 					 //put in code here to change 
 					 n.getname to MethodChaining
