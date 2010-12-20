@@ -212,15 +212,49 @@ public class EWalk //extends Visitor
 					
 					//check to see if the first child is a CallExpression (then set MethodChaining flags)
 					//if this is true then you are in the farthest right method chain (b.m1().m2(); (inside m2)
-					if (n.getNode(0).getName().equals("CallExpression")) {
-						if(VERBOSE)System.out.println("--------------TRIGGER METHOD CHAINING---------------");
-						isMethodChaining=true;
+					if(n.get(0)!=null){
+						if (n.getNode(0).getName().equals("CallExpression")) {
+							if(VERBOSE)System.out.println("--------------TRIGGER METHOD CHAINING---------------");
+							isMethodChaining=true;
 						dispatch(n.getNode(0));//visit down the call Expression tree until you get to the beginning
 						isEnd=true;//set the isEnd Flag in our current Call Expression
+					
+						}
+						else{
+							if(VERBOSE)System.out.println("!!!!!!!!!!!!!REGULAR METHOD CALL!!!!!!");
+							//Do Regular Code Here, this is just a regular CallExpression
+							inCall = true; //start looking for fully qualified name
+							//Get the First child and check to see if its null
+							// if it isn't null run a check for SuperExpression and Primary Identifier
+							// Set the respective flags to be used later*/
+							Object first = n.get(0);
+							if(first!=null) {
+								Node firstc= (Node) first;
+								if(firstc.getName().equals("SuperExpression")) {
+									isSuper=true;
+								}
+								if (firstc.getName().equals("PrimaryIdentifier")) {
+									isInstance=true;
+								}
+								dispatch(firstc); //dispatch on the node
+							}
+							
+							/*create a string array to store the return type and newMethod name of the 
+							 return method*/
+							String[] methodArray=setMethodInfo(n);
+							
+							//new method name to override in the tree
+							newMethod= methodArray[1];
+							savedReturnType = methodArray[0];
+							if(VERBOSE)System.out.println("THE RETURN TYPE" +savedReturnType );
+							if(VERBOSE)System.out.println("NewMEthod" +newMethod );
+							isInstance=false;
+						}
 					}
+					
 					else
 					{
-						if(VERBOSE)System.out.println("REGULAR METHOD CALL");
+						if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
 						//Do Regular Code Here, this is just a regular CallExpression
 						inCall = true; //start looking for fully qualified name
 						//Get the First child and check to see if its null
@@ -246,6 +280,8 @@ public class EWalk //extends Visitor
 						newMethod= methodArray[1];
 						savedReturnType = methodArray[0];
 						if(VERBOSE)System.out.println("THE RETURN TYPE" +savedReturnType );
+						if(VERBOSE)System.out.println("NewMEthod" +newMethod );
+
 						
 						isInstance=false;
 					}
@@ -379,8 +415,25 @@ public class EWalk //extends Visitor
 					   newMethod=newMethod+rightMethod +"})";
 					if(VERBOSE)System.out.println("--------------END TRIGGER--------------");
 					if(VERBOSE)System.out.println(n.toString());
-
-
+					/*PAT
+					 //put in code here to change 
+					 n.getname to MethodChaining
+					 then in CppPrinter we need to add special handling to the MethodChaining
+					 Please Code and Test this.
+					 Node noder;
+					 noder = GNode.create("AdditiveExpression");
+					 
+					 
+					 
+					 */
+					/*System.out.println("BEFORE" +n);
+					Node methodChain = GNode.create("MethodChaining");
+					for(int i=0; i<n.size(); i++)
+					{
+						methodChain.add(n.get(i));
+					}
+					n=(GNode)methodChain;*/
+					System.out.println("AFTER"+n);
 					//append ending c++ code
 					//get method info with return type, get the rightMethod Name
 					//-->End of the Line -> no returnType just char(counter+97)-1 + rightMethodName + "char(counter + 97-1)+ ARGUMENTSNODE +})
