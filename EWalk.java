@@ -12,7 +12,7 @@ import java.util.*;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = false; //debugging boolean
+	boolean VERBOSE = true; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -62,12 +62,21 @@ public class EWalk //extends Visitor
 			public String visitExpression(GNode n) {
 				if(VERBOSE)System.out.println(n.getName());
 				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
-					String instanceName = n.getNode(0).getString(0);//gets the primary ID
-						Node castex = n.getNode(2);//get the third node
-						if(castex.getName().equals("CastExpression")) {//see if its a castexpression
+					System.out.println(n.toString());
+					System.out.println(n.getNode(0).getName());
+					
+					/*CHECK THIS CODE
+					*/if(n.get(0)!=null){//THROWING NOT A CLASS EXCEPTION
+						if(n.getNode(0).get(0) instanceof Node)///
+						{
+							String instanceName = n.getNode(0).getNode(0).getString(0);//gets the primary ID
+							Node castex = n.getNode(2);//get the third node
+							if(castex.getName().equals("CastExpression")) {//see if its a castexpression
 							n.set(2,visitCastExpression(castex,instanceName));
 						}
-				} else {
+					}
+				} 
+				}else {
 				}
 				visit(n);				
 				return null;
