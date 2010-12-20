@@ -60,10 +60,10 @@ public class EWalk //extends Visitor
 			public String visitExpression(GNode n) {
 				if(VERBOSE)System.out.println(n.getName());
 				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
-					String instanceName = n.getNode(0).getString(0);
+					String instanceName = n.getNode(0).getString(0);//gets the primary ID
 						Node castex = n.getNode(2);//get the third node
 						if(castex.getName().equals("CastExpression")) {//see if its a castexpression
-							visitCastExpression(castex,instanceName);
+							n.set(2,visitCastExpression(castex,instanceName));
 						}
 				} else {
 				}
@@ -110,16 +110,40 @@ public class EWalk //extends Visitor
 			/**visit the declarator and update the type */
 			public void visitDeclarator(GNode n)
 			{
+				String instanceName = n.getString(0);//gets the primary ID
+				Node castex = n.getNode(2);//get the third node
+				if(castex.getName().equals("CastExpression")) {//see if its a castexpression ?seems like cast expresions could appear in more places than this
+					n.set(2,visitCastExpression(castex,instanceName));
+				}
 				visit(n);
 			}
 			/**NOTE: This is not a VISIT method but my own created method*/
-			public void visitCastExpression(Node n, String name) {
-				//get and variable and the new types
-				Node qual = n.getNode(0);
-				String type =qual.getString(0);
-				//fcNameList is a global ArrayList<String>
-				method.update_type(name,fcName.toString(),type);
+			public Node visitCastExpression(Node n, String targetVariableName) {
+				String targetType = n.getNode(0).getNode(0).getString(0); //target type
+				String sourceVariable = n.getNode(1).getString(0);
+				Node targetTypeNode;
+				targetTypeNode = GNode.create("PrimaryIdentifier",sourceVariable); //node to send to send to getType();
+				String type = getType(targetTypeNode); //source type
+				if(VERBOSE)System.out.printypetln("Casting variable "+sourceVariable+" to type "+type+" and assigning to variable "+targetVariableName+" of type "+type);
+				if(!type.equals("int")&&
+				   !type.equals("double")&&
+				   !type.equals("long")&&
+				   !type.equals("char")&&
+				   !type.equals("bool")&&
+				   !type.equals("float")) {
+					//special cast shoudl use java_cast()
+					Node replacement;
+					replacement = GNode.create("java_castExpression","({__rt::java_cast<"+type+","+targetType+">("+sourceVariable+") })");
+					if(VERBOSE)System.out.println("Generated casting expression: "+replacement.getString(0));
+					n=replacement;
+					//fcNameList is a global ArrayList<String>
+				} else { }
+				method.update_type(targetVariableName,fcName.toString(),type);
+				return n;
+				
 			}
+
+
 			/*returns true if a node has the name "CallExpression" */
 			public boolean isCallExpression(Node n)
 			{
