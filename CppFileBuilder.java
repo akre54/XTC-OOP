@@ -16,6 +16,7 @@ public class CppFileBuilder{
 	FileMaker cpp;
 	DependencyFinder fileinfo;
 	ArrayList<ClassStruct> allClasses;
+	public boolean VERBOSE = true;
 	
 	private File jfile;
 
@@ -456,6 +457,10 @@ public class CppFileBuilder{
 		int size = t.local.size();
 		for (int j =1;j<size;j++) {
 			Declaration method= t.local.get(j);
+			if(VERBOSE){System.out.print("translating method "+t.getCppPkg()+t.className+"::"+method.name+"(");
+				for(Fparam p: method.params) System.out.print(p.type+" ");
+				System.out.println(")");
+			}
                     //method syntax
                     cpp.write("\t"+method.returntype+" __"+t.className+
                                                             "::"+method.name);
@@ -488,10 +493,11 @@ public class CppFileBuilder{
 		for(String p: fileinfo.getPackageToNamespace()){
 			cpp.write("}\n");
 		}
+		cpp.write("//end "+t.getCppPkg()+t.className);
 		//open up java::lang to write template for Array<__className>
-		cpp.write("namespace java {\n\tnamespace lang {");
+		cpp.write("namespace java {\nnamespace lang {");
 		//writes the template<> ... __Array<classname>::__class() method
-		cpp.write("\n\ttemplate<>\n"+
+		cpp.write("\n\t\ttemplate<>\n"+
 							"\tClass __Array<"+t.getCppPkg()+t.className+">::__class() {\n"+
 							"\t\tstatic Class k = new __Class(__rt::stringify(\"[L"+fileinfo.getPackageName()+"."+t.className+"\"),\n"+
 							"\t\t\t\t\t\t\t\t__Array<"+t.superclass.getCppPkg()+t.superclass.className+">::__class(),\n"+
@@ -500,7 +506,7 @@ public class CppFileBuilder{
 							"\t}\n\n");
 							
 		//close java::lang
-		cpp.write("\t}\n} // closing java::lang for arrays\n"+
+		cpp.write("\t}\n\t} // closing java::lang for arrays\n"+
 				  "\t//===========================================================================\n\n");
 		
 		//reopen current package

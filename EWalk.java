@@ -491,10 +491,8 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-                                                String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
-						System.out.println(FullName);
+						String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
 						b =tree.root.search(FullName);
-                                                System.out.println(FullName);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 					}
 				else if (isMethodChaining)
@@ -526,7 +524,6 @@ public class EWalk //extends Visitor
 					System.out.println("No info found from search_for_method");
 					System.exit(1);
 				}
-				System.out.println(Identifier+"INSTANCE???");
 				return b.search_for_method(Identifier,isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 

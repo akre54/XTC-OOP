@@ -72,6 +72,7 @@ public class CppPrinter extends Visitor
 	{
 //		setupLog("CppPrinter");
 		DEBUG= debug;
+		DEBUG =false;
 //		logger.fine("Writing to the Log");
 		printer = new StringBuilder(); //intialize Stringbuilder
 		isPrivate =false; //sets false by default since structs are public by default
