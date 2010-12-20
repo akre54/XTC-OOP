@@ -12,7 +12,7 @@ import java.util.*;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = true; //debugging boolean
+	boolean VERBOSE = false; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -788,6 +788,7 @@ public class EWalk //extends Visitor
 					System.out.println("No info found from search_for_method");
 					System.exit(1);
 				}
+				System.out.println("sending: --"+Identifier+" "+isInstance+" "+argumentList+" "+name+" \n\tchain:"+chainCounter);
 				return b.search_for_method(Identifier,isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
