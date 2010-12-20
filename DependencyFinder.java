@@ -361,7 +361,6 @@ public class DependencyFinder {
                 if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // for now, don't import from CURRENTDIRECTORY
                     // only add using if from different namespaces
                     if (!this.currentPackage.equals(getPackageName(allClasses, d.fullPath))) {
-
                         files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
                         files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
                        files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
