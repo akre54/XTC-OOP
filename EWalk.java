@@ -748,7 +748,7 @@ public class EWalk //extends Visitor
 						String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
 						b =tree.root.search(FullName);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
-						isInstance=false;
+						//isInstance=false;
 					}
 				/*else if(isMethodChaining && isInstance)
 				{
