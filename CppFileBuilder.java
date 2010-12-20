@@ -66,7 +66,7 @@ public class CppFileBuilder{
             for(String p : fileinfo.getPackageToNamespace()){
                     h.write("namespace "+p+" {\n");
             }
-			for (ClassStruct c : fileinfo.getFileClasses()) {
+			for (ClassStruct c : fileinfo.getAllClassesInPackage(null,fileinfo.getPackageName())) {
                 h.write("\n\tstruct __" + c.className + "; \n"
                         +/**/ "\tstruct __" + c.className + "_VT;\n"
                         +/**/ "\ttypedef __rt::Ptr<__" + c.className + "> " + c.className + ";\n"
@@ -169,8 +169,9 @@ public class CppFileBuilder{
 				h.write("\t\t");
                 for(String m : f.modifiers) {
 					//ignore protection bc we assume correct
-					if((!m.equals("public"))&&(!m.equals("private"))&&(!m.equals("protected"))&&(!m.equals("const"))){
-						h.write(m+" ");System.out.println(m+"CONST???");}
+					if((!m.equals("public"))&&(!m.equals("private"))&&(!m.equals("protected"))&&(!m.equals("const"))
+					   &&(!m.equals("static")))//cannot get static initializatin to work yet
+						h.write(m+" ");
                 }
 				h.write(f.type+" "+f.var_name+";\n");//do not assign the value!!!
             }

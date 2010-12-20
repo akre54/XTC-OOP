@@ -35,6 +35,12 @@ using java::lang::ArrayOfClass;
 namespace depend {
 namespace find {
 
+	struct __Foo; 
+	struct __Foo_VT;
+	typedef __rt::Ptr<__Foo> Foo;
+	typedef __rt::Ptr<__Array<Foo> > ArrayOfFoo;
+
+
 	struct __Bar; 
 	struct __Bar_VT;
 	typedef __rt::Ptr<__Bar> Bar;
@@ -44,7 +50,7 @@ namespace find {
 	struct __Bar{ 
 		__Bar_VT* __vptr;
 		String var;
-		static Object R;
+		Object R;
 		Bar __this;
 
 
