@@ -758,9 +758,9 @@ public class InheritanceTree{
 		else result+= "_"+d.overloadNum;
 		
 		if (d.isVirtual)
-                    result= "->__vptr->"+result+"("+instance;
+                    result= instance+"->__vptr->"+result+"("+instance;
 		else if ((on_instance) && (!d.isVirtual))
-                    result="."+result+"(";
+                    result=instance+"."+result+"(";
 		else if((!on_instance) && (!d.isVirtual))
                     result+= "(";
 		else System.out.println("method didnt meet make_name requirements");
