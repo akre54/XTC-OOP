@@ -27,15 +27,18 @@
 		return k;
 	}
 	int32_t __demo::main(int32_t argc,char** args){
-beta b=new __beta();
-b->init(b);
-String a=({beta a=b->__vptr->m1(b);
- a->__vptr->m2(a);});
-<<<<<<< HEAD
-std::cout<<std::endl;
-=======
-std::cout<<a<<std::endl;
->>>>>>> 64bb5e00adab45a1a45c75ccbe7bffa86accc09d
+beta lmao=new __beta();
+lmao->init(lmao);
+lmao->__vptr->m3(lmao);
+String r=({beta a=lmao->__vptr->m2(lmao);
+ a->__vptr->m3(a);
+});
+lmao->__vptr->m3(lmao);
+String a=({beta a=lmao->__vptr->m1(lmao);
+beta b=a->__vptr->m2(a);
+ b->__vptr->m3(b);
+});
+std::cout<<r<<std::endl;
 
 	}
 
@@ -67,8 +70,15 @@ return a;
 
 	}
 
-	java::lang::String __beta::m2(beta __this){
-return new __String("ok"); 
+	beta __beta::m2(beta __this){
+beta b=new __beta();
+b->init(b);
+return b; 
+
+	}
+
+	java::lang::String __beta::m3(beta __this){
+return new __String("thisssss"); 
 
 	}
 
