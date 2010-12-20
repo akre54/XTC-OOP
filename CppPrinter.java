@@ -566,8 +566,11 @@ public class CppPrinter extends Visitor
 						if(n.get(0)!=null){
 							if((n.getNode(0).getName().equals("CallExpression")))
 							{
-								print(";})");							}
+								print(";})");
+								isMethodChaining=false;
+							}
 						}
+						
 						
 					}
 				}
