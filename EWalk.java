@@ -159,6 +159,39 @@ public class EWalk //extends Visitor
 					}
 				return false;
 			}
+			public String[] runRegular(Node n){
+				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
+				//Do Regular Code Here, this is just a regular CallExpression
+				inCall = true; //start looking for fully qualified name
+				//Get the First child and check to see if its null
+				// if it isn't null run a check for SuperExpression and Primary Identifier
+				// Set the respective flags to be used later*/
+				Object first = n.get(0);
+				if(first!=null) {
+					Node firstc= (Node) first;
+					if(firstc.getName().equals("SuperExpression")) {
+						isSuper=true;
+					}
+					if (firstc.getName().equals("PrimaryIdentifier")) {
+						isInstance=true;
+					}
+					dispatch(firstc); //dispatch on the node
+				}
+				
+				/*create a string array to store the return type and newMethod name of the 
+				 return method*/
+				//new method name to override in the tree
+				String[] methodArray=setMethodInfo(n);
+				//newMethod= methodArray[1];
+				//savedReturnType = methodArray[0];
+				if(VERBOSE)System.out.println("THE RETURN TYPE3: " +methodArray[0] );
+				if(VERBOSE)System.out.println("NewMEthod3: " +methodArray[1] );
+				
+				
+				
+				return methodArray;
+				
+			}
 			/**Visit a CallExpression (Methods) i.e. m1() and 
 			 *  call the necessary inheritance checks on the InheritanceTree
 			 *  should have a check for superExpression*/
@@ -221,69 +254,26 @@ public class EWalk //extends Visitor
 					
 						}
 						else{
-							if(VERBOSE)System.out.println("!!!!!!!!!!!!!REGULAR METHOD CALL!!!!!!");
-							//Do Regular Code Here, this is just a regular CallExpression
-							inCall = true; //start looking for fully qualified name
-							//Get the First child and check to see if its null
-							// if it isn't null run a check for SuperExpression and Primary Identifier
-							// Set the respective flags to be used later*/
-							Object first = n.get(0);
-							if(first!=null) {
-								Node firstc= (Node) first;
-								if(firstc.getName().equals("SuperExpression")) {
-									isSuper=true;
-								}
-								if (firstc.getName().equals("PrimaryIdentifier")) {
-									isInstance=true;
-								}
-								dispatch(firstc); //dispatch on the node
-							}
-							
-							/*create a string array to store the return type and newMethod name of the 
-							 return method*/
-							String[] methodArray=setMethodInfo(n);
+							//run regular node
+							String[] methodArray=runRegular(n);
 							
 							//new method name to override in the tree
 							newMethod= methodArray[1];
 							savedReturnType = methodArray[0];
-							if(VERBOSE)System.out.println("THE RETURN TYPE" +savedReturnType );
-							if(VERBOSE)System.out.println("NewMEthod" +newMethod );
 							isInstance=false;
+						
 						}
 					}
 					
 					else
 					{
-						if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
-						//Do Regular Code Here, this is just a regular CallExpression
-						inCall = true; //start looking for fully qualified name
-						//Get the First child and check to see if its null
-						// if it isn't null run a check for SuperExpression and Primary Identifier
-						// Set the respective flags to be used later*/
-						Object first = n.get(0);
-						if(first!=null) {
-							Node firstc= (Node) first;
-							if(firstc.getName().equals("SuperExpression")) {
-								isSuper=true;
-							}
-							if (firstc.getName().equals("PrimaryIdentifier")) {
-								isInstance=true;
-							}
-							dispatch(firstc); //dispatch on the node
-						}
 						
-						/*create a string array to store the return type and newMethod name of the 
-						 return method*/
-						String[] methodArray=setMethodInfo(n);
+						String[] methodArray=runRegular(n);
 						
 						//new method name to override in the tree
 						newMethod= methodArray[1];
 						savedReturnType = methodArray[0];
-						if(VERBOSE)System.out.println("THE RETURN TYPE" +savedReturnType );
-						if(VERBOSE)System.out.println("NewMEthod" +newMethod );
-
-						
-						isInstance=false;
+							isInstance=false;
 					}
 					}
 				else { //Method Chaining is already true
@@ -433,7 +423,7 @@ public class EWalk //extends Visitor
 						methodChain.add(n.get(i));
 					}
 					n=(GNode)methodChain;*/
-					System.out.println("AFTER"+n);
+					//System.out.println("AFTER"+n);
 					//append ending c++ code
 					//get method info with return type, get the rightMethod Name
 					//-->End of the Line -> no returnType just char(counter+97)-1 + rightMethodName + "char(counter + 97-1)+ ARGUMENTSNODE +})
@@ -456,7 +446,8 @@ public class EWalk //extends Visitor
 					if(VERBOSE)System.out.println("<<<<<<<< newMethod is NULL >>>>>>>>>>>>>");
 
 				}
-
+			//	isPrint=false;
+			//	isPrintln=false;
 				//isMethodChaining=false;
 			}
 			/**Returns Tree if a Node has the Name "PrimaryIdentifier"*/
@@ -791,7 +782,9 @@ public class EWalk //extends Visitor
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
 			   is currently used when get the types for values in an argument
-			 Works for Expressions (Highest Value(String Precedent)), Primitive Types, 
+			 W
+			 
+			 orks for Expressions (Highest Value(String Precedent)), Primitive Types, 
 			 Call Expressions (Return Type) and Primary Identifiers(Class Name)*/
 			public String getType(Node n)
 			{
