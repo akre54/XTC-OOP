@@ -16,6 +16,10 @@ public class demo
 
 	public static void main(String[] args) {
 		demo d= new demo();
+		TestA a = new TestA();
+		System.out.println(a.i);
+		a.i = 12;
+		System.out.println(a.i);
 	}
 
 }

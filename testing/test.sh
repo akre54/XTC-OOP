@@ -52,13 +52,13 @@ if [ $D ]; then
 	done
 	#echo $P.java:
 	#cat $P.java | nl
-	#PACKAGE=`file "$arg" | grep -e ^package`
 	PACKAGE=$(egrep ^package $P.java | cut -d ' ' -f2 | cut -d ';' -f1) # get root file's package, used for classpaths
-	echo pkg name: $PACKAGE
 	if [ "$?" -eq "0" ]
 		then
+		echo pkg name: $PACKAGE
 		make -f ../Makefile PRE=$P TFLAGS='-verbose' PACKAGE=$PACKAGE
 	else
+		echo no package
 		make -f ../Makefile PRE=$P TFLAGS='-verbose'
 	fi
 	if [ $? -eq '0' ] # made successfully!
