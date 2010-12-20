@@ -249,7 +249,7 @@ public class EWalk //extends Visitor
 						
 						isInstance=false;
 					}
-				}
+					}
 				else { //Method Chaining is already true
 					//run test case to find the begining of method chaining b.m1().....
 					if(!n.getNode(0).getName().equals("CallExpression"))
