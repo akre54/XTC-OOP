@@ -455,10 +455,10 @@ public class CppPrinter extends Visitor
 				print(" __"+classType);
 			}
 			else if(isNode(o))
-			{
+			{			
 				dispatch((Node) o);
+
 			}
-			
 			if (i==3) {
 				print(")");
 			}	
