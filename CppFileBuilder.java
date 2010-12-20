@@ -16,6 +16,7 @@ public class CppFileBuilder{
 	FileMaker cpp;
 	DependencyFinder fileinfo;
 	ArrayList<ClassStruct> allClasses;
+	public boolean VERBOSE = true;
 	
 	private File jfile;
 
@@ -231,38 +232,10 @@ public class CppFileBuilder{
 					else h.write(","+f.var_name+"("+f.value+")");
                 }
                 h.write("{");//3 tabs for Ewalk
-                h.write("//empty constructor. All work done in init");
+                h.write("\n\t\t//empty constructor. All work done in init");
                 h.write("\n\t   }\n\n");
 
-                // create init() method
-                h.write("\t\tvoid init");
-                if(constr.overloadNum!=0)
-                    h.write("_"+constr.overloadNum);
-                h.write("("+t.className+" __passedthis");
-
-                // create init's formal parameters
-                for (int i=0;i<constr.params.size();i++) {
-                    h.write(","); //comma
-                    Fparam fp = constr.params.get(i);
-
-                    //loop through formal parameter's modifiers
-                    for (String modifier : fp.modifiers) {
-                        h.write(modifier+" ");
-                    }
-                    //writes formal parameter's type and name
-                    h.write(fp.type+" "+fp.var_name);
-                }
-
-                h.write(") {\n"+
-                    "\t\t\t__this = __passedthis;\n");
-
-                //**  EWalk is called on constructor's block node  **//
-                EWalk changes = new EWalk(t,constr,constr.bnode);
-				//System.out.println("BEFORE PRINTER IS CALLED: " + constr.bnode);
-                CppPrinter print = new CppPrinter(constr.bnode);
-                h.write(print.getString().toString());//write body of the constructor in itit() method
-                h.write("\t\t}\n\n");
-            }
+			}
 		}
 	}
 	
@@ -272,9 +245,14 @@ public class CppFileBuilder{
 	 *
 	 */		
 	private void write_all_methods(InheritanceTree t){
-		String FQclassName = t.className;//to change from classname to fully qualified easier
 
-		
+		for(Declaration c: t.constructors){
+			h.write("\t\tvoid init("+t.className);
+			for(Fparam cp: c.params){
+				h.write(","+cp.type);
+			}
+			h.write(");\n");
+		}
             //loops through local methods and prints out in proper syantax
             for (Declaration method : t.local) {
                 if (method.name.equals("main")) {
@@ -358,6 +336,7 @@ public class CppFileBuilder{
 					
 		//ptr for __delete()
 		h.write("\t\tvoid (*__delete)(__"+t.className+"*);\n");
+		
 					
 		//loops through vtable and prints out in proper syntax
 		int size = t.Vt_ptrs.size();
@@ -450,12 +429,44 @@ public class CppFileBuilder{
 							"\n\t\tstatic Class k = new __Class(__rt::stringify(\""+fileinfo.getPackageName()+t.className+"\"),__rt::null());"+
 							"\n\t\treturn k;\n\t"+
 							"}\n");
-	
+		for(Declaration constr: t.constructors){
+			// create init() method
+			cpp.write("\t\tvoid __"+t.className+"::init");
+			if(constr.overloadNum!=0)
+				cpp.write("_"+constr.overloadNum);
+			cpp.write("("+t.className+" __passedthis");
 		
+			// create init's formal parameters
+			for (int i=0;i<constr.params.size();i++) {
+				cpp.write(","); //comma
+				Fparam fp = constr.params.get(i);
+			
+				//loop through formal parameter's modifiers
+				for (String modifier : fp.modifiers) {
+					cpp.write(modifier+" ");
+				}
+				//writes formal parameter's type and name
+				cpp.write(fp.type+" "+fp.var_name);
+			}
+			
+			cpp.write(") {\n"+
+					  "\t\t\t__passedthis->__this = __passedthis;\n");
+		
+			//**  EWalk is called on constructor's block node  **//
+			EWalk change = new EWalk(t,constr,constr.bnode);
+			//System.out.println("BEFORE PRINTER IS CALLED: " + constr.bnode);
+			CppPrinter printinit = new CppPrinter(constr.bnode);
+			cpp.write(printinit.getString().toString().replaceAll("\n","\n\t\t"));//write body of the constructor in init() method
+			cpp.write("\t\t}\n\n");
+		}
 	//--- adds all methods to METHODDEF	
 		int size = t.local.size();
 		for (int j =1;j<size;j++) {
 			Declaration method= t.local.get(j);
+			if(VERBOSE){System.out.print("translating method "+t.getCppPkg()+t.className+"::"+method.name+"(");
+				for(Fparam p: method.params) System.out.print(p.type+" ");
+				System.out.println(")");
+			}
                     //method syntax
                     cpp.write("\t"+method.returntype+" __"+t.className+
                                                             "::"+method.name);
@@ -486,21 +497,22 @@ public class CppFileBuilder{
 		
 		//close current package
 		for(String p: fileinfo.getPackageToNamespace()){
-			cpp.write("}\n");
+			cpp.write("}");
 		}
+		cpp.write("//close "+t.getCppPkg()+t.className+"\n");
 		//open up java::lang to write template for Array<__className>
-		cpp.write("namespace java {\n\tnamespace lang {");
+		cpp.write("\tnamespace java {\n\tnamespace lang {");
 		//writes the template<> ... __Array<classname>::__class() method
-		cpp.write("\n\ttemplate<>\n"+
-							"\tClass __Array<"+t.getCppPkg()+t.className+">::__class() {\n"+
-							"\t\tstatic Class k = new __Class(__rt::stringify(\"[L"+fileinfo.getPackageName()+"."+t.className+"\"),\n"+
-							"\t\t\t\t\t\t\t\t__Array<"+t.superclass.getCppPkg()+t.superclass.className+">::__class(),\n"+
-							"\t\t\t\t\t\t\t\t"+t.getCppPkg()+"__"+t.className+"::__class());\n"+
-							"\t\treturn k;\n"+
-							"\t}\n\n");
+		cpp.write("\n\t\ttemplate<>\n"+
+							"\t\tClass __Array<"+t.getCppPkg()+t.className+">::__class() {\n"+
+							"\t\t\tstatic Class k = new __Class(__rt::stringify(\"[L"+fileinfo.getPackageName()+"."+t.className+"\"),\n"+
+							"\t\t\t\t\t\t\t\t\t__Array<"+t.superclass.getCppPkg()+t.superclass.className+">::__class(),\n"+
+							"\t\t\t\t\t\t\t\t\t"+t.getCppPkg()+"__"+t.className+"::__class());\n"+
+							"\t\t\treturn k;\n"+
+							"\t\t}\n\n");
 							
 		//close java::lang
-		cpp.write("\t}\n} // closing java::lang for arrays\n"+
+		cpp.write("\t}\n\t} // closing java::lang for arrays\n"+
 				  "\t//===========================================================================\n\n");
 		
 		//reopen current package

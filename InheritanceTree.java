@@ -24,7 +24,7 @@ public class InheritanceTree{
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
 	
-	boolean VERBOSE = false;
+	boolean VERBOSE = true;
 	
 
 	/**
@@ -36,8 +36,12 @@ public class InheritanceTree{
 		this.packageName = "java.lang";
 		this.root = this;
 		
-		className = "Object";
-		superclass = null; //no superclass for Object
+		this.className = "Object";
+		this.superclass = null; //no superclass for Object
+		
+		//methods can call methods Staticly on this class
+		Declaration.StaticClassTypes = new ArrayList<String>(0);
+		Declaration.StaticVariable(this.className);
 
 		fields = new ArrayList<InstanceField>(); //no instancefields in Object
 		Vt_ptrs = new ArrayList<Declaration>(); // for Vtable
@@ -74,6 +78,9 @@ public class InheritanceTree{
 		Vt_ptrs.add(new Declaration("String","toString",
                                     "Object",p));
 
+		//local same as Vtable
+		this.local = new ArrayList<Declaration>(Vt_ptrs);
+		
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
 
@@ -93,7 +100,10 @@ public class InheritanceTree{
 		
 		//copies the superclass's Vtable into virtual Vtable
 		this.Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
-		
+
+		//methods can call methods Staticly on this class
+		Declaration.StaticVariable(this.className);
+
 		
 		//change __isa field to point to this className's feild
 		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
@@ -173,6 +183,8 @@ public class InheritanceTree{
 										"String",p));
 		
 		}
+		//local same as Vtable
+		this.local = new ArrayList<Declaration>(Vt_ptrs);
 		
 		//subclass are initalized to a 0 element arraylist
 		subclasses = new ArrayList<InheritanceTree>(0);
@@ -198,6 +210,9 @@ public class InheritanceTree{
 		//copies the superclass's Vtable into virtual arraylist
 		this.Vt_ptrs = new ArrayList<Declaration>(supr.Vt_ptrs);
 
+		//methods can call methods Staticly on this class
+		Declaration.StaticVariable(this.className);
+		
 		//change __isa field to point to this className's feild
 		ArrayList<Fparam> p = new ArrayList<Fparam>(0);
 		Vt_ptrs.set(0,new Declaration("Class", "__isa",
@@ -520,7 +535,7 @@ public class InheritanceTree{
 			 */
 			public void visitFieldDeclaration(GNode n){
 				EWalk e =new EWalk(myclass,new Declaration(classname,f),n);
-				System.out.println("BEFORE PRINTER2:" +n);
+				if(VERBOSE)System.out.println("BEFORE PRINTER2:" +n+"\n");
 				CppPrinter field =new CppPrinter(n);
 				
 				String s =field.getString().toString();
@@ -623,30 +638,39 @@ public class InheritanceTree{
 	/**
 	 * method used to retrieve the corret overloaded method and append its overloaded number
 	 */
-	public String[] search_for_method(boolean on_instance,ArrayList<String> paramtyps, 
+	public String[] search_for_method(String instance ,boolean on_instance,ArrayList<String> paramtyps, 
 																String method_name){
 		if(method_name.equals("super")){System.out.println("searching for super method WRONG");}
 		if(method_name.equals("this")){System.out.println("searching for this method WRONG");}
-
-		LinkedList<Declaration> possible= new LinkedList<Declaration>();
 		
-		//-----ACCESSABLE/SAME NAME/SAME #PARAMS CHECK
-		//looks in local(non virtual, non-private[if on_instance])and VT_ptrs 
-		//for same named methods and same number of parameters
-		for (Declaration j : Vt_ptrs) {
-			if ((j.name.equals(method_name)) && ((j.params.size()-1) == paramtyps.size()))
-				possible.add(j);
+		LinkedList<Declaration> possible= new LinkedList<Declaration>();
+
+		//method is not being classed Staticly so search in Vt_ptrs
+		if(!Declaration.StaticClassTypes.contains(method_name)){
+			System.out.println("checking in VT_ptrs in "+this.className);
+			//-----ACCESSABLE/SAME NAME/SAME #PARAMS CHECK
+			//looks in local(non virtual, non-private[if on_instance])and VT_ptrs 
+			//for same named methods and same number of parameters
+			for (Declaration j : Vt_ptrs) {
+				if(j.name.equals(method_name))System.out.println("params: "+j.params);
+				System.out.println("method?: "+j.name);
+				if ((j.name.equals(method_name)) && ((j.params.size()-1) == paramtyps.size()))
+					possible.add(j);
+			}
 		}
+		//look in local non-virtual cannot be both on-instance and private
+		System.out.println("checking in local "+this.className);
 		for (Declaration l : local ) {
 			if ((l.name.equals(method_name)) && (!l.isVirtual)&&(!((on_instance)&&(l.isprivate())))&&
 				 (l.params.size() == paramtyps.size())) 
 				possible.add(l);
 		}
+		
 		//if only one left 
 		//RETURN [returntype,accessor+NAME+_number]
 		if (possible.size()==1) {
 			Declaration choosen = possible.get(0);
-			return new String[]{choosen.returntype, make_name(on_instance, choosen)};
+			return new String[]{choosen.returntype, make_name(instance,on_instance, choosen)};
 		}
 		//----SPECIFICITY CHECK
 		//need to zero out specificity for next check
@@ -673,7 +697,7 @@ public class InheritanceTree{
                         min=n;
 		}
 		//RETURN [returntype,accessor+NAME+_number]
-		return new String[]{min.returntype, make_name(on_instance,min)};
+		return new String[]{min.returntype, make_name(instance,on_instance,min)};
 	}
 	/**
 	 * helper method finds how specific the casting is 
@@ -731,17 +755,22 @@ public class InheritanceTree{
 	 * helper method for search_for_method returns proper method call
 	 * 
 	 */
-	private String make_name(boolean on_instance,Declaration d){
-		String result="";
-		if ((on_instance) && (d.isVirtual))
-                    result= "->__vptr->";
-		else if ((on_instance) && (!d.isVirtual))
-                    result=".";
-		else
-                    result= "";
-		result+= d.name;
-		if(d.overloadNum==0)return result;
-		else return result+"_"+d.overloadNum;
+	private String make_name(String instance,boolean on_instance,Declaration d){
+		String result= d.name;
+		if(d.overloadNum==0);
+		else result+= "_"+d.overloadNum;
+		if((instance.equals(""))||(instance.equals(" "))) instance ="__this";
+		
+		if		((on_instance)&&(d.isVirtual))//b.m1() *public
+			result="->__vptr->"+result+"("+instance;
+		else if ((on_instance) && (!d.isVirtual))//staticly!!!???
+			result="::"+result+"(";
+		else if ((!on_instance) && (d.isVirtual))// m1() *public
+			result += "("+instance;
+		else if ((!on_instance) && (!d.isVirtual))//m1() *private
+			result+= "(";
+		else System.out.println("method didnt meet make_name requirements");
+		return result;
 	}
 	/** will return packageName in cpp syntax "::"
 	 */

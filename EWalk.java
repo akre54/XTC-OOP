@@ -3,7 +3,7 @@ package xtc.oop;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Does all the smart Translating, visits every node inside a method's block, 
@@ -48,7 +48,9 @@ public class EWalk //extends Visitor
 				isString = false,
 				isInstance=false,
 				isArgument=false,
+				isEnd = false,
 				isSuper;//flag that saves whether super is inside a call expression
+			int chainCounter= 0;
 
 			/**StringBuffer and Arraylist to store the 
 			 *FullQualified Name i.e. java.lang etc */
@@ -60,6 +62,7 @@ public class EWalk //extends Visitor
 			public String visitExpression(GNode n) {
 				if(VERBOSE)System.out.println(n.getName());
 				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
+<<<<<<< HEAD
 					String instanceName = n.getNode(0).getString(0);//gets the primary ID
 						Node castex = n.getNode(2);//get the third node
 						if(castex!=null) {
@@ -67,6 +70,23 @@ public class EWalk //extends Visitor
 								n.set(2,visitCastExpression(castex,instanceName));
 							}
 						}
+=======
+					System.out.println(n.toString());
+					System.out.println(n.getNode(0).getName());
+					
+					/*CHECK THIS CODE
+					z*/if(n.get(0)!=null){//THROWING NOT A CLASS EXCEPTION
+						if(n.getNode(0).get(0) instanceof Node)///
+						{
+							String instanceName = n.getNode(0).getNode(0).getString(0);//gets the primary ID
+							Node castex = n.getNode(2);//get the third node
+							if(castex.getName().equals("CastExpression")) {//see if its a castexpression
+							n.set(2,visitCastExpression(castex,instanceName));
+						}
+					}
+				} 
+				}else {
+>>>>>>> 5275862c1edaa78b49fcd7a1e8f2a53ca8d275b9
 				}
 				visit(n);				
 				return null;
@@ -113,10 +133,16 @@ public class EWalk //extends Visitor
 			{
 				String instanceName = n.getString(0);//gets the primary ID
 				Node castex = n.getNode(2);//get the third node
+<<<<<<< HEAD
 				if (castex!=null) {
 					if(castex.getName().equals("CastExpression")) {//see if its a castexpression ?seems like cast expresions could appear in more places than this
 						n.set(2,visitCastExpression(castex,instanceName));
 					}
+=======
+				
+				if((castex!=null)&&(castex.getName().equals("CastExpression")) ){//see if its a castexpression ?seems like cast expresions could appear in more places than this
+					n.set(2,visitCastExpression(castex,instanceName));
+>>>>>>> 5275862c1edaa78b49fcd7a1e8f2a53ca8d275b9
 				}
 				visit(n);
 			}
@@ -159,16 +185,10 @@ public class EWalk //extends Visitor
 					}
 				return false;
 			}
-			/**Visit a CallExpression (Methods) i.e. m1() and 
-			 *  call the necessary inheritance checks on the InheritanceTree
-			 *  should have a check for superExpression*/
-			public void visitCallExpression (GNode n) {
-				//reset the full qualified name global variables
-				fcName= new StringBuffer();
-				fcNameList=new ArrayList<String>();
-				
+			public String[] runRegular(Node n){
+				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
+				//Do Regular Code Here, this is just a regular CallExpression
 				inCall = true; //start looking for fully qualified name
-				
 				//Get the First child and check to see if its null
 				// if it isn't null run a check for SuperExpression and Primary Identifier
 				// Set the respective flags to be used later*/
@@ -179,37 +199,286 @@ public class EWalk //extends Visitor
 						isSuper=true;
 					}
 					if (firstc.getName().equals("PrimaryIdentifier")) {
-							isInstance=true;
+						isInstance=true;
 					}
 					dispatch(firstc); //dispatch on the node
 				}
 				
 				/*create a string array to store the return type and newMethod name of the 
-				return method*/
-				String[] methodArray=setMethodInfo(n);
-				
+				 return method*/
 				//new method name to override in the tree
-				String newMethod= methodArray[1];
-				savedReturnType = methodArray[0];
-				if(VERBOSE)System.out.println("THE RETURN TYPE" +savedReturnType );
-				//replace the AST methodName with the given name
-				if(newMethod!=null)
-					n.set(2,newMethod);
+				String[] methodArray=setMethodInfo(n);
+				//newMethod= methodArray[1];
+				//savedReturnType = methodArray[0];
+				if(VERBOSE)System.out.println("THE RETURN TYPE3: " +methodArray[0] );
+				if(VERBOSE)System.out.println("NewMEthod3: " +methodArray[1] );
 				
-				//reset flags
-				if(isMethodChaining) {
-					//set args of this call expression to the chainGang
-				//	n.getNode(3).add(0,newMethod);
-                                        System.out.println("fix method chaining");
-					//n.getNode(3).add(0,newMethod);
-					if(VERBOSE)System.out.println("Added "+newMethod+" to arguments");
-				}
-				else
+				
+				
+				return methodArray;
+				
+			}
+			/**Visit a CallExpression (Methods) i.e. m1() and 
+			 *  call the necessary inheritance checks on the InheritanceTree
+			 *  should have a check for superExpression*/
+			public void visitCallExpression (GNode n) {
+				String newMethod="";
+				boolean hasReciever= false;
+				/*
+				 Global Variables
+				 isMethodChaining (intialize to false)
+				 isEnd (intialize to False)
+				 chainCounter //intialize to 0
+				 
+				 Inside Call Expression:
+				 isEnd=false;
+				 if ismethodchaining is false
+				 if the 1st child is a CallExpression
+				 set isMethodChaining to true
+				 dispatch on the first child (CallExpression)
+				 isEnd = true;
+				 
+				 else
+				 //Do Regular Code Here this is just a regular call Expression
+				 else //method chaining is already true
+				 if the 1st child is NOT a callExpression //this is the end of the method chain
+				 //this is the start of the print so you need to do a starting print
+				 ->need to get b.m1()'s return type "({"+returnType(m1) + (char)(counter+97)"=" +primary +(should have ->)rightMethodName+"("+primaryId+(?)","+ ARGUMENTS NODE 
+				 else
+				 // (this is an inner so you need to do an inner print)
+				 // append returnType(m2) +char(counter+97) +"="+ char(counter+97)-1 + rightMethodName + "char(counter+97-1)+ ARGUMENTS
+				 get the current return type, create a new variable from the counter
+				 dispatch on the first child (The CallExpression)
+				 counter++
+				 //later
+				 if(isMethodChaining && isEnd)
+				 {
+				 //append ending c++ code
+				 
+				 //get method info with return type, get the rightMethod Name
+				 -->End of the Line -> no returnType just char(counter+97)-1 + rightMethodName + "char(counter + 97-1)+ ARGUMENTSNODE +})
+				 //reset isend
+				 //reset counter
+				 //reset methodChaining
+                 }
+				
+				 */
+				//reset the full qualified name global variables
+				fcName= new StringBuffer();
+				fcNameList=new ArrayList<String>();				
+				boolean isEnd=false;
+				if(!isMethodChaining)
 				{
-					isInstance=false;
+					
+					//check to see if the first child is a CallExpression (then set MethodChaining flags)
+					//if this is true then you are in the farthest right method chain (b.m1().m2(); (inside m2)
+					if(n.get(0)!=null){
+						if (n.getNode(0).getName().equals("CallExpression")) {
+							if(VERBOSE)System.out.println("--------------TRIGGER METHOD CHAINING---------------");
+							isMethodChaining=true;
+							
+							dispatch(n.getNode(0));//visit down the call Expression tree until you get to the beginning
+						isEnd=true;//set the isEnd Flag in our current Call Expression
+					
+						}
+						else{
+							//run regular node
+							String[] methodArray=runRegular(n);
+							
+							//new method name to override in the tree
+							newMethod= methodArray[1];
+							savedReturnType = methodArray[0];
+							isInstance=false;
+						
+						}
+					}
+					
+					else
+					{
+						
+						String[] methodArray=runRegular(n);
+						
+						//new method name to override in the tree
+						newMethod= methodArray[1];
+						savedReturnType = methodArray[0];
+							isInstance=false;
+					}
+					}
+				else { //Method Chaining is already true
+					//run test case to find the begining of method chaining b.m1().....
+					if(!n.getNode(0).getName().equals("CallExpression"))
+					{
+						
+						if(VERBOSE)System.out.println("--------------Bottom Method Chaining---------------");
+						hasReciever= false;
+						String primaryIdentifier="";
+						//this is the start of the print so you need to do a starting point print
+						//get the new method name and the current method return type
+						//newMethod="({";
+						if(n.getNode(0).getName().equals("PrimaryIdentifier"))
+						{
+							hasReciever=true;
+							primaryIdentifier=n.getNode(0).getString(0);
+							
+						}
+						/*create a string array to store the return type and newMethod name of the 
+						 return method get the String array from the setMethodInfo method*/
+						if(VERBOSE)System.out.println("--------------Call SetInfo---------------");
+						String[] methodArray=setMethodInfo(n);
+						if(VERBOSE)System.out.println("--------------End Call SetInfo---------------");
+						//new method name to override in the tree
+						String rightMethod= methodArray[1];
+						savedReturnType = methodArray[0];
+						 String character = ""+(char)(chainCounter+(97));
+						newMethod= newMethod+ savedReturnType+" " +character+ "=";
+						   //if the first child is a PrimaryExpression append primaryIdentifier
+
+						// if(hasReciever)
+						   {
+							   newMethod= newMethod+primaryIdentifier;//+rightMethod
+						   }
+						newMethod=newMethod+rightMethod;
+						
+						//call CppPriinter on the Arguments Node
+						
+						CppPrinter arguments = new CppPrinter((GNode)n.getNode(3));
+						if(VERBOSE) System.out.println("|||||||||||||Printing Arguments|||||||||||"+n.getNode(3).getName());
+						newMethod+=arguments.getString();
+						//newMethod+=")";
+						//newMethod+=";\n";
+						   chainCounter++;
+						if(VERBOSE)System.out.println("--------------END BOTTOM METHOD CHAINING---------------");
+
+		//"({"+returnType(m1)+(char)(counter+97)"=" +primary+(rightMethodName+"("+primaryId+(?)","+ ARGUMENTS NODE 
+
+					}
+					else {//this is an inner so you need to do an inner print
+						if(VERBOSE)System.out.println("--------------INNER METHOD CHAINING---------------");
+						hasReciever= false;
+						String primaryIdentifier="";
+						//this is the start of the print so you need to do a starting point print
+						//get the new method name and the current method return type
+						//newMethod="({";
+						if(n.getNode(0).getName().equals("PrimaryIdentifier"))
+						   {
+							hasReciever=true;
+							primaryIdentifier=n.getNode(0).getString(0);
+							
+						}
+						else if(n.getNode(0).getName().equals("CallExpression")){
+							dispatch(n.getNode(0));//visit down the call Expression tree until you get to the beginning
+						}
+
+						chainCounter++;
+						System.out.println(chainCounter+"--------INNTER----" +savedReturnType);
+						   
+						//newMethod+=")";
+						//newMethod+=";\n";
+						   /*create a string array to store the return type and newMethod name of the 
+							return method get the String array from the setMethodInfo method*/
+						   String[] methodArray=setMethodInfo(n);
+						   //new method name to override in the tree
+						   String rightMethod= methodArray[1];
+						   savedReturnType = methodArray[0];
+						
+						   //String character = ""+((char)chainCounter+(97-1));
+						   String character = ""+(char)(chainCounter+(97-1));
+						String character2 = ""+(char)(chainCounter+(97-2));
+
+						   newMethod= newMethod+ savedReturnType+" "+ character +"=" +character2;
+						   //if the first child is a PrimaryExpression append primaryIdentifier
+						   
+						   if(hasReciever)
+						   {
+							   newMethod= newMethod+primaryIdentifier;
+						   }
+						  // else {
+						//	   newMethod=newMethod+rightMethod;
+						//newMethod=newMethod+rightMethod;
+						//string tokenize rightmethod to getride of the current object and replace it with character
+						StringTokenizer st = new StringTokenizer(rightMethod, "(");
+						
+						String newRightMethod = st.nextToken();
+						
+						
+						newMethod=newMethod+newRightMethod+"("+character2; /*+"})";*/						//call CppPriinter on the Arguments Node
+						
+						CppPrinter arguments = new CppPrinter((GNode)n.getNode(3));
+						if(VERBOSE) System.out.println("|||||||||||||Printing Arguments|||||||||||"+n.getNode(3).getName());
+						newMethod+=arguments.getString();
+						//newMethod+=")";
+						//newMethod+=";\n";  
+						  // }
+
+						//// append returnType(m2) +char(counter+97) +"="+ char(counter+97)-1 + rightMethodName + "char(counter+97-1)+ ARGUMENTS
+						//get the current return type, create a new variable from the counter
+						//counter ++
+						  // chainCounter++;
+					}
+
+				}
+				if(isMethodChaining && isEnd)
+				{
+					
+					hasReciever= false;
+					String primaryIdentifier="";
+					//this is the start of the print so you need to do a starting point print
+					//get the new method name and the current method return type
+					//newMethod="({";
+					//a->__vptr->m2(a)
+					if(n.getNode(0).getName().equals("PrimaryIdentifier"))
+					   {
+						hasReciever=true;
+						primaryIdentifier=n.getNode(0).getString(0);
+						
+					}
+					/*create a string array to store the return type and newMethod name of the 
+					 return method get the String array from the setMethodInfo method*/
+					String[] methodArray=setMethodInfo(n);
+					//new method name to override in the tree
+					String rightMethod= methodArray[1];
+					savedReturnType = methodArray[0];
+					//newMethod+=")";
+					//newMethod+=";\n";
+					String character = ""+(char)(chainCounter+(97-1));
+					newMethod= newMethod+" "+character;
+					//if the first child is a PrimaryExpression append primaryIdentifier
+					
+					//if(hasReciever)
+					//{
+					//		newMethod= newMethod+primaryIdentifier;
+					//	}
+					// else {
+					
+					//string tokenize rightmethod to getride of the current object and replace it with character
+					StringTokenizer st = new StringTokenizer(rightMethod, "(");
+					
+					String newRightMethod = st.nextToken();
+					
+					
+					newMethod=newMethod+newRightMethod+"("+character; /*+"})";*/					//if(VERBOSE)System.out.println("--------------END TRIGGER--------------" +newRightMethod);
+					if(VERBOSE)System.out.println(n.toString());
+															//reset isend
+					isEnd=false;
+					//reset counter
+					chainCounter=0;
+					//reset methodChaining
+					isMethodChaining=false;
 				}
 				isSuper=false;
-				isMethodChaining=false;
+				//replace the AST methodName with the given name
+				if(newMethod!=null){
+					n.set(2,newMethod);
+					newMethod="";
+
+				}
+				else {
+					if(VERBOSE)System.out.println("<<<<<<<< newMethod is NULL >>>>>>>>>>>>>");
+
+				}
+			//	isPrint=false;
+			//	isPrintln=false;
+				//isMethodChaining=false;
 			}
 			/**Returns Tree if a Node has the Name "PrimaryIdentifier"*/
 			public boolean isPrimaryIdentifier(Node n)
@@ -231,19 +500,20 @@ public class EWalk //extends Visitor
 				 in Search_for_method later on up the tree*/
 				if(isCallExpression(firstChild))
 				{
-					if(VERBOSE)System.out.println("FIRST_CHILD");
+					if(VERBOSE)System.out.println("FIRST_CHILD Is A Call Expresson");
 					isMethodChaining=true;
 					//dispatch(firstChild);
 				}
 				if(isMethodChaining)
 					{
 						//store the method return type for later use
-						if(VERBOSE)System.out.println("METHOD CHAINING");
+						
 						primaryIdentifier=savedReturnType;
+						if(VERBOSE)System.out.println("METHOD CHAINING Primary ID ="+primaryIdentifier);
 						isInstance=true;
 					}
 				
-				else if(firstChild!=null)
+				if(firstChild!=null)
 					{
 						//check to see if its primaryidentifier
 						if((isPrimaryIdentifier(firstChild)))
@@ -253,7 +523,7 @@ public class EWalk //extends Visitor
 						//else dispatch on the firstchild
 						else 
 							{
-								dispatch(firstChild);
+								//dispatch(firstChild);
 							}
 					}
 				//run a check for System.out.print
@@ -291,6 +561,7 @@ public class EWalk //extends Visitor
 				if(VERBOSE){System.out.println("getting Method Info:" +primaryIdentifier+ ", " + methodName);}
 				//get an array of the method arrtibutes in the inheritance tree (return type and new method name)
 				methodArray = getMethodInfo(n,primaryIdentifier,fcNameList, methodName,argumentTypes);
+				System.out.println("++++++++++++++++"+methodArray[1]);
 				return methodArray;
 			}
 			/**Helper method returns the types ofarguments in an array list
@@ -442,7 +713,7 @@ public class EWalk //extends Visitor
 				
 				//update the type of the variable in the Declarator
 				if (VERBOSE) System.out.println("Updating Type Information("+name +"," +newtype+")");
-
+				System.out.println(name+"-> "+newtype);
 				method.update_type(name,currentPackage[0], newtype);
 				if (n.getNode(1).getNode(1) !=null ) {
 				if (n.getNode(1).getNode(1).getName().equals("Dimensions")) {
@@ -480,34 +751,49 @@ public class EWalk //extends Visitor
 			   puts in check for isSuper flag and isInstance Flag*/
 			public String[] getMethodInfo(Node n,String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
 			{
-				if (VERBOSE) System.out.println("\t\t Method Chaining?"+isMethodChaining+"getMethodInfo");
+				if (VERBOSE) System.out.println("\t\t Method Chaining?"+isMethodChaining);
 				//method .search for type with packages if you dont send a package its the package you're in
 				InheritanceTree b; //will be current Class, the superclass or the instance's class
-				if(isInstance && !isMethodChaining)
+				if(isInstance && chainCounter==0)
 					{
-						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
-						if (VERBOSE)System.out.println("Method.Search_for_type:" + Identifier);
+						if(VERBOSE)System.out.println("****************INSTANCE***********");
 						
+						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
+						if (VERBOSE)System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
+<<<<<<< HEAD
+						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
+=======
+						System.out.println("identifier of type= "+qualities[1]);
+>>>>>>> 69f5fcdd091559d5c0153037c179cdc9a5274dd9
 						//remove the last value from the arrayList (thats always the class name
 						String className =(String)qualities[1];
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-                                                String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
-						System.out.println(FullName);
+						String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
+						if(VERBOSE)System.out.println("THIS IS THE FCNAME" + qualities.toString());
 						b =tree.root.search(FullName);
-                                                System.out.println(FullName);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
+						//isInstance=false;
 					}
-				else if (isMethodChaining)
+				/*else if(isMethodChaining && isInstance)
 				{
 					String packages = "";
 					String FullName = "";
 					//currently not supporting classes outside of the current methdo
-					if(VERBOSE)System.out.print("Is MEthod Chaining:" +packages +"," + Identifier);
-					if(!packages.equals(""))FullName = packages+"."+Identifier;
-					else FullName =Identifier;
-                                        
+					if(!packages.equals(""))FullName = packages+"."+name;
+					else FullName =name;
+					if(VERBOSE)System.out.println("Is Method Chaining Bottom: b=tree.root.search("+FullName+")");
+				}*/
+				else if (isMethodChaining)
+				{
+					if(VERBOSE)System.out.println("-------------RUN METHOD CHAINING SEARCH---------");
+					String packages = "";
+					String FullName = "";
+					//currently not supporting classes outside of the current methdo
+					if(!packages.equals(""))FullName = packages+"."+savedReturnType;
+					else FullName =savedReturnType;
+					if(VERBOSE)System.out.println("Is Method Chaining: b=tree.root.search("+FullName+")");
 					b=tree.root.search(FullName);
 					//what do i do to get the full package name?
 				}
@@ -523,16 +809,20 @@ public class EWalk //extends Visitor
 				System.out.println("null------------------------!\n");
 				System.exit(2);
 				}
+				System.out.println("sending: --"+Identifier+" "+isInstance+" "+argumentList+" "+name+" \n\tchain:"+chainCounter);
+
 				//returns an array of string 0= return type and 1=new method string
-				if(b.search_for_method(isInstance,argumentList,name)==null){
+				if(b.search_for_method(Identifier,isInstance,argumentList,name)==null){
 					System.out.println("No info found from search_for_method");
 					System.exit(1);
 				}
-				return b.search_for_method(isInstance,argumentList,name);
+				return b.search_for_method(Identifier,isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
 			   is currently used when get the types for values in an argument
-			 Works for Expressions (Highest Value(String Precedent)), Primitive Types, 
+			 W
+			 
+			 orks for Expressions (Highest Value(String Precedent)), Primitive Types, 
 			 Call Expressions (Return Type) and Primary Identifiers(Class Name)*/
 			public String getType(Node n)
 			{
