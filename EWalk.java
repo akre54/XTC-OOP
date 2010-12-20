@@ -124,7 +124,7 @@ public class EWalk //extends Visitor
 				Node targetTypeNode;
 				targetTypeNode = GNode.create("PrimaryIdentifier",sourceVariable); //node to send to send to getType();
 				String type = getType(targetTypeNode); //source type
-				if(VERBOSE)System.out.printypetln("Casting variable "+sourceVariable+" to type "+type+" and assigning to variable "+targetVariableName+" of type "+type);
+				if(VERBOSE)System.out.println("Casting variable "+sourceVariable+" to type "+type+" and assigning to variable "+targetVariableName+" of type "+type);
 				if(!type.equals("int")&&
 				   !type.equals("double")&&
 				   !type.equals("long")&&
