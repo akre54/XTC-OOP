@@ -182,8 +182,11 @@ public class Translator extends Tool {
                         }
 			
 			if(VERBOSE){//print out all files and classes to be translated
-				for(FileDependency d: allDependencies.keySet()) System.out.println(d+" "+d.fullPath);
+				System.out.println("\nFILES:");
+				for(FileDependency d: allDependencies.keySet()) System.out.println(" "+d);
+				System.out.println("\nCLASSES:");
 				for(ClassStruct c: classes.keySet()) System.out.println(c+" "+c.className);
+				System.out.println();
 			}
 					  
 			//creates tree root a.k.a. the Object class
@@ -202,6 +205,7 @@ public class Translator extends Tool {
                             for (ClassStruct c : classes.keySet()) {
                                 if (classes.get(c) == false) {
                                     if (c.superClass.equals("")) {//*** extends object
+										if(VERBOSE)System.out.println("PUTTING "+c.className+" ON TREE");
                                         new InheritanceTree(c.packageName, c.classNode, Object);
                                         classes.put(c, true);
                                     } else {
@@ -209,6 +213,7 @@ public class Translator extends Tool {
 										else FQ=c.packageName+c.superClass;
 										InheritanceTree superclass = Object.search(FQ);
                                         if (superclass != null) {//**extends an already translated class
+											if(VERBOSE)System.out.println("PUTTING "+c.className+" ON TREE");
                                             new InheritanceTree(c.packageName, c.classNode, superclass);
                                             classes.put(c, true);
                                         }
@@ -219,13 +224,16 @@ public class Translator extends Tool {
 				if (leftTotranslate == numFalse()) System.out.println("infiniteloop");//**infiniteloop test
 				leftTotranslate = classes.size();//**update for infiniteloop
 			}
-					 
+
 			//----- creates all CppFileBuilders
                         CppFileBuilder cppfiles;
                         boolean superiswritten =true;
                         LinkedList<ClassStruct> editablelist;
                         for (FileDependency d: allDependencies.keySet()){
 							DependencyFinder dep = new DependencyFinder(getNodeFromFilename(d.fullPath), d);
+							
+							if(VERBOSE)System.out.println("PRINTING "+dep.getFilePath()+"'s C++ FILES");
+
 							editablelist = new LinkedList<ClassStruct>(dep.getFileClasses());
 							//CppFileBuilder takes the Files dependencyfinder and arraylist of the ClassStructs
 							cppfiles = new CppFileBuilder(dep, new ArrayList<ClassStruct>(classes.keySet()));
@@ -238,6 +246,8 @@ public class Translator extends Tool {
 										else FQ=c.packageName+c.className;
 										superiswritten =true;
 										if( c.superClass.equals("")){//*** extends object
+											if(VERBOSE)System.out.println("-WRITING "+c.className+" TO "+dep.getFilePath());
+
 											cppfiles.addClassdef(Object.search(FQ));
 											editablelist.remove(c);
 										}//end of if check
@@ -247,6 +257,8 @@ public class Translator extends Tool {
 													superiswritten = false;
 											}
 											if (superiswritten){//**extends an already written class
+												if(VERBOSE)System.out.println("-WRITING "+c.className+" TO "+dep.getFilePath());
+
 												cppfiles.addClassdef(Object.search(FQ));
 												editablelist.remove(c);
 											}
@@ -255,8 +267,7 @@ public class Translator extends Tool {
 									}//end of for loop
 								
 							}//end of while
-							System.out.println("outside while loop");
-							try{cppfiles.close();System.out.println("closing file");}
+							try{cppfiles.close();System.out.println("CLOSING FILE: "+dep.getFilePath());}
 							catch(Exception e){System.out.println("closing failed");}
 						}//end of outer for loop
 						if(runtime.test("printAST")) {
@@ -325,7 +336,6 @@ public class Translator extends Tool {
             for (ClassStruct c : classes.keySet()) {
                 if (c.filePath.equals(filename))
                     return c.fileNode;
-				System.out.println(c+" "+c.className+" "+c.filePath);
             }
 			System.out.println(filename);
             throw new RuntimeException("can't find any classes belonging to " + filename);

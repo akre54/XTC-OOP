@@ -212,7 +212,6 @@ public class EWalk //extends Visitor
 					
 					//check to see if the first child is a CallExpression (then set MethodChaining flags)
 					//if this is true then you are in the farthest right method chain (b.m1().m2(); (inside m2)
-					if(n.get(0)!=null){
 					if (n.getNode(0).getName().equals("CallExpression")) {
 						if(VERBOSE)System.out.println("--------------TRIGGER METHOD CHAINING---------------");
 						isMethodChaining=true;
@@ -692,10 +691,8 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
 						
 						//set the inheritance tree based on the found class in the package
-                                                String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
-						System.out.println(FullName);
+						String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
 						b =tree.root.search(FullName);
-                                                System.out.println(FullName);
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 						isInstance=false;
 					}
@@ -737,19 +734,7 @@ public class EWalk //extends Visitor
 					System.out.println("No info found from search_for_method");
 					System.exit(1);
 				}
-				System.out.println(Identifier+"INSTANCE???");
-				//if(VERBOSE){System.out.println("b.search for method("+Identifier +"," +Identifier+ "," +isInstance+ "," +argumentList+"," +name +")");
-				if(isInstance)
-				{
-					if(VERBOSE) System.out.println("b.search for method("+Identifier +"," +Identifier+ "," +isInstance+ "," +argumentList+"," +name +")");
-					return b.search_for_method(Identifier,isInstance,argumentList,name);
-				}
-				else {
-					if(VERBOSE) System.out.println("b.search for method("+"__this" +"," +Identifier+ "," +isInstance+ "," +argumentList+"," +name +")");
-					return b.search_for_method("__this",isInstance,argumentList,name);
-				}
-
-				
+				return b.search_for_method(Identifier,isInstance,argumentList,name);
 			}
 			/**Helper method that checks for the types in the subtree and returns them 
 			   is currently used when get the types for values in an argument
