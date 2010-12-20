@@ -84,13 +84,11 @@ using java::lang::ArrayOfClass;
 		beta __this;
 
 
-		__beta():__vptr(&__vtable){//empty constructor. All work done in init
+		__beta():__vptr(&__vtable){
+		//empty constructor. All work done in init
 	   }
 
-		void init(beta __passedthis) {
-			__this = __passedthis;
-		}
-
+		void init(beta);
 		static Class __class();
 		static beta m1(beta);
 		static beta m2(beta);

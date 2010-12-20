@@ -12,7 +12,7 @@ import java.util.*;
  */ 
 public class EWalk //extends Visitor
 {
-	boolean VERBOSE = false; //debugging boolean
+	boolean VERBOSE = true; //debugging boolean
 	private InheritanceTree tree; //the given inheritanceTree Object passed in the constructor
 	private Declaration method; //the given Declaration Object passed in the constructor
 	//private boolean isInstance; //check for callExpression (needed for chaining) checks if there is a receiver (b.someMethod())
@@ -743,8 +743,16 @@ public class EWalk //extends Visitor
 						
 						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
 						if (VERBOSE)System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
+<<<<<<< HEAD
+//<<<<<<< HEAD
+						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
+//=======
+						System.out.println("identifier of type= "+qualities[1]);
+//>>>>>>> 69f5fcdd091559d5c0153037c179cdc9a5274dd9
+=======
 						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
 						System.out.println("identifier of type= "+qualities[1]);
+>>>>>>> 70a396f145f8ba4d8eb99de0d00f126b9f0c60a2
 						//remove the last value from the arrayList (thats always the class name
 						String className =(String)qualities[1];
 						if(VERBOSE)System.out.println("isInstance:tree.root.search(" +qualities +","+className+")");
@@ -888,7 +896,7 @@ public class EWalk //extends Visitor
 				}//end of for loop
 				//after visiting each child and getting the type find 
 				//the largest precent type set and return that type
-				for(int l= 0; l<=PrimTypes.length; l++)
+				for(int l= 0; l<PrimTypes.length; l++)
 				{
 						if (typeOn[l]) {//if that type is on return it
 							checkAdditiveExpression(n, PrimTypes[l]);

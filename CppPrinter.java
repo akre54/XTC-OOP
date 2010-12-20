@@ -170,7 +170,7 @@ public class CppPrinter extends Visitor
 	{
 		print("(");		
 		setBinary(n);		
-		print("){ \n");
+		print(")");
 	}//end of visitCallExpression method
 	
 	/** calls default binary behavior on Expression */
@@ -488,10 +488,50 @@ public class CppPrinter extends Visitor
 		
 	
 	}
+	public void visitLogicalAndExpression(GNode n)
+	{
+		printLogicalOperators(n, " && ");
+	}
+	public void visitLogicalOrExpression(GNode n)
+	{
+		printLogicalOperators(n, " || ");
+	}
+	public void printLogicalOperators(GNode n, String symbol)
+	{
+		print("(");
+		Object one = n.get(0);
+		if(isNode(one))
+		{
+			Node nOne= (Node)one;
+			if(DEBUG)System.out.println(nOne.getName());
+			dispatch((Node)one);
+		}
+		else if (isString(one))
+		{
+			print((String)one);
+		}
+		
+		print(symbol);
+		Object two=n.get(1);
+		if(isNode(two))
+		{
+			dispatch((Node) two);
+		}
+		else if (isString(two))
+		{
+			print((String)two);
+		}
+		print(")");
+	}
 	public void visitPrimaryIdentifier(GNode n)
 	{
 		if (!isMethodChaining)
 			print(n.getString(0));
+	}
+	public void visitNullLiteral(GNode n)
+	{
+		print(" __rt::null()");
+		visit(n);
 	}
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
