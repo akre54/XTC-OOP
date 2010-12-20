@@ -49,10 +49,9 @@ public class Test {
     return this;
   }
 
-  /*Method Chaining 
    public Test m5(Test t) {
     return t.m3().m4();
-  }*/
+  }
 
   public Object m6(Test t) {
     return R1;
@@ -234,7 +233,7 @@ public class Test {
 
     // -----------------------------------------------------------------------
 
-   /* o = Test.m2();
+    o = Test.m2();
 
     if (R3 == o) {
       System.out.println("PASS Test.m2()");
@@ -242,11 +241,11 @@ public class Test {
     } else {
       System.out.println("FAIL Test.m2()");
     }
-    test++;*/
+    test++;
 
     // -----------------------------------------------------------------------
 
-   /* o = t.m2();
+    o = t.m2();
 
     if (R3 == o) {
       System.out.println("PASS t.m2()");
@@ -254,23 +253,23 @@ public class Test {
     } else {
       System.out.println("FAIL t.m2()");
     }
-    test++;*/
+    test++;
 
     // -----------------------------------------------------------------------
 
-   // t = new Test();
+    t = new Test();
 
-    /*if (t != r) {
+    if (t != r) {
       System.out.println("PASS t != r");
       success++;
     } else {
       System.out.println("FAIL t != r");
     }
     test++;
-	 */
+	 
 
     // -----------------------------------------------------------------------
-/*
+
     if (! t.equals(r)) {
       System.out.println("PASS ! t.equals(r)");
       success++;
@@ -278,10 +277,10 @@ public class Test {
       System.out.println("FAIL ! t.equals(r)");
     }
     test++;
-*/
+
     // -----------------------------------------------------------------------
 
-   /* s1 = t.toString();
+   s1 = t.toString();
 
     if (! s1.equals(s2)) {
       System.out.println("PASS ! t.toString().equals(r.toString())");
@@ -289,11 +288,11 @@ public class Test {
     } else {
       System.out.println("FAIL ! t.toString().equals(r.toString())");
     }
-    test++;*/
+    test++;
 
     // -----------------------------------------------------------------------
 
-   /* o = t.m1();
+    o = t.m1();
 
     if (R1 == o) {
       System.out.println("PASS t.m1()");
@@ -302,10 +301,10 @@ public class Test {
       System.out.println("FAIL t.m1()");
     }
     test++;
-*/
+
     // -----------------------------------------------------------------------
 
-    /*o = t;
+    o = t;
 
     if (o instanceof Test) {
       System.out.println("PASS o instanceof Test");
@@ -314,7 +313,7 @@ public class Test {
       System.out.println("FAIL o instanceof Test");
     }
     test++;
-	 */
+	
 
     // -----------------------------------------------------------------------
 
@@ -405,7 +404,6 @@ public class Test {
     test++;
 
     // -----------------------------------------------------------------------
-	  //LOOK INTO Inner Portion of Method Chaining
     t.count = 0;
     t.m5(t).m3().m4();
 
@@ -674,17 +672,18 @@ public class Test {
     }
     test++;
 	 
+	 
 
     // -----------------------------------------------------------------------
 
-    if ("xtc.oop.Test".equals(k1.getName())) {
+   /* if ("xtc.oop.Test".equals(k1.getName())) {
       System.out.println("PASS \"xtc.oop.Test\".equals(k1.getName())");
       success++;
     } else {
       System.out.println("FAIL \"xtc.oop.Test\".equals(k1.getName())");
     }
     test++;
-
+*/
     // -----------------------------------------------------------------------
 
     if (k1.toString().equals("class xtc.oop.Test")) {
