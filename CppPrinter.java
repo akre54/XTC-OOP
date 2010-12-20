@@ -50,6 +50,7 @@ public class CppPrinter extends Visitor
 	private boolean isPrint;
 	private String primIdentifier;
 	private boolean isMethodChaining;
+	private boolean isEnd; //flag to close methodchaining brakcets
 	private String declared; //string that stores declared variable for NewclassExpressions
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
@@ -465,6 +466,7 @@ public class CppPrinter extends Visitor
 			
 		}
 		//make sure its not an instanceof Object, String or Class
+		System.out.println("::::::::::::::::::::::"+classType);
 		if(!((classType.equals("String") || classType.equals("Object") || classType.equals("Class")))){
 			//close the brackets print a new line and then print the init
 			print(";\n");
@@ -494,7 +496,7 @@ public class CppPrinter extends Visitor
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
 	{
-		isPrint=false;
+		boolean isStart=false;
 		//check the first child to see if its a primaryIdentifier 
 		//put in the special case for Pat's Cout
 		Object third= n.get(2);
@@ -502,15 +504,17 @@ public class CppPrinter extends Visitor
 		if(n.get(0)!=null){
 			if(n.getNode(0).getName().equals("CallExpression"))
 			{
-				if(isMethodChaining)
+				if(!isMethodChaining)
 				{
-					isMethodChaining=false;
-				}
-				else {
 					print("({");
 					isMethodChaining =true;
+					isStart=true;
 				}
 			}
+			//if(n.getNode(0).getName().equals("PrimaryIdentifier") && isMethodChaining)
+			//{
+				//isEnd=true;
+			//}
 		}
 		if(third !=null)
 		{
@@ -560,18 +564,31 @@ public class CppPrinter extends Visitor
 					}
 					
 					visitChildren(n, 3, n.size(), "");
-					print(")");
+					
+					if(isMethodChaining || isStart)
+					{
+						printer.append(");\n");
+					}
+					else {
+						print(")");
+					}
+					
 					if(isMethodChaining)
 					{
 						if(n.get(0)!=null){
 							if((n.getNode(0).getName().equals("CallExpression")))
 							{
-								print(";})");
+								
 								isMethodChaining=false;
 							}
 						}
 						
-						
+					}
+					
+					if(isStart)
+					{
+						printer.append("})");
+						//isEnd=false;
 					}
 				}
 				
