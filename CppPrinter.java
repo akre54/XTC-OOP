@@ -487,6 +487,7 @@ public class CppPrinter extends Visitor
 		//check the first child to see if its a primaryIdentifier 
 		//put in the special case for Pat's Cout
 		Object third= n.get(2);
+		
 		if(third !=null)
 		{
 			if(third instanceof String)
@@ -506,10 +507,33 @@ public class CppPrinter extends Visitor
 				}
 				else
 				{
+					boolean hasReciever=false; //boolean flag of recievers i.e. b.m1()
+					String primaryid =""; //reciever stored as a string
+					visitChildren(n,0,1,"");
+					System.out.print(n.toString());
+					if(n.get(0)!=null){
+						if(n.get(0) instanceof Node )
+						   {
+							   if (n.getNode(0).getName().equals("PrimaryIdentifier"))
+							   { 
+								   hasReciever=true;
+								   primaryid = n.getNode(0).getString(0);
+							   }
+						   }
+					}
 					//visit all the children minus the arguments
 					visitChildren(n, 1, 3, "");
 					//visit the arguments
-					print("(");
+				//	print("(");  NOW HANDLED IN EWALK
+					if(hasReciever){ //check to see if there is a reciever b.m1()
+						print(primaryid);
+						//if there are any arguments make sure to print a comma
+						if(n.getNode(3).size()>0)//arguments Node
+						{
+							print(",");
+						}
+					}
+					
 					visitChildren(n, 3, n.size(), "");
 					print(")");
 					
@@ -682,7 +706,22 @@ public class CppPrinter extends Visitor
 		if(two!=null)
 		{
 			print("=");
-			checkInstance(two);
+			//check to see if the node is a string Literal
+			if(two instanceof Node)
+			{
+				Node gTwo = (Node) two;
+				if(gTwo.getName().equals("StringLiteral"))
+				{
+					print("new __String(" +gTwo.getString(0)+")");
+				}
+				else {
+					checkInstance(two);
+				}
+			}
+			else {
+				checkInstance(two);
+			}
+
 		}
 	}
 	/**Visit the type node and print it*/
