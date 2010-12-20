@@ -62,10 +62,11 @@ public class EWalk //extends Visitor
 				if (!n.getNode(0).getName().toString().equals("SubscriptExpression")) {
 					String instanceName = n.getNode(0).getString(0);//gets the primary ID
 						Node castex = n.getNode(2);//get the third node
-						if(castex.getName().equals("CastExpression")) {//see if its a castexpression
-							n.set(2,visitCastExpression(castex,instanceName));
+						if(castex!=null) {
+							if(castex.getName().equals("CastExpression")) {//see if its a castexpression
+								n.set(2,visitCastExpression(castex,instanceName));
+							}
 						}
-				} else {
 				}
 				visit(n);				
 				return null;
@@ -112,8 +113,10 @@ public class EWalk //extends Visitor
 			{
 				String instanceName = n.getString(0);//gets the primary ID
 				Node castex = n.getNode(2);//get the third node
-				if(castex.getName().equals("CastExpression")) {//see if its a castexpression ?seems like cast expresions could appear in more places than this
-					n.set(2,visitCastExpression(castex,instanceName));
+				if (castex!=null) {
+					if(castex.getName().equals("CastExpression")) {//see if its a castexpression ?seems like cast expresions could appear in more places than this
+						n.set(2,visitCastExpression(castex,instanceName));
+					}
 				}
 				visit(n);
 			}
@@ -124,7 +127,7 @@ public class EWalk //extends Visitor
 				Node targetTypeNode;
 				targetTypeNode = GNode.create("PrimaryIdentifier",sourceVariable); //node to send to send to getType();
 				String type = getType(targetTypeNode); //source type
-				if(VERBOSE)System.out.printypetln("Casting variable "+sourceVariable+" to type "+type+" and assigning to variable "+targetVariableName+" of type "+type);
+				if(VERBOSE)System.out.println("Casting variable "+sourceVariable+" to type "+type+" and assigning to variable "+targetVariableName+" of type "+type);
 				if(!type.equals("int")&&
 				   !type.equals("double")&&
 				   !type.equals("long")&&
