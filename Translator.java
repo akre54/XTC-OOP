@@ -34,7 +34,6 @@ import java.util.HashMap;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
-import xtc.tree.Visitor;
 
 import xtc.util.Tool;
 
@@ -109,7 +108,6 @@ public class Translator extends Tool {
 			throw new IllegalArgumentException(file + ": file too large");
 		}
 		inputFile = file;
-		//System.out.println("using this method");
 		return file;
 	}
 
@@ -281,6 +279,7 @@ public class Translator extends Tool {
                     if (allDependencies.size() == 1 && allDependencies.containsKey(new FileDependency(fullPathName, DependencyOrigin.ROOTFILE))) { // if we're translating the root file, set its package as the root package
                         rootPackage = depend.getPackageName();
                     }
+
                     
                     for (ClassStruct c : depend.getFileClasses()) {
                         classes.put(c, false);
