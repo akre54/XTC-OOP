@@ -402,7 +402,7 @@ public class EWalk //extends Visitor
 						   newMethod= newMethod+primaryIdentifier;
 					   }
 					   // else {
-					   newMethod=newMethod+rightMethod +"})";
+					newMethod=newMethod+rightMethod; /*+"})";*/
 					if(VERBOSE)System.out.println("--------------END TRIGGER--------------");
 					if(VERBOSE)System.out.println(n.toString());
 					/*PAT

@@ -49,6 +49,7 @@ public class CppPrinter extends Visitor
 	private boolean isInstance;
 	private boolean isPrint;
 	private String primIdentifier;
+	private boolean isMethodChaining;
 	private String declared; //string that stores declared variable for NewclassExpressions
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
 	public CppPrinter(GNode n)
@@ -59,6 +60,7 @@ public class CppPrinter extends Visitor
 		if(n!=null){
 		if(DEBUG)System.out.println(n.toString());
 		}
+		isMethodChaining =false;
 //		setupLog("CppPrinter");
 		printer = new StringBuilder(); //intialize Stringbuilder
 		isInstance=false;
@@ -437,6 +439,7 @@ public class CppPrinter extends Visitor
 	public void visitNewClassExpression(GNode n)
 	{
 		print("new ");
+		String classType="";
 		for(int i=0;i<n.size();i++)
 		{
 			if (i==3) {
@@ -448,7 +451,8 @@ public class CppPrinter extends Visitor
 			Object o=n.get(i);
 			if(isString(o))
 			{
-				print(" __"+(String)o);
+				classType=(String) o;
+				print(" __"+classType);
 			}
 			else if(isNode(o))
 			{
@@ -460,25 +464,31 @@ public class CppPrinter extends Visitor
 			}	
 			
 		}
-		//close the brackets print a new line and then print the init
-		print(";\n");
-		//  b->init(b,8,"string");
-		print(declared);
-		print("->init");
-		print("(" +declared);
-		//check to see if their are any arguemnts
-		Node arguments = n.getNode(3);
-		if(arguments.size()>0)
-		{
-			print(",");
-			visitChildren(arguments,0,arguments.size(),",");
+		//make sure its not an instanceof Object, String or Class
+		if(!(classType.equals("String") || classType.equals("Object") || classType.equals("Class"))){
+			//close the brackets print a new line and then print the init
+			print(";\n");
+			//  b->init(b,8,"string");
+			print(declared);
+			print("->init");
+			print("(" +declared);
+			//check to see if their are any arguemnts
+			Node arguments = n.getNode(3);
+			if(arguments.size()>0)
+			{
+				print(",");
+				visitChildren(arguments,0,arguments.size(),",");
+				
+			}
+			print(")");
 			
 		}
-		print(")");
+		
+	
 	}
 	public void visitPrimaryIdentifier(GNode n)
 	{
-		print(n.getString(0));
+			print(n.getString(0));
 	}
 	/**visit call expression where a method is called  could be done on an instance handled in eWalk*/
 	public void visitCallExpression(GNode n)
@@ -487,7 +497,19 @@ public class CppPrinter extends Visitor
 		//check the first child to see if its a primaryIdentifier 
 		//put in the special case for Pat's Cout
 		Object third= n.get(2);
-		
+		//if the first child is a Call Expression trigger ismethodChaining
+		if(n.get(0)!=null){
+			if(n.getNode(0).getName().equals("CallExpression"))
+			{
+				if(isMethodChaining)
+				{
+					isMethodChaining=false;
+				}
+				else {
+					isMethodChaining =true;
+				}
+			}
+		}
 		if(third !=null)
 		{
 			if(third instanceof String)
@@ -518,7 +540,7 @@ public class CppPrinter extends Visitor
 							   { 
 								   hasReciever=true;
 								   primaryid = n.getNode(0).getString(0);
-								   print(primaryid);
+								   //print(primaryid);
 							   }
 						   }
 					}
@@ -537,7 +559,10 @@ public class CppPrinter extends Visitor
 					
 					visitChildren(n, 3, n.size(), "");
 					print(")");
-					
+					if(isMethodChaining)
+					{
+						print("})");
+					}
 				}
 				
 			}
@@ -593,7 +618,7 @@ public class CppPrinter extends Visitor
 	//	{
 			if(isInstance)
 			{
-				print(primIdentifier+",");
+				//print(primIdentifier+",");
 				isInstance=false;
 				primIdentifier="";
 			}
@@ -601,7 +626,9 @@ public class CppPrinter extends Visitor
 				//print("__this"+ ",");
 			}
 	//	}
-
+	//	if (n.size()!=0) {
+		//	print(",");
+		//}
 		visitChildren(n, 0, n.size(), ",");
 		isArguments=false;
 	}
