@@ -50,8 +50,7 @@ if [ $D ]; then
 			cp ../java_lang.h $directory
 			cp ../ptr.h $directory
 	done
-	#echo $P.java:
-	#cat $P.java | nl
+
 	PACKAGE=$(egrep ^package $P.java | cut -d ' ' -f2 | cut -d ';' -f1) # get root file's package, used for classpaths
 	if [ "$?" -eq "0" ]
 		then
