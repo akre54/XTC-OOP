@@ -31,7 +31,7 @@ beta b=new __beta();
 b->init(b);
 String a=({beta a=b->__vptr->m1(b);
  a->__vptr->m2(a);});
-std::cout<<<<std::endl;
+std::cout<<a<<std::endl;
 
 	}
 
