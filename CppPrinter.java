@@ -518,6 +518,7 @@ public class CppPrinter extends Visitor
 							   { 
 								   hasReciever=true;
 								   primaryid = n.getNode(0).getString(0);
+								   print(primaryid);
 							   }
 						   }
 					}
