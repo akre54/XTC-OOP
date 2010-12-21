@@ -49,6 +49,7 @@ public class EWalk //extends Visitor
 				isInstance=false,
 				isArgument=false,
 				isEnd = false,
+				isStringInstance=false,
 				isSuper;//flag that saves whether super is inside a call expression
 			int chainCounter= 0;
 
@@ -176,26 +177,35 @@ public class EWalk //extends Visitor
 				// if it isn't null run a check for SuperExpression and Primary Identifier
 				// Set the respective flags to be used later*/
 				Object first = n.get(0);
+				
 				if(first!=null) {
 					Node firstc= (Node) first;
+					System.out.println(":::::::" +firstc.toString());
+					System.out.println("?????????"+firstc.getName());
 					if(firstc.getName().equals("SuperExpression")) {
 						isSuper=true;
 					}
 					if (firstc.getName().equals("PrimaryIdentifier")) {
 						isInstance=true;
 					}
+					if(firstc.getName().equals("StringLiteral")){
+						//isStringInstance=true;
+					}
+					if(VERBOSE)System.out.println("Dispatchingg.....");
 					dispatch(firstc); //dispatch on the node
 				}
+				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
 				
 				/*create a string array to store the return type and newMethod name of the 
 				 return method*/
 				//new method name to override in the tree
 				String[] methodArray=setMethodInfo(n);
+				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
 				//newMethod= methodArray[1];
 				//savedReturnType = methodArray[0];
 				if(VERBOSE)System.out.println("THE RETURN TYPE3: " +methodArray[0] );
 				if(VERBOSE)System.out.println("NewMEthod3: " +methodArray[1] );
-				
+				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
 				
 				
 				return methodArray;
@@ -207,45 +217,7 @@ public class EWalk //extends Visitor
 			public void visitCallExpression (GNode n) {
 				String newMethod="";
 				boolean hasReciever= false;
-				/*
-				 Global Variables
-				 isMethodChaining (intialize to false)
-				 isEnd (intialize to False)
-				 chainCounter //intialize to 0
-				 
-				 Inside Call Expression:
-				 isEnd=false;
-				 if ismethodchaining is false
-				 if the 1st child is a CallExpression
-				 set isMethodChaining to true
-				 dispatch on the first child (CallExpression)
-				 isEnd = true;
-				 
-				 else
-				 //Do Regular Code Here this is just a regular call Expression
-				 else //method chaining is already true
-				 if the 1st child is NOT a callExpression //this is the end of the method chain
-				 //this is the start of the print so you need to do a starting print
-				 ->need to get b.m1()'s return type "({"+returnType(m1) + (char)(counter+97)"=" +primary +(should have ->)rightMethodName+"("+primaryId+(?)","+ ARGUMENTS NODE 
-				 else
-				 // (this is an inner so you need to do an inner print)
-				 // append returnType(m2) +char(counter+97) +"="+ char(counter+97)-1 + rightMethodName + "char(counter+97-1)+ ARGUMENTS
-				 get the current return type, create a new variable from the counter
-				 dispatch on the first child (The CallExpression)
-				 counter++
-				 //later
-				 if(isMethodChaining && isEnd)
-				 {
-				 //append ending c++ code
-				 
-				 //get method info with return type, get the rightMethod Name
-				 -->End of the Line -> no returnType just char(counter+97)-1 + rightMethodName + "char(counter + 97-1)+ ARGUMENTSNODE +})
-				 //reset isend
-				 //reset counter
-				 //reset methodChaining
-                 }
-				
-				 */
+				isStringInstance=false;
 				//reset the full qualified name global variables
 				fcName= new StringBuffer();
 				fcNameList=new ArrayList<String>();				
@@ -733,8 +705,11 @@ public class EWalk //extends Visitor
 			   returns the givne string array that should contain the return type and c++ Standard methodname 
 			   puts in check for isSuper flag and isInstance Flag*/
 			public String[] getMethodInfo(Node n,String Identifier,ArrayList<String> nameList,String name, ArrayList<String> argumentList)
-			{
-				if (VERBOSE) System.out.println("\t\t Method Chaining?"+isMethodChaining);
+			{ 
+				if (VERBOSE) System.out.println("\t\t Method Chaining? "+isMethodChaining);
+					if (VERBOSE) System.out.println("\t\t isInstance? "+isInstance);	
+				if (VERBOSE) System.out.println("\t\t isStringInstance? "+isStringInstance);
+				if (VERBOSE) System.out.println("\t\t The Tree "+n.toString());
 				//method .search for type with packages if you dont send a package its the package you're in
 				InheritanceTree b; //will be current Class, the superclass or the instance's class
 				if(isInstance && chainCounter==0)
@@ -760,6 +735,13 @@ public class EWalk //extends Visitor
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 						//isInstance=false;
 					}
+				else if (isStringInstance) //"I am a String".equals(stringName);
+				{
+					b=tree.root.search("String");
+					isStringInstance=false;
+					if(VERBOSE){System.out.println("On Instance:"+ isStringInstance+"," + method +","+argumentList+","+name);}
+
+				}
 				/*else if(isMethodChaining && isInstance)
 				{
 					String packages = "";
@@ -836,9 +818,30 @@ public class EWalk //extends Visitor
 				//check for call expressions' return type
 				else if (n.getName().equals("CallExpression"))
 				{
+					if(VERBOSE) System.out.println("_______________________");
 					String[] methodArray;
+					if(n.get(0)!=null){
+						if(n.getNode(0).getName().equals("PrimaryIdentifier"))
+						{
+							isInstance=true;
+							
+						}
+					}	
 					//return the return type gotten from getMethodInfo (located as the first item in the given array)
 					methodArray=setMethodInfo(n);
+					if(n.get(0)!=null){
+						if(n.getNode(0).getName().equals("PrimaryIdentifier"))
+						{
+							isInstance=false;
+							
+						}
+						
+					}
+					if(methodArray[1]!=null)
+					{
+						n.set(2,methodArray[1]);
+					}
+					if(VERBOSE)System.out.println("METHODDDDDDDDD:"+methodArray[1]);
 					return methodArray[0];
 				}
 				//get the primary identifiers class Name

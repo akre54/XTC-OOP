@@ -453,7 +453,7 @@ public class CppPrinter extends Visitor
 			Object o=n.get(i);
 			if(isString(o))
 			{
-				classType=(String) o;
+				classType=(String)o;
 				print(" __"+classType);
 			}
 			else if(isNode(o))
@@ -466,8 +466,9 @@ public class CppPrinter extends Visitor
 			}	
 			
 		}
+		classType=n.getNode(2).getString(0);
 		//make sure its not an instanceof Object, String or Class
-		if(DEBUG) System.out.println("::::::::::::::::::::::"+classType);
+		/*if(DEBUG)*/ System.out.println("::::::::::::::::::::::"+classType);
 		if(!((classType.equals("String") || classType.equals("Object") || classType.equals("Class")))){
 			//close the brackets print a new line and then print the init
 			print(";\n");

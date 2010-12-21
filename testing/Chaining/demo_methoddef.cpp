@@ -27,18 +27,14 @@
 		return k;
 	}
 	int32_t __demo::main(int32_t argc,char** args){
-beta lmao=new __beta();
-lmao->init(lmao);
-lmao->__vptr->m3(lmao);
-String r=({beta a=lmao->__vptr->m2(lmao);
- a->__vptr->m3(a);
-});
-lmao->__vptr->m3(lmao);
-String a=({beta a=lmao->__vptr->m1(lmao);
-beta b=a->__vptr->m2(a);
- b->__vptr->m3(b);
-});
-std::cout<<r<<std::endl;
+beta k1=new __beta();
+k1->init(k1);
+if("xtc.oop.Test"equals(__thisk1->__vptr->getName(k1))){
+std::cout<<"PASS \"xtc.oop.Test\".equals(k1.getName())" <<std::endl;
+}
+else { 
+std::cout<<"FAIL \"xtc.oop.Test\".equals(k1.getName())" <<std::endl;
+} 
 
 	}
 
@@ -83,6 +79,11 @@ return b;
 
 	java::lang::String __beta::m3(beta __this){
 return new __String("thisssss"); 
+
+	}
+
+	java::lang::String __beta::getName(beta __this){
+return new __String("xtc.oop.Test"); 
 
 	}
 

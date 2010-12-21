@@ -93,6 +93,7 @@ using java::lang::ArrayOfClass;
 		static beta m1(beta);
 		static beta m2(beta);
 		static java::lang::String m3(beta);
+		static java::lang::String getName(beta);
 
 		static __beta_VT __vtable;
 	};
@@ -108,6 +109,7 @@ using java::lang::ArrayOfClass;
 		beta (*m1)(beta);
 		beta (*m2)(beta);
 		java::lang::String (*m3)(beta);
+		java::lang::String (*getName)(beta);
 
 
 		__beta_VT():
@@ -119,6 +121,7 @@ using java::lang::ArrayOfClass;
 			toString((String(*)(beta))&__Object::toString),
 			m1(&__beta::m1),
 			m2(&__beta::m2),
-			m3(&__beta::m3){}
+			m3(&__beta::m3),
+			getName(&__beta::getName){}
 	};
 
