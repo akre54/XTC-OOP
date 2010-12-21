@@ -191,8 +191,33 @@ public class CppPrinter extends Visitor
 	/** calls default binary behavior on Expression */
 	public void visitExpression(GNode n)
 	{
-		setBinary(n);
-	}
+	
+		//get the first operand
+		Node operand1= n.getNode(0);
+		dispatch(operand1);
+		print(n.getString(1)); //print the operator		
+		
+		//if the postiion 3 child is a String Literal set it to a new String
+		if(n.get(2)!=null)
+		{
+			if(n.getNode(2) instanceof Node)
+			{
+				if(n.getNode(2).getName().equals("StringLiteral"))
+				{
+					print("new __String(");
+				dispatch(n.getNode(2));
+				print(")");
+				}
+				else {
+					//get the second operand
+					Node operand2= n.getNode(2);
+					dispatch(operand2);	
+				}
+
+			}
+		}
+
+		}
 	/** calls default unary behavior on Expression */
 	public void visitUnaryExpression(GNode n)
 	{
