@@ -30,7 +30,7 @@ import xtc.tree.Node;
 import xtc.tree.Visitor;
 
 //code needs for recording logs
-import java.util.logging.*;
+import java.util.*;
 import java.io.*;
 
 import xtc.util.Tool;
@@ -50,6 +50,7 @@ public class CppPrinter extends Visitor
 	private boolean isPrint;
 	private String primIdentifier;
 	private boolean isMethodChaining;
+	private boolean isQualified;
 	private boolean isEnd; //flag to close methodchaining brakcets
 	private String declared; //string that stores declared variable for NewclassExpressions
 	/*Default constructor that should be used by all classes, intializes sringbuilder, and calls visit on given bode*/
@@ -66,6 +67,7 @@ public class CppPrinter extends Visitor
 		printer = new StringBuilder(); //intialize Stringbuilder
 		isInstance=false;
 		primIdentifier ="";
+		isQualified=false;
 		isPrivate =false; //sets false by default since structs are public by default
 		visit(n); //visit the given node (starts all the visiting)
 	}
@@ -621,6 +623,18 @@ public class CppPrinter extends Visitor
 				}
 				else
 				{
+					String newMethod="";
+					/*if(isQualified)//is it is a qualified remove the -> and put ::
+					{
+						StringTokenizer st = new StringTokenizer(n.getString(2), "->");
+						
+						while (st.hasMoreElements()){
+							newMethod= st.nextToken();
+						}
+						n.set(2,newMethod+"::");
+						
+					}*/
+					
 					boolean hasReciever=false; //boolean flag of recievers i.e. b.m1()
 					String primaryid =""; //reciever stored as a string
 					visitChildren(n,0,1,"");
@@ -636,10 +650,10 @@ public class CppPrinter extends Visitor
 							   }
 						   }
 					}
+					
 					//visit all the children minus the arguments
 					visitChildren(n, 1, 3, "");
-					//visit the arguments
-				//	print("(");  NOW HANDLED IN EWALK
+				
 					if(hasReciever){ //check to see if there is a reciever b.m1()
 						//print(primaryid);
 						//if there are any arguments make sure to print a comma
@@ -683,9 +697,10 @@ public class CppPrinter extends Visitor
 			//{
 			//	dispatch((Node)third);
 			//}
-		}
+		
 
 			
+	}
 	}
 	/**visit qualifiedIdentifier i.e. custom Objects
 	 It is assumed that all the "SMART" work has already been handled in EWalk
@@ -693,6 +708,7 @@ public class CppPrinter extends Visitor
 	 */
 	public void visitQualifiedIdentifier(GNode n)
 	{
+		isQualified=true;
 		for(int i=0; i<n.size();i++)
 		{
 			String name = n.getString(i);
@@ -701,6 +717,7 @@ public class CppPrinter extends Visitor
 			{
 				print("::");
 			}
+			
 		}
 	}
 	/**********************Other***************************/
@@ -976,26 +993,6 @@ public class CppPrinter extends Visitor
 	{
 		return printer;
 	}	
-	public void setupLog(String name)
-	{
-		//delete the file if it already exists
-		File f = new File(name+".log");
-		if(f.exists())//delete it
-		{
-			f.delete();
-		}
-		
-		try {
-			// Create a file handler that write log record to a file called my.log
-			FileHandler handler = new FileHandler(name+".log",true);
-			
-			// Add to the desired logger
-			//Logger logger = Logger.getLogger("com.mycompany");
-			logger.addHandler(handler);
-		} catch (IOException e) {
-		}
-		
-		
-	}
+	
 }
 

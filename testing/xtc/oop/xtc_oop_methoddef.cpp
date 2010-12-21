@@ -137,36 +137,22 @@ o=r->__vptr->m1(r);
 test++;
 t=r;
 if((t==r)){
-std::cout<<("PASS t == r") <<std::endl;
+std::cout<<"PASS t == r" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL t == r") <<std::endl;
+std::cout<<"FAIL t == r" <<std::endl;
 } 
 test++;
-if(t->__vptr->equals(t,r)){
-std::cout<<("PASS t.equals(r)") <<std::endl;
-success++;
-}
-else { 
-std::cout<<("FAIL t.equals(r)") <<std::endl;
-} 
 test++;
-if(r->__vptr->equals(r,t)){
-std::cout<<("PASS r.equals(t)") <<std::endl;
-success++;
-}
-else { 
-std::cout<<("FAIL r.equals(t)") <<std::endl;
-} 
 test++;
 int32_t h=r->__vptr->hashCode(r);
 if((7353==h)){
-std::cout<<("PASS 7353 == r.hashCode()") <<std::endl;
+std::cout<<"PASS 7353 == r.hashCode()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL 7353 == r.hashCode()") <<std::endl;
+std::cout<<"FAIL 7353 == r.hashCode()" <<std::endl;
 } 
 test++;
 String s1=t->__vptr->toString(t);
@@ -174,25 +160,25 @@ String s2=r->__vptr->toString(r);
 test++;
 o=t->__vptr->m1(t);
 test++;
-		o=__Rest::m2(); //changed manually
+		o=__Rest::m2();
 test++;
 o=r->m2();
 test++;
 Test tr=r;
 o=tr->m2();
 test++;
-		o=__Test::m2(); //changed manually
+		o=__Test::m2();
 test++;
 o=t->m2();
 test++;
 t=new __Test();
 t->init(t);
 if((t!=r)){
-std::cout<<("PASS t != r") <<std::endl;
+std::cout<<"PASS t != r" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL t != r") <<std::endl;
+std::cout<<"FAIL t != r" <<std::endl;
 } 
 test++;
 test++;
@@ -203,70 +189,70 @@ test++;
 o=t;
 if(({ Class k=o->__vptr->getClass(o);
 k->__vptr->isInstance(k,o);})){
-std::cout<<("PASS o instanceof Test") <<std::endl;
+std::cout<<"PASS o instanceof Test" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL o instanceof Test") <<std::endl;
+std::cout<<"FAIL o instanceof Test" <<std::endl;
 } 
 test++;
 if(({ Class k=o->__vptr->getClass(o);
 k->__vptr->isInstance(k,o);})){
-std::cout<<("PASS o instanceof Object") <<std::endl;
+std::cout<<"PASS o instanceof Object" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL o instanceof Object") <<std::endl;
+std::cout<<"FAIL o instanceof Object" <<std::endl;
 } 
 test++;
 if(!({ Class k=o->__vptr->getClass(o);
 k->__vptr->isInstance(k,o);})){
-std::cout<<("PASS ! (o instanceof String)") <<std::endl;
+std::cout<<"PASS ! (o instanceof String)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL ! (o instanceof String)") <<std::endl;
+std::cout<<"FAIL ! (o instanceof String)" <<std::endl;
 } 
 test++;
 test++;
 o=t->m2();
 test++;
 if((0==t->count)){
-std::cout<<("PASS Test.<init>()") <<std::endl;
+std::cout<<"PASS Test.<init>()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL Test.<init>()") <<std::endl;
+std::cout<<"FAIL Test.<init>()" <<std::endl;
 } 
 test++;
 if(((0==r->round) && (0==r->count))){
-std::cout<<("PASS Rest.<init>()") <<std::endl;
+std::cout<<"PASS Rest.<init>()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL Rest.<init>()") <<std::endl;
+std::cout<<"FAIL Rest.<init>()" <<std::endl;
 } 
 test++;
 ({Test a=t->__vptr->m3(t);
  a->__vptr->m4(a);
 });
 if((2==t->count)){
-std::cout<<("PASS t.m3().m4()") <<std::endl;
+std::cout<<"PASS t.m3().m4()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL t.m3().m4()") <<std::endl;
+std::cout<<"FAIL t.m3().m4()" <<std::endl;
 } 
 test++;
 ({Test a=r->__vptr->m3(r);
  a->__vptr->m4(a);
 });
 if(((1==r->round) && (1==r->count))){
-std::cout<<("PASS r.m3().m4()") <<std::endl;
+std::cout<<"PASS r.m3().m4()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL r.m3().m4()") <<std::endl;
+std::cout<<"FAIL r.m3().m4()" <<std::endl;
 } 
 test++;
 t->count=0;
@@ -275,11 +261,11 @@ Test b=a->__vptr->m3(a);
  b->__vptr->m4(b);
 });
 if((4==t->count)){
-std::cout<<("PASS t.m5(t).m3().m4()") <<std::endl;
+std::cout<<"PASS t.m5(t).m3().m4()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL t.m5(t).m3().m4()") <<std::endl;
+std::cout<<"FAIL t.m5(t).m3().m4()" <<std::endl;
 } 
 test++;
 r->count=0;
@@ -289,11 +275,11 @@ Test b=a->__vptr->m3(a);
  b->__vptr->m4(b);
 });
 if(((2==r->round) && (2==r->count))){
-std::cout<<("PASS r.m5(r).m3().m4()") <<std::endl;
+std::cout<<"PASS r.m5(r).m3().m4()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL r.m5(r).m3().m4()") <<std::endl;
+std::cout<<"FAIL r.m5(r).m3().m4()" <<std::endl;
 } 
 test++;
 t->count=0;
@@ -304,11 +290,11 @@ Test b=a->__vptr->m3(a);
  b->__vptr->m4(b);
 });
 if((((0==r->round) && (0==r->count)) && (4==t->count))){
-std::cout<<("PASS r.m5(t).m3().m4()") <<std::endl;
+std::cout<<"PASS r.m5(t).m3().m4()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL r.m5(t).m3().m4()") <<std::endl;
+std::cout<<"FAIL r.m5(t).m3().m4()" <<std::endl;
 } 
 test++;
 o=t->__vptr->m6(t,t);
@@ -348,120 +334,73 @@ test++;
 Class k1=t->__vptr->getClass(t);
 Class k2=r->__vptr->getClass(r);
 if((k1!=k2)){
-std::cout<<("PASS k1 != k2") <<std::endl;
+std::cout<<"PASS k1 != k2" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL K1 != k2") <<std::endl;
+std::cout<<"FAIL K1 != k2" <<std::endl;
 } 
 test++;
-		/*
-if(({String a=k1->__vptr->getName(k1);
- a->__vptr->equals(a,new __String("xtc.oop.Test"));
-})){
-std::cout<<("PASS k1.getName().equals(\"xtc.oop.Test\")") <<std::endl;
-success++;
-}
-else { 
-std::cout<<("FAIL k1.getName().equals(\"xtc.oop.Test\")") <<std::endl;
-} 
-		 */
 test++;
-		/*
-if("xtc.oop.Test"equals(__this,k1->__vptr->getName(k1))){
-std::cout<<("PASS \"xtc.oop.Test\".equals(k1.getName())") <<std::endl;
-success++;
-}
-else { 
-std::cout<<("FAIL \"xtc.oop.Test\".equals(k1.getName())") <<std::endl;
-} 
-		 */
 test++;
-/*if(({String a=k1->__vptr->toString(k1);
- a->__vptr->equals(a,new __String("class xtc.oop.Test"));
-})){
-std::cout<<("PASS k1.toString().equals(\"class xtc.oop.Test\")") <<std::endl;
-success++;
-}
-else { 
-std::cout<<("FAIL k1.toString().equals(\"class xtc.oop.Test\")") <<std::endl;
-} */
 test++;
-if(!k1->__vptr->equals(k1,k2)){
-std::cout<<("PASS ! k1.equals(k2)") <<std::endl;
-success++;
-}
-else { 
-std::cout<<("FAIL ! k1.equals(k2)") <<std::endl;
-} 
 test++;
 k2=k2->__vptr->getSuperclass(k2);
-		
 if((k1==k2)){
-std::cout<<("PASS k1 == k2.super()") <<std::endl;
+std::cout<<"PASS k1 == k2.super()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL K1 == k2.super()") <<std::endl;
+std::cout<<"FAIL K1 == k2.super()" <<std::endl;
 } 
 test++;
-		
-if(k1->__vptr->equals(k1,k2)){
-std::cout<<("PASS k1.equals(k2.super())") <<std::endl;
-success++;
-}
-else { 
-std::cout<<("FAIL k1.equals(k2.super())") <<std::endl;
-} 
 test++;
-		/* CAUSE OF SEMENTATION FAULT
 k1=k1->__vptr->getSuperclass(k1);
 k2=k2->__vptr->getSuperclass(k2);
 if((k1==k2)){
-std::cout<<("PASS k1.super() == k2.super().super()") <<std::endl;
+std::cout<<"PASS k1.super() == k2.super().super()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL K1.super() == k2.super().super()") <<std::endl;
+std::cout<<"FAIL K1.super() == k2.super().super()" <<std::endl;
 } 
-		 */
 test++;
 if(k1->__vptr->equals(k1,k2)){
-std::cout<<("PASS k1.super().equals(k2.super().super())") <<std::endl;
+std::cout<<"PASS k1.super().equals(k2.super().super())" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL k1.super().equals(k2.super().super())") <<std::endl;
+std::cout<<"FAIL k1.super().equals(k2.super().super())" <<std::endl;
 } 
 test++;
 k1=k1->__vptr->getSuperclass(k1);
 if(( __rt::null()==k1)){
-std::cout<<("PASS null == k1.super().super()") <<std::endl;
+std::cout<<"PASS null == k1.super().super()" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL null == k1.super().super()") <<std::endl;
+std::cout<<"FAIL null == k1.super().super()" <<std::endl;
 } 
 test++;
 s1=new __String("Hello Kitty #1");
 s2=new __String("Hello Kitty #1");
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(String)") <<std::endl;
+std::cout<<"PASS s1.equals(String)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(String)") <<std::endl;
+std::cout<<"FAIL s1.equals(String)" <<std::endl;
 } 
 test++;
 s2=new __String(({ std::ostringstream sout;
 sout <<"Hel"<<"lo Kitty #1";
 sout.str(); }));
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(String + String)") <<std::endl;
+std::cout<<"PASS s1.equals(String + String)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(String + String)") <<std::endl;
+std::cout<<"FAIL s1.equals(String + String)" <<std::endl;
 } 
 test++;
 s2=new __String(({ std::ostringstream sout;
@@ -470,44 +409,44 @@ sout <<__rt::stringify("He")<<"ll";
 sout.str(); }))<<__rt::stringify("o Kitty #1");
 sout.str(); }));
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(String + String + String)") <<std::endl;
+std::cout<<"PASS s1.equals(String + String + String)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(String + String + String)") <<std::endl;
+std::cout<<"FAIL s1.equals(String + String + String)" <<std::endl;
 } 
 test++;
 s2=new __String(({ std::ostringstream sout;
 sout <<__rt::stringify("Hello Kitty #")<<1;
 sout.str(); }));
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(String + int)") <<std::endl;
+std::cout<<"PASS s1.equals(String + int)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(String + int)") <<std::endl;
+std::cout<<"FAIL s1.equals(String + int)" <<std::endl;
 } 
 test++;
 s2=new __String(({ std::ostringstream sout;
 sout <<__rt::stringify("Hello Kitty #")<<'1';
 sout.str(); }));
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(String + char)") <<std::endl;
+std::cout<<"PASS s1.equals(String + char)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(String + char)") <<std::endl;
+std::cout<<"FAIL s1.equals(String + char)" <<std::endl;
 } 
 test++;
 s2=new __String(({ std::ostringstream sout;
 sout <<(char)72<<__rt::stringify("ello Kitty #1");
 sout.str(); }));
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(char + String)") <<std::endl;
+std::cout<<"PASS s1.equals(char + String)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(char + String)") <<std::endl;
+std::cout<<"FAIL s1.equals(char + String)" <<std::endl;
 } 
 test++;
 char c=72;
@@ -515,22 +454,22 @@ s2=new __String(({ std::ostringstream sout;
 sout <<c<<__rt::stringify("ello Kitty #1");
 sout.str(); }));
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(char + String)") <<std::endl;
+std::cout<<"PASS s1.equals(char + String)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(char + String)") <<std::endl;
+std::cout<<"FAIL s1.equals(char + String)" <<std::endl;
 } 
 test++;
 s2=new __String(({ std::ostringstream sout;
 sout <<'H'<<__rt::stringify("ello Kitty #1");
 sout.str(); }));
 if(s1->__vptr->equals(s1,s2)){
-std::cout<<("PASS s1.equals(char + String)") <<std::endl;
+std::cout<<"PASS s1.equals(char + String)" <<std::endl;
 success++;
 }
 else { 
-std::cout<<("FAIL s1.equals(char + String)") <<std::endl;
+std::cout<<"FAIL s1.equals(char + String)" <<std::endl;
 } 
 test++;
 std::cout<<" " <<std::endl;

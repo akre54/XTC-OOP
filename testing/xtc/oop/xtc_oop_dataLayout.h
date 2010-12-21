@@ -19,7 +19,6 @@
 #pragma once
 
 #include "java_lang.h"
-#include "xtc_oop_dataLayout.h"
 
 using java::lang::Object;
 using java::lang::__Object;
