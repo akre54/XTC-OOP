@@ -30,10 +30,8 @@ namespace find {
 	}
 		void __Foo::init(Foo __passedthis) {
 			__passedthis->__this = __passedthis;
-<<<<<<< HEAD
-=======
-			Object Foo::R =__Object();
->>>>>>> 74802605a914dfc021fa5d5c61c8067369a3841f
+		__Foo::R=(java_cast<Object>(new __Object()));
+		(const Object)__Foo::R;
 		}
 
 	int32_t __Foo::main(int32_t argc,char** args){
@@ -43,7 +41,7 @@ b->init(b);
 	}
 
 	java::lang::String __Foo::m1(){
-return __this->var; 
+return new __String(""); 
 
 	}
 
@@ -72,7 +70,9 @@ namespace find {
 	}
 		void __Bar::init(Bar __passedthis) {
 			__passedthis->__this = __passedthis;
-Foo::m1();
+		__Bar::R=(java_cast<Object>(new __Object()));
+		(const Object)__Bar::R;
+__Foo::m1();
 				}
 
 	depend::find::Foo __Bar::m2(){

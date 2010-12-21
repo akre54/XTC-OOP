@@ -28,7 +28,7 @@ public class InstanceField extends Variable{
 		}
 		return false;
 	}
-	public boolean isconst(){
+	public boolean isConst(){
 		for(String m: modifiers){
 			if(m.equals("const") )return true;
 		}

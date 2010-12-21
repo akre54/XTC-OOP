@@ -353,6 +353,15 @@ public class DependencyFinder {
                 files.add("using java::lang::ArrayOfInt;");
                 files.add("using java::lang::ArrayOfObject;");
                 files.add("using java::lang::ArrayOfClass;");
+				files.add("using java::lang::ArrayOfString;");
+                files.add("using java::lang::ArrayOfBoolean;");
+                files.add("using java::lang::ArrayOfFloat;");
+                files.add("using java::lang::ArrayOfDouble;");
+                files.add("using java::lang::ArrayOfShort;");
+                files.add("using java::lang::ArrayOfLong;");
+                files.add("using java::lang::ArrayOfChar;");
+
+				
             } else {
                 System.out.println("do something different for origin file?");
             }

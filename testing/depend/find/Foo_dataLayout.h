@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "Bar_dataLayout.h"
+#include "java_lang.h"
 
 using java::lang::Object;
 using java::lang::__Object;
@@ -30,7 +30,14 @@ using java::lang::__Array;
 using java::lang::ArrayOfInt;
 using java::lang::ArrayOfObject;
 using java::lang::ArrayOfClass;
-
+using java::lang::ArrayOfString;
+using java::lang::ArrayOfBoolean;
+using java::lang::ArrayOfFloat;
+using java::lang::ArrayOfDouble;
+using java::lang::ArrayOfShort;
+using java::lang::ArrayOfLong;
+using java::lang::ArrayOfChar;
+using __rt::java_cast;
 namespace depend {
 namespace find {
 
@@ -49,15 +56,11 @@ namespace find {
 	struct __Foo{ 
 		__Foo_VT* __vptr;
 		String var;
-<<<<<<< HEAD
-		Object R;
-=======
-		const static Object R; //=__Object();
->>>>>>> 74802605a914dfc021fa5d5c61c8067369a3841f
+		static Object R;
 		Foo __this;
 
 
-		__Foo():__vptr(&__vtable),var(new __String("")),R(new __Object()){
+		__Foo():__vptr(&__vtable),var(new __String("")){
 		//empty constructor. All work done in init
 	   }
 
@@ -92,11 +95,11 @@ namespace find {
 	struct __Bar{ 
 		__Bar_VT* __vptr;
 		String var;
-		Object R;
+		static Object R;
 		Bar __this;
 
 
-		__Bar():__vptr(&__vtable),var(new __String("")),R(new __Object()){
+		__Bar():__vptr(&__vtable),var(new __String("")){
 		//empty constructor. All work done in init
 	   }
 
