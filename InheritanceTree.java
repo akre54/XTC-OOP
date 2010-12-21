@@ -758,7 +758,7 @@ public class InheritanceTree{
 	 */
 	private String make_name(String instance,boolean on_instance,Declaration d){
 		String result= d.name;
-		boolean comma = (d.params.size()>1);
+		boolean comma = ((d.params.size()>1)||(d.name.equals("equals")));
 		if(d.overloadNum==0);
 		else result+= "_"+d.overloadNum;
 		if((instance.equals(""))||(instance.equals(" "))) instance ="__this";
