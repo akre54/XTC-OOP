@@ -3,8 +3,6 @@ package xtc.oop;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import xtc.util.Tool;
-import xtc.util.Runtime;
 
 /** 
  * Creates a cpp file you can write to.
@@ -29,6 +27,15 @@ class FileMaker {
 		}
 		catch (IOException a) {
 		}
+    }
+    public FileMaker (String parent, String namespaceName, String desc,String end) {
+        namespaceName = namespaceName.replaceAll("::","_");
+        cFile = new File(parent + "/" + namespaceName + desc + "." + end);
+        try {
+                outputWriter = new FileWriter(cFile);
+        }
+        catch (IOException a) {
+        }
     }
 
    public FileMaker (File jFile, String name) {
@@ -89,7 +96,7 @@ class FileMaker {
     }
 
 	private static File convertNameToC (File input,String desc, String end) {
-		String jname = input.getName ();
+		String jname = input.getName();
 		String cname = jname.substring (0,jname.length()-5) +desc + "." + end; // remove ".java" and add desc.end
 		File cfile = new File (input.getParent (), cname);
 		return cfile;
