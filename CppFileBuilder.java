@@ -50,11 +50,12 @@ public class CppFileBuilder{
               "* USA.\n"+
               "*/\n\n"+
 
-             "#pragma once\n\n");
+             "#pragma once\n\n"+
+				"#include \"java_lang.h\"\n");
 
             // #includes all files its dependent on, then using declares them
             for (String importDeclaration : fileinfo.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
-                    h.write(importDeclaration+"\n");
+                   // h.write(importDeclaration+"\n");
             }
             h.write("\n");
 
@@ -170,9 +171,10 @@ public class CppFileBuilder{
 				h.write("\t\t");
                 for(String m : f.modifiers) {
 					//ignore protection bc we assume correct
-					if((!m.equals("public"))&&(!m.equals("private"))&&(!m.equals("protected"))&&(!m.equals("const"))
-					   &&(!m.equals("static")))//cannot get static initializatin to work yet
+					if((!m.equals("public"))&&(!m.equals("private"))&&(!m.equals("protected"))
+					   &&(!m.equals("const")))//cannot get static initializatin to work yet
 						h.write(m+" ");
+					
                 }
 				h.write(f.type+" "+f.var_name+";\n");//do not assign the value!!!
             }
@@ -233,6 +235,7 @@ public class CppFileBuilder{
                 // intialize all the instance fields
                 for (InstanceField f : t.fields) {
 					if(f.value.equals("")) h.write(","+f.var_name+"("+f.var_name+")");
+					else if((f.isStatic())||(f.isConst()));//do not write them
 					else h.write(","+f.var_name+"("+f.value+")");
                 }
                 h.write("{");//3 tabs for Ewalk
@@ -453,7 +456,11 @@ public class CppFileBuilder{
 			
 			cpp.write(") {\n"+
 					  "\t\t\t__passedthis->__this = __passedthis;\n");
-		
+			for(InstanceField i: t.fields){
+				if(i.isStatic())cpp.write("\t\t__"+t.className+"::"+i.var_name+"=(java_cast<"+i.type+">("+i.value+"));\n");
+				if(i.isConst())cpp.write("\t\t(const "+i.type+")__"+t.className+"::"+i.var_name+";\n");
+					
+			}
 			//**  EWalk is called on constructor's block node  **//
 			EWalk change = new EWalk(t,constr,constr.bnode);
 			//System.out.println("BEFORE PRINTER IS CALLED: " + constr.bnode);

@@ -621,8 +621,8 @@ public class EWalk //extends Visitor
 						GNode sideB = (GNode)n.getNode(2);
 						sideA = sideA.ensureVariable((GNode)side1);
 						sideB = sideB.ensureVariable((GNode)side2);
-						sideA.add(0,"({ std::ostringstream sout;\nsout <<");
-						sideB.add(";\nsout.str(); })");
+						sideA.add(0,"new __String(({ std::ostringstream sout;\nsout <<");
+						sideB.add(";\nsout.str(); }))");
 						n.set(0,sideA); n.set(1,"<<"); n.set(2,sideB);
 					}
 				}
@@ -981,10 +981,11 @@ public class EWalk //extends Visitor
 				String variable =n.getString(0);
 				for(InstanceField i:tree.fields){
 					if(i.var_name.equals(variable)) {
-						if(i.isStatic())n.set(0,"__"+tree.className+"::"+variable);
-						else n.set(0,"__this->"+variable);
+						if(i.isStatic()){n.set(0,"__"+tree.className+"::"+variable);}
+						else {n.set(0,"__this->"+variable);}
 					}
 				}
+				if (Declaration.StaticClassTypes.contains(variable))n.set(0,"__"+variable);
 			}
 			public void visitModifier (GNode n) {
 				String temp = n.getString(0);

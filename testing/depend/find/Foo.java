@@ -13,6 +13,6 @@ String var="";
 	
 	}
 	public static String m1(){
-		return var;
+		return 5;
 	}
 }

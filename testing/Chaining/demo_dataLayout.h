@@ -30,6 +30,13 @@ using java::lang::__Array;
 using java::lang::ArrayOfInt;
 using java::lang::ArrayOfObject;
 using java::lang::ArrayOfClass;
+using java::lang::ArrayOfString;
+using java::lang::ArrayOfBoolean;
+using java::lang::ArrayOfFloat;
+using java::lang::ArrayOfDouble;
+using java::lang::ArrayOfShort;
+using java::lang::ArrayOfLong;
+using java::lang::ArrayOfChar;
 
 
 	struct __demo; 
@@ -92,7 +99,7 @@ using java::lang::ArrayOfClass;
 		static Class __class();
 		static beta m1(beta);
 		static beta m2(beta);
-		static java::lang::String m3(beta);
+		static void m3(beta);
 		static java::lang::String getName(beta);
 
 		static __beta_VT __vtable;
@@ -108,7 +115,7 @@ using java::lang::ArrayOfClass;
 		String (*toString)(beta);
 		beta (*m1)(beta);
 		beta (*m2)(beta);
-		java::lang::String (*m3)(beta);
+		void (*m3)(beta);
 		java::lang::String (*getName)(beta);
 
 
