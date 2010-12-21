@@ -348,7 +348,11 @@ public class EWalk //extends Visitor
 						String newRightMethod = st.nextToken();
 						
 						
-						newMethod=newMethod+newRightMethod+"("+character2; /*+"})";*/						//call CppPriinter on the Arguments Node
+						newMethod=newMethod+newRightMethod+"("+character2; 
+						if(n.getNode(3).size()>0)
+						{
+							newMethod+=",";
+						}/*+"})";*/						//call CppPriinter on the Arguments Node
 						
 						CppPrinter arguments = new CppPrinter((GNode)n.getNode(3));
 						if(VERBOSE) System.out.println("|||||||||||||Printing Arguments|||||||||||"+n.getNode(3).getName());
@@ -403,7 +407,11 @@ public class EWalk //extends Visitor
 					String newRightMethod = st.nextToken();
 					
 					
-					newMethod=newMethod+newRightMethod+"("+character; /*+"})";*/					//if(VERBOSE)System.out.println("--------------END TRIGGER--------------" +newRightMethod);
+					newMethod=newMethod+newRightMethod+"("+character; /*+"})";*/	
+					if(n.getNode(3).size()>0)
+					{
+						newMethod+=",";
+					}//if(VERBOSE)System.out.println("--------------END TRIGGER--------------" +newRightMethod);
 					if(VERBOSE)System.out.println(n.toString());
 															//reset isend
 					isEnd=false;

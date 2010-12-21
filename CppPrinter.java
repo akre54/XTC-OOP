@@ -88,7 +88,7 @@ public class CppPrinter extends Visitor
 	/**Only prints out a special case if isTReturn Flag is set to true otherwise does normal behavor*/
 	public void visitStringLiteral(GNode n)
 	{
-		if(isReturn) //check to see if we are current in a return subtree
+		if(isReturn || isArguments) //check to see if we are current in a return subtree
 			print("new __String("+n.getString(0)+")"); //print out the proper code
 		else//otherwise just visit the tree as normal
 			visit(n);
@@ -685,29 +685,7 @@ public class CppPrinter extends Visitor
 			//}
 		}
 
-		/*if(isPrint){
-		Object o= n.get(0);
-		if (o!=null)
-		{
-			if(isNode(o))
-			{
-				Node oNode = (Node)o;
-				//if it is a primaryIdentifier print out a check statement
-				if (oNode.getName().equals("PrimaryIdentifier") ){
-					
-					//print("__rt::checkNotNull("+oNode.getString(0)+");\n");
-					primIdentifier= oNode.getString(0);
-					print(primIdentifier);
-					isInstance=true;
-				}
-				//else its not a PrimaryIdentifier Node dispatch on it as normal
-				else{
-					dispatch(oNode);
-				}
-			}
-		}
-		}*/
-		
+			
 	}
 	/**visit qualifiedIdentifier i.e. custom Objects
 	 It is assumed that all the "SMART" work has already been handled in EWalk
@@ -732,7 +710,7 @@ public class CppPrinter extends Visitor
 	{
 		isArguments=true;
 	//	if(isCallExpression)
-	//	{
+			
 			if(isInstance)
 			{
 				//print(primIdentifier+",");
@@ -742,10 +720,11 @@ public class CppPrinter extends Visitor
 			else {
 				//print("__this"+ ",");
 			}
-	//	}
-	//	if (n.size()!=0) {
-		//	print(",");
-		//}
+			if(n.size()!=0)
+			{
+			
+			}
+
 		visitChildren(n, 0, n.size(), ",");
 		isArguments=false;
 	}
