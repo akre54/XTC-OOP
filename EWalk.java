@@ -180,32 +180,23 @@ public class EWalk //extends Visitor
 				
 				if(first!=null) {
 					Node firstc= (Node) first;
-					System.out.println(":::::::" +firstc.toString());
-					System.out.println("?????????"+firstc.getName());
 					if(firstc.getName().equals("SuperExpression")) {
 						isSuper=true;
 					}
 					if (firstc.getName().equals("PrimaryIdentifier")) {
 						isInstance=true;
 					}
-					if(firstc.getName().equals("StringLiteral")){
-						//isStringInstance=true;
-					}
-					if(VERBOSE)System.out.println("Dispatchingg.....");
 					dispatch(firstc); //dispatch on the node
 				}
-				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
 				
 				/*create a string array to store the return type and newMethod name of the 
 				 return method*/
 				//new method name to override in the tree
 				String[] methodArray=setMethodInfo(n);
-				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
 				//newMethod= methodArray[1];
 				//savedReturnType = methodArray[0];
 				if(VERBOSE)System.out.println("THE RETURN TYPE3: " +methodArray[0] );
 				if(VERBOSE)System.out.println("NewMEthod3: " +methodArray[1] );
-				if(VERBOSE)System.out.println("!!!!!!!REGULAR METHOD CALL!!!!!!!!!!");
 				
 				
 				return methodArray;
@@ -717,9 +708,8 @@ public class EWalk //extends Visitor
 						if(VERBOSE)System.out.println("****************INSTANCE***********");
 						
 						String[] qualities=method.search_for_type(Identifier);//send the primary Identifier
+
 						if (VERBOSE) {System.out.println("INSTANCE: Method.Search_for_type:" + Identifier);
-						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
-						System.out.println("identifier of type= "+qualities[1]);
 						System.out.println("~~~~~~~~~~~~"+qualities[0] + "~~~~~~~~~~~~~~" +qualities[1]);
 						System.out.println("identifier of type= "+qualities[1]);
 						}
@@ -731,7 +721,7 @@ public class EWalk //extends Visitor
 						//set the inheritance tree based on the found class in the package
 						String FullName = (qualities[0].equals("") ? "" : qualities[0]+".")+qualities[1];
 						if(VERBOSE)System.out.println("THIS IS THE FCNAME" + qualities.toString());
-						b =tree.root.search(FullName);
+						b =tree.root.search(FullName);if(b!=null)System.out.println("search found in on instance chain==0");
 						if(VERBOSE){System.out.println("On Instance:"+ isInstance+"," + method +","+argumentList+","+name);}
 						//isInstance=false;
 					}
@@ -760,7 +750,7 @@ public class EWalk //extends Visitor
 					if(!packages.equals(""))FullName = packages+"."+savedReturnType;
 					else FullName =savedReturnType;
 					if(VERBOSE)System.out.println("Is Method Chaining: b=tree.root.search("+FullName+")");
-					b=tree.root.search(FullName);
+					b=tree.root.search(FullName);if(b!=null)System.out.println("search found in IS METHODCHAINGN");
 					//what do i do to get the full package name?
 				}
 				else if (isSuper) 
@@ -770,6 +760,7 @@ public class EWalk //extends Visitor
 				else {
 					if(VERBOSE){System.out.println("Running"+ isInstance+"," + method +", "+argumentList+","+name);}
 					b=tree; //set be = to the current tree
+					if(b!=null)System.out.println("search found in ELSE");
 				}
 				if (b==null) {
 				if(VERBOSE) System.out.println("null------------------------!\n");

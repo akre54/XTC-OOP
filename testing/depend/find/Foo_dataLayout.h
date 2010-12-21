@@ -49,11 +49,15 @@ namespace find {
 	struct __Foo{ 
 		__Foo_VT* __vptr;
 		String var;
+<<<<<<< HEAD
+		Object R;
+=======
 		const static Object R; //=__Object();
+>>>>>>> 74802605a914dfc021fa5d5c61c8067369a3841f
 		Foo __this;
 
 
-		__Foo():__vptr(&__vtable),var(new __String("")){
+		__Foo():__vptr(&__vtable),var(new __String("")),R(new __Object()){
 		//empty constructor. All work done in init
 	   }
 
@@ -82,6 +86,44 @@ namespace find {
 			equals((bool(*)(Foo, Object))&__Object::equals),
 			getClass((Class(*)(Foo))&__Object::getClass),
 			toString((String(*)(Foo))&__Object::toString){}
+	};
+
+//data layout for depend.findBar
+	struct __Bar{ 
+		__Bar_VT* __vptr;
+		String var;
+		Object R;
+		Bar __this;
+
+
+		__Bar():__vptr(&__vtable),var(new __String("")),R(new __Object()){
+		//empty constructor. All work done in init
+	   }
+
+		void init(Bar);
+		static Class __class();
+		static depend::find::Foo m2();
+
+		static __Bar_VT __vtable;
+	};
+
+//vtable layout for depend.findBar
+	struct __Bar_VT{
+		Class __isa;
+		void (*__delete)(__Bar*);
+		int32_t (*hashCode)(Bar);
+		bool (*equals)(Bar, Object);
+		Class (*getClass)(Bar);
+		String (*toString)(Bar);
+
+
+		__Bar_VT():
+			__isa(__Bar::__class()),
+			__delete(&__rt::__delete<__Bar>),
+			hashCode((int32_t(*)(Bar))&__Object::hashCode),
+			equals((bool(*)(Bar, Object))&__Object::equals),
+			getClass((Class(*)(Bar))&__Object::getClass),
+			toString((String(*)(Bar))&__Object::toString){}
 	};
 
 }

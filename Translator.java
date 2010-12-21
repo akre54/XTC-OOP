@@ -228,18 +228,25 @@ public class Translator extends Tool {
 			//----- creates all CppFileBuilders
                         CppFileBuilder cppfiles;
                         boolean superiswritten =true;
-                        LinkedList<ClassStruct> editablelist;
+                        LinkedList<ClassStruct> editablelist = new LinkedList<ClassStruct>();
+						LinkedList<ClassStruct> translatedlist=new LinkedList<ClassStruct>();
                         for (FileDependency d: allDependencies.keySet()){
 							DependencyFinder dep = new DependencyFinder(getNodeFromFilename(d.fullPath), d);
 							
 							if(VERBOSE)System.out.println("PRINTING "+dep.getFilePath()+"'s C++ FILES");
-
-							editablelist = new LinkedList<ClassStruct>(dep.getFileClasses());
-							//CppFileBuilder takes the Files dependencyfinder and arraylist of the ClassStructs
-							cppfiles = new CppFileBuilder(dep, new ArrayList<ClassStruct>(classes.keySet()));
-							int num_classes = editablelist.size();
-							//writes to CppFileBuilder class by class
-							while(num_classes!=0){
+							//list of all classes in same package
+							editablelist =new LinkedList<ClassStruct>(dep.getAllClassesInPackage(null,dep.getPackageName()));
+							if((editablelist.size()!=0)&&(translatedlist.contains(editablelist.get(0)))){
+								//already translated this package do nothing
+							}
+							else{
+								translatedlist.addAll(editablelist);
+								System.out.println("TRANSLATING STUFFFFFFFFFF TO FILESSSSSSSSSSSSSSS");
+								//CppFileBuilder takes the Files dependencyfinder and arraylist of the ClassStructs
+								cppfiles = new CppFileBuilder(dep, new ArrayList<ClassStruct>(classes.keySet()));
+								int num_classes = editablelist.size();
+								//writes to CppFileBuilder class by class
+								while(num_classes!=0){
 									for (int i=0;i< num_classes;i++){
 										ClassStruct c = editablelist.get(i);
 										if(!c.packageName.equals(""))FQ=c.packageName+"."+c.className;
@@ -265,10 +272,12 @@ public class Translator extends Tool {
 										}//end of else check
 										num_classes = editablelist.size();
 									}//end of for loop
-								
-							}//end of while
-							try{cppfiles.close();System.out.println("CLOSING FILE: "+dep.getFilePath());}
+							
+								}//end of while
+							
+							try{if (cppfiles!=null)cppfiles.close();System.out.println("CLOSING FILE: "+dep.getFilePath());}
 							catch(Exception e){System.out.println("closing failed");}
+							}
 						}//end of outer for loop
 						if(runtime.test("printAST")) {
 							//print the ast

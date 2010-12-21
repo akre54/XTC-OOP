@@ -641,8 +641,8 @@ public class InheritanceTree{
 	 */
 	public String[] search_for_method(String instance ,boolean on_instance,ArrayList<String> paramtyps, 
 																String method_name){
-		if(method_name.equals("super")){System.out.println("searching for super method WRONG");}
-		if(method_name.equals("this")){System.out.println("searching for this method WRONG");}
+		if(method_name.equals("super")){System.out.println("searching for super method WE DO NOT HANDLE");}
+		if(method_name.equals("this")){System.out.println("searching for this method SHOULD NOT BE SEARCHING");}
 		
 		LinkedList<Declaration> possible= new LinkedList<Declaration>();
 
@@ -758,6 +758,7 @@ public class InheritanceTree{
 	 */
 	private String make_name(String instance,boolean on_instance,Declaration d){
 		String result= d.name;
+		boolean comma = (d.params.size()>1);
 		if(d.overloadNum==0);
 		else result+= "_"+d.overloadNum;
 		if((instance.equals(""))||(instance.equals(" "))) instance ="__this";
@@ -771,6 +772,7 @@ public class InheritanceTree{
 		else if ((!on_instance) && (!d.isVirtual))//m1() *private
 			result+= "(";
 		else System.out.println("method didnt meet make_name requirements");
+		if(comma) result+=",";
 		return result;
 	}
 	/** will return packageName in cpp syntax "::"

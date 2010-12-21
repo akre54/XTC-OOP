@@ -210,8 +210,7 @@ public class CppFileBuilder{
                 }
                 //write className
                 h.write("__"+t.className);
-                if(constr.overloadNum!=0)
-                        h.write("_"+constr.overloadNum);
+
                 h.write("(");
 
                 //loop through formal parameter
@@ -430,14 +429,12 @@ public class CppFileBuilder{
 		//writes the __class() method
 		cpp.write("\t"+t.local.get(0).returntype+" __"+t.className+
 							"::"+t.local.get(0).name+"(){"+
-							"\n\t\tstatic Class k = new __Class(__rt::stringify(\""+fileinfo.getPackageName()+t.className+"\"),__rt::null());"+
+							"\n\t\tstatic Class k = new __Class(__rt::stringify(\""+fileinfo.getPackageName()+"."+t.className+"\"),__rt::null());"+
 							"\n\t\treturn k;\n\t"+
 							"}\n");
 		for(Declaration constr: t.constructors){
 			// create init() method
 			cpp.write("\t\tvoid __"+t.className+"::init");
-			if(constr.overloadNum!=0)
-				cpp.write("_"+constr.overloadNum);
 			cpp.write("("+t.className+" __passedthis");
 		
 			// create init's formal parameters
