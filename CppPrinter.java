@@ -721,7 +721,7 @@ public class CppPrinter extends Visitor
 			print(name);
 			if(n.size()>1 && i<n.size()-1)
 			{
-				print("::");
+				print("RAWR");
 			}
 		}
 	}
