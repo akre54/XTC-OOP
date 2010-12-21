@@ -28,9 +28,8 @@ class FileMaker {
 		catch (IOException a) {
 		}
     }
-    public FileMaker (String parent, String namespaceName, String desc,String end) {
-        namespaceName = namespaceName.replaceAll("::","_");
-        cFile = new File(parent + "/" + namespaceName + desc + "." + end);
+    public FileMaker (String filePath) {
+        cFile = new File(filePath);
         try {
                 outputWriter = new FileWriter(cFile);
         }
@@ -64,20 +63,6 @@ class FileMaker {
 		catch (IOException a) {
 		}
     }
-	
-/** 
- * Create a new cpp file that has the same name and path as the origonal .java file.
- * Follows the pathname conventions of the File class: http://download.oracle.com/javase/1.4.2/docs/api/java/io/File.html
- * @param pathName A String that contains the path and file name of a file ending in .java.
- */ 
-	public FileMaker (String pathName) {
-		cFile = convertNameToC (pathName);
-		try {
-			outputWriter = new FileWriter(cFile);
-		}
-		catch (IOException a) {
-		}
-	}
 
 
     private static File convertNameToC (File input, String end) {

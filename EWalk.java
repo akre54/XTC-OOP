@@ -982,10 +982,11 @@ public class EWalk //extends Visitor
 				String variable =n.getString(0);
 				for(InstanceField i:tree.fields){
 					if(i.var_name.equals(variable)) {
-						if(i.isStatic())n.set(0,"__"+tree.className+"::"+variable);
-						else n.set(0,"__this->"+variable);
+						if(i.isStatic()){n.set(0,"__"+tree.className+"::"+variable);}
+						else {n.set(0,"__this->"+variable);}
 					}
 				}
+				if (Declaration.StaticClassTypes.contains(variable))n.set(0,"__"+variable);
 			}
 			public void visitModifier (GNode n) {
 				String temp = n.getString(0);

@@ -310,8 +310,9 @@ public class DependencyFinder {
                         case IMPORT:
                         case IMPORTEDPACKAGE: // we're importing all files in directory now, so these two checks not needed until we update Inheritancebuilder to handle implicit imports
                         case CURRENTPACKAGE: */
-                if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // AK 12-18-10 8:00 problems with current directory finding.
-                    files.add("#include \"" + hFileName(allClasses, d.fullPath, currentPackage) + "\"");
+                if (d.origin != DependencyOrigin.CURRENTDIRECTORY || !this.currentPackage.equals(getPackageName(allClasses, d.fullPath)) ) { // we've updated so all files from same package are in one file in a namespace
+					 		String pack = getPackageName(allClasses, d.fullPath);
+                    files.add("#include \"" + hFileName(allClasses, d.fullPath, pack) + "\"");
                 }
                     /*        break;
                         /*case IMPORTEDPACKAGE:
@@ -342,6 +343,19 @@ public class DependencyFinder {
 
             ArrayList<String> files = new ArrayList<String>();
 
+            for (FileDependency d : fileDependencies) {
+                if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // for now, don't import from CURRENTDIRECTORY
+                    // only add using if from different namespaces
+                    if (!this.currentPackage.equals(getPackageName(allClasses, d.fullPath))) {
+                        String pack = getPackageName(allClasses, d.fullPath);
+                        for (ClassStruct c : getAllClassesInPackage(allClasses, pack)) {
+                            files.add("using " + qualifiedName(allClasses, c.className, d.fullPath, false) + ";");
+                            files.add("using " + qualifiedName(allClasses, c.className, d.fullPath, true) + ";");
+                        }
+                    }
+                }
+            }
+
             if (origin != DependencyOrigin.ROOTFILE || files.isEmpty()) { // if the root file but no included files
                 files.add("using java::lang::Object;");
                 files.add("using java::lang::__Object;");
@@ -360,22 +374,11 @@ public class DependencyFinder {
                 files.add("using java::lang::ArrayOfShort;");
                 files.add("using java::lang::ArrayOfLong;");
                 files.add("using java::lang::ArrayOfChar;");
+                files.add("using __rt::java_cast;");
 
 				
             } else {
                 System.out.println("do something different for origin file?");
-            }
-
-            for (FileDependency d : fileDependencies) {
-                if (d.origin != DependencyOrigin.CURRENTDIRECTORY) { // for now, don't import from CURRENTDIRECTORY
-                    // only add using if from different namespaces
-                    if (!this.currentPackage.equals(getPackageName(allClasses, d.fullPath))) {
-                        files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
-                        files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
-                       files.add("using " + qualifiedName(allClasses, d.fullPath, false) + ";");
-                       files.add("using " + qualifiedName(allClasses, d.fullPath, true) + ";");
-                    }
-                }
             }
 
             return files;
@@ -438,33 +441,41 @@ public class DependencyFinder {
             return currentFilePath.hashCode();
         }
 
-        public static String javaFileName(String fullPath) {
-            return (new File(fullPath)).getName();
+        public static String javaFileName(String fullPath, String packName) {
+            String namespace = packName.replaceAll("\\.","_");
+            return namespace; //+"_"+(new File(fullPath)).getName();
         }
 
         /** @return just name of file (ie ImportFile from ImportFile.java,
                       * used for cpp import headers */
-        public static String cppFileName(ArrayList<ClassStruct> c, String fullPath, String currentPackage) {
-            String directory = getNamespaceDirectory(c, fullPath, currentPackage);
-            String basename = javaFileName(fullPath).replace(".java",".cpp");
+        public static String cppFileName(ArrayList<ClassStruct> allClasses, String fullPath, String currentPackage) {
+            String directory = getNamespaceDirectory(allClasses, fullPath, currentPackage);
+            String basename = javaFileName(fullPath, currentPackage)+"_methoddef.cpp";
 
             if (directory.equals(""))
                 return basename;
             else
                 return directory + "/" + basename;
         }
-        public static String hFileName(ArrayList<ClassStruct> c, String fullPath, String currentPackage) {
-            String directory = getNamespaceDirectory(c, fullPath, currentPackage);
-            String basename = javaFileName(fullPath).replace(".java","_dataLayout.h");
+        public String cppFileName(ArrayList<ClassStruct> allClasses){
+            return cppFileName(allClasses, currentFilePath, currentPackage);
+        }
+        public String hFileName(ArrayList<ClassStruct> allClasses) {
+            return hFileName(allClasses, currentFilePath, currentPackage);
+        }
+        public static String hFileName(ArrayList<ClassStruct> allClasses, String fullPath, String currentPackage) {
+            String directory = getNamespaceDirectory(allClasses, fullPath, currentPackage);
+            String basename = javaFileName(fullPath, currentPackage)+"_dataLayout.h";
 
             if (directory.equals(""))
                 return basename;
             else
                 return directory + "/" + basename;
         }
-        public static String qualifiedName(ArrayList<ClassStruct> c, String fullPath, boolean useunderscores) {
-            String namespace = getNamespace(c, fullPath);
-            String basename = javaFileName(fullPath).replace(".java","");
+        public static String qualifiedName(ArrayList<ClassStruct> allClasses, String className, String fullPath, boolean useunderscores) {
+            String namespace = getNamespace(allClasses, fullPath);
+            //String basename = javaFileName(fullPath, packName).replace(".java","");
+            String basename = className;
             if (useunderscores)
                 return namespace + "::__" + basename;
             else
