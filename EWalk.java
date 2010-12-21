@@ -621,8 +621,8 @@ public class EWalk //extends Visitor
 						GNode sideB = (GNode)n.getNode(2);
 						sideA = sideA.ensureVariable((GNode)side1);
 						sideB = sideB.ensureVariable((GNode)side2);
-						sideA.add(0,"({ std::ostringstream sout;\nsout <<");
-						sideB.add(";\nsout.str(); })");
+						sideA.add(0,"new __String(({ std::ostringstream sout;\nsout <<");
+						sideB.add(";\nsout.str(); }))");
 						n.set(0,sideA); n.set(1,"<<"); n.set(2,sideB);
 					}
 				}

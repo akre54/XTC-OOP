@@ -23,18 +23,16 @@
 
 
 	Class __demo::__class(){
-		static Class k = new __Class(__rt::stringify("demo"),__rt::null());
+		static Class k = new __Class(__rt::stringify(".demo"),__rt::null());
 		return k;
 	}
 	int32_t __demo::main(int32_t argc,char** args){
-beta k1=new __beta();
-k1->init(k1);
-if("xtc.oop.Test"equals(__thisk1->__vptr->getName(k1))){
-std::cout<<"PASS \"xtc.oop.Test\".equals(k1.getName())" <<std::endl;
-}
-else { 
-std::cout<<"FAIL \"xtc.oop.Test\".equals(k1.getName())" <<std::endl;
-} 
+beta lmao=new __beta();
+lmao->init(lmao);
+({beta a=lmao->__vptr->m1(lmao);
+beta b=a->__vptr->m2(a);
+ b->__vptr->m3(b);
+});
 
 	}
 
@@ -56,7 +54,7 @@ std::cout<<"FAIL \"xtc.oop.Test\".equals(k1.getName())" <<std::endl;
 	//===========================================================================
 
 	Class __beta::__class(){
-		static Class k = new __Class(__rt::stringify("beta"),__rt::null());
+		static Class k = new __Class(__rt::stringify(".beta"),__rt::null());
 		return k;
 	}
 		void __beta::init(beta __passedthis) {
@@ -77,8 +75,8 @@ return b;
 
 	}
 
-	java::lang::String __beta::m3(beta __this){
-return new __String("thisssss"); 
+	void __beta::m3(beta __this){
+std::cout<<"thisssss";
 
 	}
 
