@@ -147,11 +147,25 @@ public class CppPrinter extends Visitor
 	/** Visit the selection expression i.e. java.lang*/
 	public void visitSelectionExpression(GNode n)
 	{
-			//prints the selection expression
-		Node prim = n.getNode(0);
+		//if it only has one child (a primary id) then print ->
+		if(n.size()==2)
+		{
+			Node prim = n.getNode(0);
+			dispatch(prim);
+			print("->");
+		}
+		else
+		{
+			Node prim = n.getNode(0);
 		dispatch(prim);
+			print("::");
+		}
+		//else print ::
+		//prints the selection expression
+		
 		//print a . at the end of each expression
-		print("::");	
+			
+		
 		Object o =n.get(1);
 		if(o instanceof String) //make sure the object o is an string
 		{
@@ -248,7 +262,7 @@ public class CppPrinter extends Visitor
 	/**replaces "this" with __this for propery c++ conversion*/
 	public void visitThisExpression(GNode n)
 	{
-		print("__this.");
+		print("__this");
 		visit(n);
 	}
 	/**Assumes that all "smart' code has been handled in EWalk does nothing but print code *place holder**/
@@ -480,7 +494,7 @@ public class CppPrinter extends Visitor
 			Node arguments = n.getNode(3);
 			if(arguments.size()>0)
 			{
-				print(",");
+				//print(",");
 				visitChildren(arguments,0,arguments.size(),",");
 				
 			}
@@ -529,6 +543,8 @@ public class CppPrinter extends Visitor
 	{
 		if (!isMethodChaining)
 			print(n.getString(0));
+		
+		declared = n.getString(0);
 	}
 	public void visitNullLiteral(GNode n)
 	{
@@ -604,7 +620,7 @@ public class CppPrinter extends Visitor
 						//if there are any arguments make sure to print a comma
 						if(n.getNode(3).size()>0)//arguments Node
 						{
-							print(",");
+							//print(",");
 						}
 					}
 					
@@ -670,7 +686,7 @@ public class CppPrinter extends Visitor
 	}
 	/**visit qualifiedIdentifier i.e. custom Objects
 	 It is assumed that all the "SMART" work has already been handled in EWalk
-	 i.e. prints no "." or "->" etc just prints the __ and the name
+	 i.e. prints no "." or "->" etc just prints the name
 	 */
 	public void visitQualifiedIdentifier(GNode n)
 	{
@@ -678,6 +694,10 @@ public class CppPrinter extends Visitor
 		{
 			String name = n.getString(i);
 			print(name);
+			if(n.size()>1 && i<n.size()-1)
+			{
+				print("::");
+			}
 		}
 	}
 	/**********************Other***************************/
