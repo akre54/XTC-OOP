@@ -31,9 +31,7 @@ public class CppFileBuilder{
 			
 		jfile = new File(fileinfo.getFilePath());
 
-                String namespaceName = DependencyFinder.getNamespace(allClasses, fileinfo.getFilePath());
-                String parent = jfile.getParent();
-		h = (new FileMaker(parent, namespaceName,"_dataLayout","h"));
+		h = (new FileMaker(fileinfo.hFileName(allClasses)));
 		h.write("/* Object-Oriented Programming\n"+
               "* Copyright (C) 2010 Robert Grimm\n"+
               "*\n"+
@@ -80,7 +78,7 @@ public class CppFileBuilder{
 		 *creates new cc file cc_methoddef
 		 *copies start of translation.cc into cc_classdef
 		 */
-		cpp =(new FileMaker(parent, namespaceName,"_methoddef","cpp"));
+		cpp =(new FileMaker(fileinfo.cppFileName(allClasses)));
 		cpp.write(
 			"/* Object-Oriented Programming\n"+
 			"* Copyright (C) 2010 Robert Grimm\n"+
