@@ -766,7 +766,7 @@ public class InheritanceTree{
 		if		((on_instance)&&(d.isVirtual))//b.m1() *public
 			result="->__vptr->"+result+"("+instance;
 		else if ((on_instance) && (!d.isVirtual))//staticly!!!???
-			result="::"+result+"(";
+			result="->"+result+"(";
 		else if ((!on_instance) && (d.isVirtual))// m1() *public
 			result += "("+instance;
 		else if ((!on_instance) && (!d.isVirtual))//m1() *private
