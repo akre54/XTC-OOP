@@ -52,11 +52,12 @@ public class CppFileBuilder{
               "* USA.\n"+
               "*/\n\n"+
 
-             "#pragma once\n\n");
+             "#pragma once\n\n"+
+				"#include \"java_lang.h\"\n");
 
             // #includes all files its dependent on, then using declares them
             for (String importDeclaration : fileinfo.getCppIncludeDecs(allClasses, DependencyOrigin.IMPORT) ) {
-                    h.write(importDeclaration+"\n");
+                   // h.write(importDeclaration+"\n");
             }
             h.write("\n");
 

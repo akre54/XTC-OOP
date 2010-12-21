@@ -360,6 +360,7 @@ public class DependencyFinder {
                 files.add("using java::lang::ArrayOfShort;");
                 files.add("using java::lang::ArrayOfLong;");
                 files.add("using java::lang::ArrayOfChar;");
+                files.add("using __rt::java_cast;");
 
 				
             } else {
