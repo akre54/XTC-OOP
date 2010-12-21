@@ -310,9 +310,11 @@ public class DependencyFinder {
                         case IMPORT:
                         case IMPORTEDPACKAGE: // we're importing all files in directory now, so these two checks not needed until we update Inheritancebuilder to handle implicit imports
                         case CURRENTPACKAGE: */
-                if (d.origin != DependencyOrigin.CURRENTDIRECTORY || !this.currentPackage.equals(getPackageName(allClasses, d.fullPath)) ) { // we've updated so all files from same package are in one file in a namespace
+                if (d.origin != DependencyOrigin.CURRENTDIRECTORY &&
+							 d.origin != DependencyOrigin.CURRENTPACKAGE ) { // we've updated so all files from same package are in one file in a namespace
 					 		String pack = getPackageName(allClasses, d.fullPath);
-                    files.add("#include \"" + hFileName(allClasses, d.fullPath, pack) + "\"");
+							if (!files.contains("#include \"" + hFileName(allClasses, d.fullPath, pack) + "\""))
+	                    files.add("#include \"" + hFileName(allClasses, d.fullPath, pack) + "\"");
                 }
                     /*        break;
                         /*case IMPORTEDPACKAGE:
@@ -349,8 +351,9 @@ public class DependencyFinder {
                     if (!this.currentPackage.equals(getPackageName(allClasses, d.fullPath))) {
                         String pack = getPackageName(allClasses, d.fullPath);
                         for (ClassStruct c : getAllClassesInPackage(allClasses, pack)) {
-                            files.add("using " + qualifiedName(allClasses, c.className, d.fullPath, false) + ";");
-                            files.add("using " + qualifiedName(allClasses, c.className, d.fullPath, true) + ";");
+									if (!files.contains("using " + qualifiedName(allClasses, c.className, d.fullPath, false) + ";"))
+	                            files.add("using " + qualifiedName(allClasses, c.className, d.fullPath, false) + ";");
+	                            files.add("using " + qualifiedName(allClasses, c.className, d.fullPath, true) + ";");
                         }
                     }
                 }
@@ -541,9 +544,9 @@ public class DependencyFinder {
             for (ClassStruct c : classes) {
                 if (c.filePath.equals(filename)) {
                     String r = "";
-                    if (!c.packageName.equals(currentPackage)) {
-                        r = c.packageName.replaceAll("\\.", "/");
-                        r = r.replace(c.rootPackage + "/", "");
+                    if (!c.packageName.equals(c.rootPackage)) {
+								r = c.packageName.replaceAll("\\.", "/");
+						      r = r.replace(c.rootPackage + "/", "");
                     }
                     return r;
                 }

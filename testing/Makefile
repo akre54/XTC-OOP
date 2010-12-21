@@ -5,6 +5,7 @@ SHELL = /bin/sh
 
 PRE = demo
 PACKAGE = 
+NSPACK = $(subst .,_,$(PACKAGE))
 METHODDEFS = $(wildcard */*_methoddef.cpp)
 TARGETS = main.cpp *_methoddef.cpp $(METHODDEFS) java_lang.cpp
 CC = g++
@@ -27,7 +28,7 @@ clean:
 #Run the translator on demo.java
 translate:
 	java xtc.oop.Translator $(TFLAGS) -translate $(PRE).java
-	cat $(PRE)_methoddef.cpp | nl
+	cat $(NSPACK)_methoddef.cpp | nl
 
 #Execute the translated code
 ex:	compile
