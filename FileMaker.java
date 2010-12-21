@@ -28,8 +28,9 @@ class FileMaker {
 		catch (IOException a) {
 		}
     }
-    public FileMaker (String namespaceName, String desc,String end) {
-        cFile = new File(namespaceName + desc + "." + end);
+    public FileMaker (String parent, String namespaceName, String desc,String end) {
+        namespaceName = namespaceName.replaceAll("::","_");
+        cFile = new File(parent + "/" + namespaceName + desc + "." + end);
         try {
                 outputWriter = new FileWriter(cFile);
         }
