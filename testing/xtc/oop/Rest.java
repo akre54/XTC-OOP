@@ -27,11 +27,13 @@ public class Rest extends Test {
   }
 
   public Object m1() {
-    return Test.R2;
+	  Object o=new Object();
+	  return o;
   }
 
   public static Object m2() {
-    return Test.R4;
+	   Object o=new Object();
+	  return o;
   }
 
   public Test m4() {
@@ -40,7 +42,8 @@ public class Rest extends Test {
   }
 
   public Object m7(Test t) {
-    return R3;
+	  Object o=new Object();
+	  return o;
   }
 
   public int hashCode() {
