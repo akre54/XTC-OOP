@@ -131,6 +131,10 @@ public class EWalk //extends Visitor
 				}
 				visit(n);
 			}
+			/*public void VisitCastExpression(GNode n)
+			{
+				////////////THIS IS WHERE PAT'S CODE SHOULD HAVE GONE
+			}*/
 			/**NOTE: This is not a VISIT method but my own created method*/
 			public Node visitCastExpression(Node n, String targetVariableName) {
 				String targetType = n.getNode(0).getNode(0).getString(0); //target type
