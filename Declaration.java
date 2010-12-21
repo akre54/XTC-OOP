@@ -73,10 +73,8 @@ public class Declaration{
 	 * returns the type of that name in arraylist [java,lang,Foo]
 	 *
 	 */
-	public String[] search_for_type(String name){System.out.println("SEARCH FOR TYPE_______"+name);
-		System.out.println("looking for "+name+" variables in "+this.ownerClass+"::"+this.name);
+	public String[] search_for_type(String name){
 		if(StaticClassTypes.contains(name)) return new String[]{"",name};//calling statically
-		System.out.println("\t# variables:"+variables.size());
 		for (Variable i : variables) {				
 
                 if(name.equals(i.var_name)){

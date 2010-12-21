@@ -19,7 +19,6 @@ public class InstanceField extends Variable{
 			if(this.type.equals("int32_t"))this.value ="0";
 			if(this.type.equals(""))this.value ="";
 			if(this.type.equals(""))this.value ="";
-
 		}
 	}
 	public boolean isStatic(){

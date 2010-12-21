@@ -24,7 +24,7 @@ public class InheritanceTree{
 	public InheritanceTree superclass;
 	public ArrayList<InheritanceTree> subclasses;
 	
-	boolean VERBOSE = true;
+	boolean VERBOSE = false;
 	
 
 	/**
