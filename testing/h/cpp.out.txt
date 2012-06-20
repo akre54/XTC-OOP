@@ -1,0 +1,7 @@
+Int:8
+Eight:35
+Float235044
+Threenums:1.9
+Threemult:27
+threeLarge:8970
+double:0.45
